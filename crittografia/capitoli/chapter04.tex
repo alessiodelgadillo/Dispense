@@ -1,0 +1,127 @@
+\chapter{Teoria della casualità}
+
+In crittografia c'è un gran bisogno di sequenze casuali:\ la generazione della chiave deve essere imprevedibile, inoltre spesso si deve ricorrere ad algoritmi randomizzati.\
+
+\section{Significato algoritmico della casualità}
+
+Si prendano due sequenze di lunghezza $n$
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{l l}
+        $h$:  & 1 1 1 1 1 1 1 1 1 1 1 1 \dots 1 \\
+        $h'$: & 1 0 1 1 0 1 1 0 1 0 1 1 \dots 0 \\
+    \end{tabular}
+\end{table}
+
+\noindent Per descrivere la prima sequenza basterebbe dire che è composta da $n$ volte ``1''; per descrivere la seconda si dovrebbe dettarla.\
+
+La \textbf{casualità} è una \textit{proprietà di quelle sequenze che \textbf{non} possono essere descritte in modo compatto}.\
+Formalizziamo la suddetta definizione:
+\[P(h) = \left(\frac{1}{20}\right)^{20} \qquad P(h') = \left(\frac{1}{20}\right)^{20}\]
+L'algoritmo $A_h$ che genera la sequenza $h$ sarebbe $\langle\mathtt{genera\ n\ 1}\rangle$ e, immaginandolo di averlo codificato in binario, la sua lunghezza in bit sarebbe
+\[|A_h| = \Theta(\log n)\]
+
+\vspace{12pt}
+\noindent\textit{Intuizione}:\ una sequenza binaria è casuale se non ammette un algoritmo di generazione la cui rappresentazione binaria sia più corta della sequenza stessa.\
+\vspace{12pt}
+
+\noindent Difatti, $A_h'$ è del tipo $\langle \mathtt{print\ "cifra1",\ print\ "cifra2",\ \dots}\rangle$, perciò, il numero di bit necessari a codificarlo sarà sicuramente uno per ogni cifra della sequenza insieme alle costanti per le keyword del linguaggio.\
+Perciò, $|A_ h'| \geq |n| = |h'|$.
+
+\subsubsection{Sistemi di calcolo}
+
+Sono un'infinità numerabile $S_1, S_2, \dots, S_i, \dots$\
+Si prenda come riferimento il sistema di calcolo $S_i$ e si supponga che $p$ sia un programma che genera una sequenza generica $h$ nel sistema $S_i$.\
+
+\begin{definition}
+    La complessità di Kolmogorov di $h$ nel sistema $S_i$ è
+    \[K_{S_i}(h) = \min\{|p| \mid S_i(p) = h\}\]
+\end{definition}
+
+\noindent In altre parole, la complessità di $h$ nel sistema $S_i$ è la lunghezza del programma più breve che genera $h$ nel sistema $S_i$.\
+
+\textbf{Osservazione}:\ se la sequenza $h$ non obbedisce ad alcuna legge semplice, allora il più corto programma che la può generare deve contenerla al suo interno e la genera trasferendola in output.\
+\[K_{S_i}(h) = |h| + c_i\]
+dove $c_i$ è una costante che dipende da $S_i$ e rappresenta la parte di programma che trasferisce $h$ in output.\
+Tuttavia si tratta di una definizione vincolata a sistemi di calcolo specifici, perciò è necessario considerare un \textit{sistema universale} per poterla svincolare.\
+
+Il \textbf{sistema di calcolo universale} $S_u$ è in grado di simulare qualsiasi altro sistema di calcolo; in particolare, preso $p$ come un programma che genera $h$ nel sistema $S_i$, allora $S_u(\langle i,p\rangle)$ è il sistema $S_u$ che simula $S_i$ con al suo interno il programma $p$:
+\[S_u(\langle i,p\rangle) = S_i(p)= h\]
+È possibile considerare $q =\langle i,p\rangle$ come il programma che genera $h$ in $S_u$.\
+
+\noindent Quanto è grande $q$?
+\[|q| = |\langle i,p\rangle| = |i| + |p| = \log_2i + |p|\]
+$q$ dipende da $i$, ma non da $h$.\
+Si può affermare che
+\[\forall h\ K_{S_u}(h) \leq K_{S_i}(h) + c\]
+il simbolo ``='' si tiene di conto quando non esistono sistemi migliori da simulare (che permettono di trovare $h$) oltre che $S_i$, mentre il simbolo $<$ si tiene di conto quando esiste un altro sistema $S_j \neq S_i$ che contiene un programma che restituisce $h$ più corto di
+quello presente in $S_i$.\
+
+\begin{definition}
+    La complessità di Kolmogorov di una sequenza $h$ è
+    \[K(h) = K_{S_u}(h)\]
+\end{definition}
+
+\begin{definition}
+    Una sequenza $h$ è casuale se
+    \[K(h) \geq |h| - \lceil \log_2|h|\rceil\]
+\end{definition}
+
+\noindent \textbf{Osservazione:}\ la casualità è un proprietà della sequenza (non dipende dalla sorgente che ha generato la sorgente).\
+
+\subsection{Due risultati della teoria di Kolmogorov}
+
+\subsubsection{Conteggio delle sequenze (positivo)}
+
+\begin{center}
+    $\forall n,\ \exists$ sequenze casuali (secondo Kolmogorov) di lunghezza $n$.
+\end{center}
+
+\begin{proof}
+    Sia $S= 2^n$ il numero di sequenze binarie di lunghezza $n$ e $T$ il numero di sequenze di lunghezza $n$ non casuali.\
+    Obiettivo:\ $T < S$.\
+    Per far questo si consideri $N$, il numero di sequenze binarie di lunghezza $< n - \lceil log_2 (n)\rceil$ che equivale a:
+    \[\sum_{i=0}^{n - \lceil \log n\rceil -1} 2^i = 2^{n- \lceil \log n\rceil} -1\]
+    Tra queste $N$ sequenze ci sono anche i programmi che generano le $T$ sequenze non casuali di lunghezza $n$.\
+    Da questo calcolo ricaviamo: \[T \leq N < S \Rightarrow T < S\]
+    Quindi, $\forall n$, esistono certamente sequenze casuali di lunghezza $n$ e sono enormemente più numerose di quelle non casuali.\
+    \[\frac{T}{S} \leq \frac{N}{S} = \frac{2^{n-\lceil(\log n)\rceil}-1}{2^n} = \frac{1}{2^{\lceil\log n\rceil}} - \frac{1}{2^n} < \frac{1}{2^{\lceil\log n\rceil}} \Rightarrow \lim_{n\to\infty} \frac{T}{S} = 0\]
+
+\end{proof}
+
+\subsubsection{Stabilire se una sequenza arbitaria è casuale (negativo)}
+
+Secondo Kolmogorov stabilire se una sequenza arbitraria è casuale è un problema indecidibile.\
+
+\begin{proof}
+
+    Supponiamo che esista un algoritmo \texttt{Random} t.c.\
+    \[\mathtt{Random}(h) = \left\{\begin{array}{l l}
+            1 & \mathrm{se}\ h\ \mathrm{casuale} \\
+            0 & \mathrm{altrimenti}              \\
+        \end{array}\right.\]
+    Allora possiamo costruire l'algoritmo \texttt{Paradosso} che enumera tutte le possibili sequenze binarie in ordine di lunghezza crescente.\
+
+    \begin{flushleft}
+        \ttfamily
+        Paradosso:
+
+        \quad for binary $h= 1 \to\infty$ do\{
+
+        \qquad if($|h| - \lceil \log|h|\rceil > |p| \land \mathtt{Random}(h) == 1$)
+
+        \quad\qquad return h;
+
+        \}
+    \end{flushleft}
+
+    \noindent $p$ è una sequenza binaria che rappresenta \texttt{Paradosso} e \texttt{Random}, ovvero rappresenta il programma complessivo:\ $|p| = |\mathtt{Paradosso}| + |\mathtt{Random}|$ e $|p|$ non dipende da $h$ perché essa appare come nome di variabile (il suo valore è registrato in una cella di memoria al di fuori del programma).\
+
+    Quindi, \texttt{Paradosso} restituisce come risultato la prima sequenza casuale $h$ di lunghezza t.c.\ $|h| - \lceil \log_2|h|\rceil > |p|$; esistendo sequenze casuali di qualsiasi lunghezza, certamente ne esisterà una che soddisfi entrambe le condizioni.\
+    Tuttavia la prima condizione afferma che $p$ è breve e genera $h$, quindi $h$ non può essere casuale, mentre la seconda condizione afferma il contrario.\
+    \begin{center}
+        Il programma \texttt{Random} non può esistere.\
+    \end{center}
+
+\end{proof}

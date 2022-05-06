@@ -1,0 +1,334 @@
+\chapter{Rappresentazione matematica e Teoria della Calcolabilità}
+
+\section{Rappresentazione matematica di oggetti}
+
+\begin{flushleft}
+    \textbf{Alfabeto}:\ insieme finito di \textit{caratteri} o \textit{simboli}.\
+\end{flushleft}
+
+
+\noindent Un oggetto è rappresentato da una sequenza ordinata di caratteri dell'alfabeto:
+\begin{itemize}
+    \item a oggetti diversi corrispondono sequenze diverse;
+    \item il numero di oggetti che si possono rappresentare non ha limiti.
+\end{itemize}
+
+\subsubsection{Alfabeti e sequenze}
+
+Alfabeto $\Gamma,\ |\Gamma| = s$
+
+\vspace{12pt}
+
+\noindent $N$ oggetti da rappresentare.
+\begin{itemize}
+    \item $d(s, N)$:\ lunghezza della sequenza più lunga che rappresenta un oggetto dell'insieme.
+    \item $d_{\min}(s, N)$:\ valore minimo di $d(s, N)$ tra tutte le rappresentazioni possibili.
+\end{itemize}
+Un metodo di rappresentazione è tanto migliore, tanto più $d(s, N)$ si avvicina a $d_{\min}(s, N)$.\
+
+\subsubsection{Rappresentazione unaria}
+
+$s=1, \Gamma = \{0\}$:\ le sequenze di rappresentazioni possono essere solo ripetizioni dello 0 \[\Rightarrow d_{\min} = (1, N) = N\]
+rappresentazione estremamente sfavorevole $0, 00, \dots, 00000,\mathrm{etc}.$
+
+\subsubsection{Rappresentazione binaria}
+
+$s=2, \Gamma = \{0,1\}$:\ $\forall k \geq 1,\ 2^k$ sequenze di lunghezza $k$.\
+Il numero totale di sequenze lunghe da 1 a $k$ è dato da \[\sum_{i=0}^k 2^i = 2^{k+1}-2\]
+$N$ oggetti da rappresentare \[\Rightarrow 2^{k+1} -2 \geq N\]
+\[\Rightarrow k \geq \log_2(N+2) -1 \]
+$d_{\min}(2,N)$:\ minimo intero $k$ che soddisfa tale relazione
+\[\Rightarrow d_{\min}(2,N) = \lceil\log_2(N+2)-1\rceil\]
+\[\Rightarrow \lceil\log_2 N\rceil -1 \leq d_{\min}(2,N) \leq \lceil \log_2 N\rceil\]
+
+\noindent $\lceil \log_2 N\rceil$ caratteri binari sono sufficienti per costruire $N$ sequenze differenti:
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{l l}
+        $N=7$, & $\lceil\log_27\rceil=3$          \\
+        \multicolumn{2}{c}{$0,1,00,01,10,11,000$} \\
+    \end{tabular}
+\end{table}
+
+\noindent Si possono costruire $N$ sequenze differenti tutte di $\lceil\log_2 N\rceil$ caratteri:
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{l}
+        $N=7$                           \\
+        {$000,001,010,011,100,101,110$} \\
+    \end{tabular}
+\end{table}
+
+\subsubsection{Rappresentazioni s-arie}
+
+Si possono costruire $N$ sequenze differenti con $\lceil\log_sN\rceil$ caratteri; si possono costruire $N$ sequenze differenti tutte di $\lceil\log_sN\rceil$ caratteri.\
+
+Per esempio:\ $\Gamma = \{0,1,2,...,9\}$ con $\lceil\log_{10} 1000\rceil = 3$ caratteri, si ottengono 1000 sequenze (dalla 000 alla 999).\
+
+\subsubsection{Rappresentazioni}
+
+Usare sequenze della stessa lunghezza è vantaggioso:\ per concatenare sequenze di lunghezza diversa è necessario inserire una marca di separazione tra l'una o l'altra; questi accorgimenti non sono necessari se la lunghezza delle sequenze è unica e nota.
+
+\textbf{Rappresentazioni efficienti}:\ rappresentazioni che usano un numero massimo di caratteri di ordine \textit{logaritmico} nella cardinalità $N$ dell'insieme da rappresentare; l'alfabeto deve contenere almeno 2 caratteri.\
+
+\subsubsection{Rappresentazioni di interi}
+La notazione posizionale per rappresentare i numeri interi è una rappresentazione efficiente, indipendentemente dalla base $s \geq 2$ scelta.\
+Un intero $N$ è rappresentato con un numero $d$ di cifre tale che \[\lceil\log_sN\rceil\leq d \leq  \lceil\log_sN\rceil+1\]
+\textit{Riduzione logaritmica} tra il valore $N$ di un numero e la lunghezza $d$ della sua rappresentazione.\
+
+\section{Teoria della Calcolabilità}
+
+Si occupa delle questioni fondamentali circa la \textbf{potenza} e le \textbf{limitazioni} dei sistemi di calcolo.\
+L'origine risale alla prima metà del ventesimo secolo, quando i logici matematici iniziarono ad esplorare i concetti di computazione, algoritmo e problema risolvibile per via algoritmica e dimostrarono l'esistenza di \textbf{problemi che non ammettono un algoritmo di risoluzione}:\ \textit{problemi non decidibili}.\
+
+\subsubsection{Problemi computazionali}
+
+Problemi formulati matematicamente di cui cerchiamo una soluzione algoritmica.\
+Classificazione:
+\begin{itemize}
+    \item problemi non decidibili
+    \item problemi decidibili
+          \begin{itemize}
+              \item problemi trattabili (costo polinomiale)
+              \item problemi intrattabili (costo esponenziale)
+          \end{itemize}
+\end{itemize}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{l l}
+        \textbf{Calcolabilità} & nozioni di \textit{algoritmo} e di \textit{problema non decidibile}          \\
+        \textbf{Complessità}   & nozioni di \textit{algoritmo efficiente} e di \textit{problema intrattabile} \\
+    \end{tabular}
+\end{table}
+
+\noindent La calcolabilità ha lo scopo di classificare i problemi in \textbf{risolvibili} e \textbf{non risolvibili}, mentre la complessità in ``\textit{facili}'' e ``\textit{difficili}''.\
+
+\subsection{Esistenza di problemi indecidibili}
+
+\subsubsection{Insiemi numerabili}
+
+Due insiemi A e B hanno lo stesso numero di elementi se e solo se si può stabilire una \textit{corrispondenza biunivoca} tra i loro elementi.\
+
+Un insieme è \textbf{numerabile} (possiede una infinità numerabile di elementi) se e solo se i suoi elementi possono essere messi in \textit{corrispondenza biunivoca con i numeri naturali}.\
+Un insieme numerabile è un insieme i cui elementi possono essere enumerati, ossia descritti da una sequenza del tipo $a_1, a_2,\dots,a_n,\dots$
+
+\subsubsection{Enumerazione delle sequenze}
+
+Si vogliono elencare in un ordine ragionevole le sequenze di lunghezza finita costruite su un alfabeto finito; le sequenze non sono in numero finito, quindi non si potrà completare l'elenco.\
+Scopo:
+\begin{itemize}
+    \item raggiungere qualsiasi sequenza $\sigma$ arbitrariamente scelta in un \textit{numero finito di passi};
+    \item $\sigma$ deve dunque trovarsi a distanza finita dall'inizio dell'elenco.
+\end{itemize}
+
+\noindent\textbf{Ordinamento canonico}:\ si stabilisce un ordine tra i caratteri dell'alfabeto, si ordinano le sequenze in ordine di lunghezza crescente e, a pari lunghezza, in ``ordine alfabetico''.\
+Una sequenza $s$ arbitraria si troverà tra quelle di $|s|$ caratteri, in posizione alfabetica tra queste.\
+\begin{itemize}
+    \item Ad una sequenza arbitraria corrisponde il numero che ne indica la posizione nell'elenco.
+    \item A un numero naturale $n$ corrisponde la sequenza che occupa la posizione $n$ nell'elenco.
+\end{itemize}
+
+\noindent\textbf{Osservazione}:\ la numerazione delle sequenze è possibile perché esse sono di \textbf{lunghezza finita} anche se illimitata, cioè per un qualunque intero d scelto a priori esistono sequenze di lunghezza maggiore di $d$.\
+Per sequenze di lunghezza infinita la numerazione non è possibile.
+
+Gli insiemi non numerabili sono tutti gli insiemi non equivalenti a N:
+\begin{itemize}
+    \item insieme dei numeri reali
+    \item insieme dei numeri reali compresi nell'intervallo aperto (0,1)
+    \item insieme dei numeri reali compresi nell'intervallo chiuso [0,1]
+    \item insieme di tutte le linee nel piano
+    \item insieme delle funzioni in una o più variabili
+\end{itemize}
+
+\begin{center}
+    L'insieme dei problemi computazionali NON è numerabile.\
+\end{center}
+
+\subsection{Problemi e funzioni}
+
+Un problema computazionale può essere visto come una funzione matematica che associa ad ogni insieme di dati, espressi da $k$ numeri interi, il corrispondente risultato, espresso da $j$ numeri interi
+\[f: N^k \rightarrow N^j\]
+\begin{center}
+    L'insieme delle funzioni $f: N^k \rightarrow N^j$ NON è numerabile
+\end{center}
+
+\subsubsection{Diagonalizzazione}
+
+$F = \{\mathrm{funzioni}\ f \mid f: N \rightarrow \{0,1\}\}$ ogni $f \in F$ può essere rappresentata da una sequenza infinita
+\begin{table}[H]
+    \centering
+    \begin{tabular}{l l}
+        $x$    & 0 1 2 3 4 \dots $n$ \dots \\
+        $f(x)$ & 0 1 0 1 0 \dots 0 \dots   \\
+    \end{tabular}
+\end{table}
+\noindent o, se possibile, da una regola finita di costruzione
+\[ f(x) = \left\{\begin{array}{l l}
+        0 & x\ \mathit{pari}    \\
+        1 & x\ \mathit{dispari} \\
+    \end{array}\right.\]
+
+\begin{theorem}
+    L'insieme $F$ non è numerabile.
+\end{theorem}
+
+\begin{proof}
+
+    Per assurdo, $F$ sia numerabile.\
+    Possiamo enumerare ogni funzione:\ assegnare ad ogni $f \in F$ un numero progressivo nella numerazione e costruire una tabella (infinita) di tutte le funzioni.\
+
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{c|c l}
+            $x$      & 0 1 2 3 4 5 6 7 8 & \dots \\\hline
+            $f_0(x)$ & 1 0 1 0 1 0 0 0 1 & \dots \\
+            $f_1(x)$ & 0 0 1 1 0 0 1 1 0 & \dots \\
+            $f_2(x)$ & 1 1 0 1 0 1 0 0 1 & \dots \\
+            $f_3(x)$ & 0 1 1 0 1 0 1 1 1 & \dots \\
+            $f_4(x)$ & 1 1 0 0 1 0 0 0 1 & \dots \\
+            \dots    & \dots             & \dots \\
+        \end{tabular}
+    \end{table}
+
+    \noindent Consideriamo la funzione $g \in F$
+    \[g(x) = \left\{\begin{array}{l l}
+            0 & f_x(x) = 1 \\
+            1 & f_x(x) = 0 \\
+        \end{array}\right.\]
+    $g$ non corrisponde ad alcuna delle $f_i$ della tabella:\ \textbf{differisce da tutte nei valori posti sulla diagonale principale}.\
+
+    Per assurdo $\exists\ j\ \mathrm{t.c.}\  g(x) = f_j(x)$ allora  $g(j) = f_j (j)$, ma per definizione
+    \[g(j) = \left\{\begin{array}{l l}
+            0 & f_j(j) = 1 \\
+            1 & f_j(j) = 0 \\
+        \end{array}\right.\]
+    contraddizione!
+
+    Per qualunque numerazione scelta, esiste sempre almeno una funzione esclusa:\ $F$ non è numerabile.\
+    Si possono considerare linee arbitrarie che attraversano la tabella toccando tutte le righe e tutte le colonne esattamente una volta, e definire funzioni che assumono in ogni punto un valore opposto a quello incontrato sulla linea.\
+    Esistono infinite funzioni di $F$ escluse da qualsiasi numerazione.\
+\end{proof}
+
+
+\subsubsection{Conclusione}
+
+$F = \{f:N \rightarrow \{0,1\}\}$ non è numerabile; a maggior ragione, non sono numerabili gli insiemi delle funzioni
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{l}
+        $f:N \rightarrow N$     \\
+        $f:N \rightarrow R$     \\
+        $f:R \rightarrow R$     \\
+        $f:N^k \rightarrow N^j$ \\
+    \end{tabular}
+\end{table}
+
+\noindent L'insieme dei problemi computazionali non è numerabile.\
+
+\subsection{Il problema della rappresentazione}
+
+L'informatica rappresenta tutte le sue entità (quindi anche gli algoritmi) in forma digitale, come \textit{sequenze finite di simboli di alfabeti finiti} (e.g.\ \{0,1\})
+
+\begin{definition}
+    Un \textit{algoritmo} è una sequenza finita di operazioni, completamente e univocamente determinate.\
+\end{definition}
+
+\noindent La formulazione di un algoritmo dipende dal modello di calcolo utilizzato
+\begin{itemize}
+    \item programma per un modello matematico astratto, come una Macchina di Turing
+    \item algoritmo per in pseudocodice per RAM
+    \item programma in linguaggio C per un PC
+\end{itemize}
+
+\noindent Qualsiasi modello si scelga, gli algoritmi devono esservi descritti, ossia rappresentati da sequenze finite di caratteri di un alfabeto finito; di conseguenza \textit{gli algoritmi sono possibilmente infiniti}, ma numerabili:\ possono essere ``elencati'' (messi in corrispondenza biunivoca con l'insieme dei numeri naturali).\
+
+Drastica perdita di potenza:\ gli algoritmi sono numerabili e sono meno dei problemi computazionali, che hanno la potenza del continuo
+\[|\{\mathrm{Problemi}\}|  > >  |\{\mathrm{Algoritmi}\}|\]
+Esistono problemi privi di un corrispondente algoritmo di calcolo.\
+
+\subsection{Il problema dell'arresto}
+
+Esistono dunque problemi non calcolabili.\
+I problemi che si presentano spontaneamente sono tutti calcolabili, non è stato facile individuare un problema che non lo fosse.\
+
+Il \textbf{problema dell'arresto} (Turing, 1930) è un problema posto in forma decisionale
+\[\mathrm{Arresto}: \{\mathit{Istanza}\} \rightarrow \{0,1\}\]
+Per i problemi decisionali, la calcolabilità è in genere chiamata decidibilità.\
+
+\vspace{12pt}
+
+\noindent\textit{Presi ad arbitrio un algoritmo A e i suoi dati di input D, decidere in \textbf{tempo finito} se la computazione di A su D termina o no}.
+
+\vspace{12pt}
+
+\noindent Si tratta di un algoritmo che indaga sulle proprietà di un altro algoritmo, trattato come dato di input.\
+È legittimo:\ possiamo usare lo stesso alfabeto per codificare algoritmi e i loro dati di ingresso (sequenze di simboli dell'alfabeto); una stessa sequenza di simboli può essere quindi interpretata sia come un programma, sia come un dato di ingresso di un altro programma.\
+
+Il problema consiste nel chiedersi se un generico programma termina la sua esecuzione oppure va in ``ciclo'', ovvero continua a ripetere la stessa sequenza di istruzioni all'infinito (supponendo di non avere limiti di tempo e memoria).\
+
+Turing ha dimostrato che riuscire a dimostrare se un programma arbitrario si arresta e termina la sua esecuzione non è solo un'impresa ardua, ma in generale è impossibile!
+
+\begin{theorem}
+    Il problema dell'arresto è indecidibile.\
+\end{theorem}
+
+\begin{proof}
+
+    Se il problema dell'arresto fosse decidibile, allora esisterebbe un algoritmo \texttt{ARRESTO} che, presi $A$ e $D$ come dati di input, determina in tempo finito le risposte
+    \[\mathtt{ARRESTO}(A,D) = \left\{\begin{array}{l l}
+            1 & \mathrm{se}\ A(D)\ \mathrm{termina}      \\
+            0 & \mathrm{se}\ A(D)\ \mathrm{non\ termina} \\
+        \end{array}\right.\]
+    \textbf{Osservazione}:\ l'algoritmo \texttt{ARRESTO} non può consistere in un algoritmo che simuli la computazione $A(D)$; se $A$ non si arresta su $D$, \texttt{ARRESTO} non sarebbe in grado di rispondere NO (0) in tempo finito.\
+
+    In particolare possiamo scegliere $D = A$, cioè considerare la computazione $A(A)$:
+    \[\mathtt{ARRESTO}(A,A) = 1 \Leftrightarrow A(A)\ \mathrm{termina}\]
+    Se esistesse \texttt{ARRESTO}, esisterebbe anche il seguente algoritmo
+
+    \begin{verbatim}
+PARADOSSO(A)
+    while (ARRESTO(A, A)){
+        ; 
+}
+\end{verbatim}
+
+    \noindent L'ispezione dell'algoritmo \texttt{PARADOSSO} mostra che
+    \[\mathtt{PARADOSSO}(A)\ \mathrm{termina} \Leftrightarrow x = \mathtt{ARRESTO}(A,A) = 0 \Leftrightarrow A(A)\ \mathrm{non\ termina}\]
+    Cosa succede calcolando \texttt{PARADOSSO(PARADOSSO)}?
+    \[\mathtt{PARADOSSO}(\mathtt{PARADOSSO})\ \mathrm{termina}\]
+    \[\Leftrightarrow x = \mathtt{ARRESTO}(\mathtt{PARADOSSO},\mathtt{PARADOSSO}) = 0\]
+    \[\Leftrightarrow \mathtt{PARADOSSO}(\mathtt{PARADOSSO})\ \mathrm{non\ termina}\]
+    L'unico modo di risolvere la contraddizione è che l'algoritmo \texttt{PARADOSSO} non possa esistere, dunque non può esistere nemmeno l'algoritmo \texttt{ARRESTO}.\
+
+\end{proof}
+
+\noindent\textbf{Osservazione}:\ non può esistere un algoritmo che decida in tempo finito se un algoritmo arbitrario termina la sua computazione su dati arbitrari; ciò non significa che non si possa decidere in tempo finito la terminazione di algoritmi particolari.\
+Il problema è indecidibile su una coppia $\langle A,D\rangle$ scelta arbitrariamente.\
+
+L'algoritmo \texttt{ARRESTO} costituirebbe uno strumento estremamente potente:\ permetterebbe infatti di dimostrare congetture ancora aperte sugli interi, per esempio la congettura di Goldbach.\
+
+\vspace{12pt}
+\noindent``\textbf{Lezione di Turing}'':\ \textit{non esistono algoritmi che decidono il comportamento di altri algoritmi esaminandoli dall'esterno, cioè senza passare dalla loro simulazione}
+
+\subsection{Modelli di calcolo}
+
+La teoria della calcolabilità dipende dal modello di calcolo, oppure la decidibilità è una proprietà del problema?
+
+I linguaggi di programmazione esistenti sono tutti equivalenti?\
+Ce ne sono alcuni più potenti e/o più semplici di altri?\
+Ci sono algoritmi descrivibili in un linguaggio, ma non in un altro?\
+È possibile che problemi oggi irrisolvibili possano essere risolti in futuro con altri linguaggi o con altri calcolatori?\
+La teorie della calcolabilità e della complessità dipendono dal modello di calcolo?
+
+\subsubsection{Tesi di Church-Turing}
+
+Tutti i (ragionevoli) modelli di calcolo \textbf{\textit{risolvono esattamente la stessa classe di problemi}}, dunque si equivalgono nella possibilità di risolvere problemi, pur operando con diversa efficienza.\
+
+\begin{center}
+    \textit{La decidibilità è una proprietà del problema}.\
+\end{center}
+Incrementi qualitativi alla struttura di una macchina, o alle istruzioni di un linguaggio di programmazione, servono solo a abbassare il tempo di esecuzione e rendere più agevole la programmazione.\

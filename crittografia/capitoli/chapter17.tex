@@ -1,0 +1,142 @@
+\chapter{Quantum Distribution Key}
+
+Il \textbf{Quantum Distribution Key} (\textbf{QDK}) è un protocollo per la distribuzione quantistica delle chiavi e si pone come alternativa al protocollo Diffie-Hellman.\
+I protocolli per la distribuzione quantistica delle chiavi sono già in uso, non hanno bisogno del computer quantistico per funzionare; si usano insieme al One-Time Pad e permettono di creare e scambiare lunghissime chiavi binarie in massima sicurezza.\
+
+La meccanica quantistica non può essere utilizzata per lo scambio dei messaggi perché utilizza dei principi che permettono di verificare se c'è stata un'intrusione sul canale:\ una volta che Alice e Bob hanno costruito una chiave, prima di usarla eseguono una verifica per controllare se durante lo scambio di chiavi qualcuno ha provato ad intercettarle; in caso affermativo la chiave viene scartata prima che venga usata.\
+Siccome la verifica dell'intrusione avviene a comunicazione conclusa, è chiaro che non sarebbe efficace usarlo per lo scambio di messaggi.\
+
+Inoltre, esiste la crittografia \textit{post quantistica} che riguarda la cifratura a chiave pubblica e l'obiettivo di questo tipo di crittografia è andare ad individuare dei cifrari a chiave pubblica che rimangono difficili anche per le macchine quantistiche.\
+
+\subsubsection{Principi della meccanica quantistica}
+
+\begin{itemize}
+    \item \textbf{Sovrapposizione di stati}:\ proprietà di un sistema quantistico di trovarsi in più stati contemporaneamente.
+    \item \textbf{Decoerenza}:\ l'osservazione o la misurazione di un sistema quantistico disturba il sistema stesso che va a perdere la proprietà della sovrapposizione di stati collassando in uno stato singolo.
+    \item \textbf{No-cloning}:\ impossibilità di duplicare un sistema quantistico conservando nella copia lo stato quantico dell'originale; sostanzialmente è impossibile copiare uno stato quantistico non noto.
+    \item \textbf{Entanglement}:\ possibilità che due o più elementi si trovino in stato quantico correlato fra loro in modo che, pur se portati a grande distanza, mantengano la loro correlazione.
+\end{itemize}
+
+\section{Protocollo BB84}
+
+È un protocollo per scambiare le chiavi mediante invio di \textbf{fotoni polarizzati}.\
+I fotoni sono privi di massa e si propagano alla velocità della luce.\
+Un fotone può avere diversi stati di polarizzazione (o piani di oscillazione del campo elettrico), a noi ne interessano quattro:\ verticale, orizzontale, a $+45^{\circ}$ e a $-45^{\circ}$.\
+Questi stati vengono divisi in due coppie, la \textbf{base di polarizzazione ortogonale} e la \textbf{basi di polarizzazione diagonale}.\
+In ciascuno di questi stati viene codificato un bit di informazione, per esempio:
+\begin{itemize}
+    \item polarizzazione verticale $\rightarrow$ 0
+    \item polarizzazione orizzontale $\rightarrow$ 1
+    \item polarizzazione a $+45^{\circ}$ $\rightarrow$ 0
+    \item polarizzazione a $-45^{\circ}$ $\rightarrow$ 1
+\end{itemize}
+
+\noindent Perché usare due basi e non una sola?\
+Scegliendo una base sola, non saremmo in grado di misurare con precisione lo stato di polarizzazione del fotone.\
+Se Bob conosce la base di preparazione, la misura del fotone sarà accurata e conoscerà con certezza il bit di informazione; se invece la base è sconosciuta, è possibile distinguere solo due stati di polarizzazione nell'ambito della stessa base:\ se Bob sceglie una base diversa da quella usata da Alice, il risultato della misura è probabilistico.\
+
+\vspace{12pt}
+\noindent\textbf{Osservazione}:\ il protocollo BB84 non dipende in alcun modo da difficoltà di particolari problemi matematici e nemmeno dal fatto che un giorno potrebbe essere dimostrato che $\mathit{P} = \mathit{NP}$.
+
+\subsection{Apparecchiatura}
+
+Il protocollo richiede due canali:\ la prima comunicazione avviene sul canale quantistico, dove viaggiano i fotoni che incapsulano il bit casuale scelto da Alice.\
+La seconda fase di comunicazione avviene sul canale standard e serve a comunicare la base utilizzata per misurare e per inviare.\
+
+L'\textbf{OPG} è un'apparecchiatura che permette di emettere un fotone alla volta.\
+Un'altra componente, la \textbf{PC}, consente di imporre al fotone una certa polarizzazione.\
+Alice utilizzerà un \textit{random number generator} per scegliere (casualmente) se mandare 0 o 1 e in quale base mandarlo.\
+
+Bob sceglie casualmente una base tramite un \textit{random number generator} e usa un \textbf{deviatore} per scegliere il \textbf{PBS} (\textit{beam splitter polarizzante}) corretto:\ serve a misurare il fotone per determinarne la polarizzazione; si noti che risponde correttamente soltanto se la base alla quale fa riferimento è la stessa che Alice aveva usato al momento dell'invio.\
+
+\subsubsection{PBS}
+
+Sia $S$ l'asse di polarizzazione del PBS e $F$ la direzione di polarizzazione del fotone.\
+Dopo che il fotone è entrato nel beam splitter viene deviato in una delle due uscite possibili:\ $A$ (\textit{assorbimento}) e $R$ (\textit{riflessione}).\
+
+\begin{itemize}
+    \item Il fotone viene inviato all'uscita $A$ con probabilità $\cos^2\Theta$ e assume polarizzazione $S$.
+    \item Il fotone viene inviato all'uscita $R$ con probabilità $\sin^2\Theta$ e assume polarizzazione $\perp$ a $S$.
+\end{itemize}
+
+\noindent $\Theta$ è l'angolo tra le due polarizzazioni.\
+
+\begin{itemize}
+    \item $\Theta = 0^{\circ}$ ($F \equiv S$):\ il fotone esce da $A$, con polarizzazione $S=F$.\
+    \item $\Theta = 90^{\circ}$ ($F \perp S$):\ il fotone esce da $R$, con polarizzazione $S^{\perp}=F$.\
+    \item $\Theta = \pm 45^{\circ} \Rightarrow \cos^2\Theta = \sin^2\Theta = \frac{1}{2}$:\ il fotone esce con pari probabilità da $A$ o $R$ e la sua polarizzazione cambia ($S, S^{\perp}$).\
+\end{itemize}
+
+\noindent \textbf{Fenomeno quantistico}:\ la lettura attraverso il PBS \textit{distrugge} lo stato quantistico precedente.\
+
+Tutti quei bit ottenuti tramite una base diversa da quella usata per generarlo, essendo il risultato completamente casuale, verranno scartati e non saranno inclusi nella chiave.\
+Poiché la base scelta per interpretare il fotone è casuale, si ha il 50\% di probabilità di trovare la base corretta, quindi solo metà dei bit inviati sotto forma di fotoni da Alice verranno effettivamente ``percepiti'' come parte della chiave da Bob.\
+
+Alla fine di questo procedimento, Alice e Bob si salvano quali basi sono state scelte per polarizzare e quali per interpretare e se le comunicheranno sul canale standard.\
+
+\subsubsection{Fasi del BB84}
+
+\begin{enumerate}
+    \item Alice invia una sequenza $S_A$ di bit codificati nelle polarizzazioni dei fotoni sul canale quantistico.
+    \item Bob interpreta $S_A$ con le sue basi che ha scelto casualmente e ottiene $S_B$ (dove le basi coincidono, le misure sono uguali).
+    \item Sul canale standard, Bob comunica ad Alice le basi scelte e Alice indica quali sono comuni alle sue.
+    \item Alice e Bob sacrificano una porzione $S_A'', S_B''$ di $S_A'$ e $S_B'$ in posizioni prestabilite, comunicandole sul canale standard (si passano alcuni bit di $S_A'$ e $S_B'$).\ Se $S_A'' \neq S_B''$ interrompono la comunicazione, altrimenti usano $S_A' \backslash S_A'' = S_A' \backslash S_A''$ come chiave.
+\end{enumerate}
+
+\noindent In assenza di interferenze di Eve, Alice e Bob possiedono una sottosequenza identica ($S_A' = S_B'$), formata dai bit codificati e decodificati con basi comuni.\
+\[|S_A'| = |S_B'| \simeq \frac{|S_A|}{2}\]
+
+\subsubsection{Quantum Bit Error Rate}
+
+Il \textbf{Quantum Bit Error Rate} (QBER) è la percentuale di bit errati (dovuti ad errori dell'apparato sperimentale e non da intrusioni).\
+Nel confronto tra le due sequenze che Alice e Bob sacrificano per verificare se c'è stato un crittoanalista, se la percentuale di errori è maggiore di QBER allora concludono che Eve è stata sul canale, altrimenti l'errore viene attribuito all'apparato sperimentale:\ usano un codice a correzione di errori per ricostruire una chiave corretta.\
+
+\vspace{12pt}
+\noindent\textbf{Nota bene}:\ Eve può comunque non far notare il suo passaggio sul canale quantistico intercettando solo pochi fotoni così da far attribuire la colpa degli errori all'apparato.\
+\vspace{12pt}
+
+\noindent Per evitare che Eve entri in possesso di qualche bit della chiave senza che Alice e Bob lo sappiano, le sequenze ottenute vengono inserite in funzioni hash e  come chiavi vengono usate le immagini hash.\
+
+\newpage
+
+\subsubsection{Protocollo}
+
+\textit{Canale quantistico}
+\vspace{12pt}
+
+\noindent $S_A[1,n] \rightarrow$ sequenza iniziale di bit da cui verrà estratta la chiave (rappresentata con un codice a correzione di errori).\
+
+\begin{verbatim}
+for i=1 to n
+    Alice: sceglie una base a caso, codifica S_A[i],
+            invia il fotone a Bob
+
+    Eve intercetta il fotone, lo misura con una sua base,
+            lo invia a Bob e calcola S_E[i]
+
+    Bob: sceglie una base a caso, interpreta il fotone
+            ricevuto e costruisce S_B[i]
+\end{verbatim}
+
+\noindent\textit{Canale standard}
+\vspace{12pt}
+
+\noindent QBER è la \% di errore dovuti al rumore, mentre $h$ è una funzione hash crittografica.
+
+\begin{flushleft}
+    Bob comunica ad Alice la sequenza di basi scelte.
+
+    Alice comunica a Bob le basi comuni.
+\end{flushleft}
+
+\begin{enumerate}
+    \item estraggono $S_A'$ e $S_B'$ corrispondenti alle basi comuni e da queste estraggono due sottosequenze in posizioni concordate $\rightarrow S_A'', S_B''$.
+    \item Si scambiano $S_A''$ e $S_B''$.\ Se la \% di bit $\neq$ è $>$ QBER $\Rightarrow$ Stop.
+    \item Altrimenti calcolano $S_A' \backslash S_A''$ e $S_B' \backslash S_B''$, le decodificano con il codice a correzione di errori $\Rightarrow$ ottengono una sequenza comune $S_C$.
+          \begin{center}
+              \textbf{Attenzione}:\ Eve potrebbe conoscere alcuni bit di $S_C$.\
+          \end{center}
+    \item Alice e Bob calcolano $k = h(S_C)$ e usano $k$ come chiave.\
+\end{enumerate}
+
+

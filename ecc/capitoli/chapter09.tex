@@ -1,0 +1,243 @@
+\section{Alcuni risultati classici}
+
+Introdurremo brevemente alcuni risultati basilari della teoria della calcolabilità che ne illustrano l'essenza, caratterizzando la classe delle funzioni, ovvero dei problemi calcolabili, mediante alcuni teoremi di ``chiusura''.\
+Privilegeremo una presentazione orientata ai fondamenti dell'informatica, a volte purtroppo senza la profondità e l'accuratezza che sarebbero necessari nel presentare una teoria in cui precisione e attenzione ai dettagli giocano un ruolo essenziale.\
+Prima di enunciare questi risultati, insistiamo a ricordare che, grazie alla tesi di Church, possiamo chiamare \textit{calcolabili} indifferentemente le funzioni esprimibili nel formalismo delle macchine di Turing o le funzioni $\mu$-ricorsive o i programmi \textit{\footnotesize WHILE} o ciò che volete voi, purché la loro definizione rispetti le cinque condizioni intuitive poste agli algoritmi che sono state espresse nel primo capitolo:\ le nostre ipotesi di lavoro.
+
+Cominciamo con un semplice risultato sulla cardinalità\footnote{Dato un insieme $A$, indicheremo con $\#(A)$ la sua cardinalità, ovvero il numero dei suoi elementi.} dell'insieme delle funzioni calcolabili, da cui segue che vi sono funzioni \textit{non calcolabili}.
+
+\begin{theorem}
+    \label{n_fcalcolabili}
+    \hfill
+    \begin{itemize}
+        \item[i)] Le funzioni calcolabili sono $\#(\mathbb{N})$; inoltre anche le funzioni calcolabili totali sono $\#(\mathbb{N})$.
+        \item[ii)] Esistono funzioni non calcolabili.
+    \end{itemize}
+\end{theorem}
+
+\begin{proof}
+    \hfill
+    \begin{itemize}
+        \item[i)] Costruisci $\#(\mathbb{N})$ MdT $M_i$ che svuotano il nastro dall'input, ci scrivono la stringa $|^i$ e si arrestano (sono tutte le funzioni costanti).\ Che non siano più di $\#(\mathbb{N})$ segue dal fatto che le MdT si possono enumerare, come fatto intuire a pagina 26.\
+        \item[ii)] Con una costruzione analoga a quella di Cantor (la classe dei sottoinsiemi di $\mathbb{N}$ non è numerabile) si vede che $\{f : \mathbb{N} \rightarrow \mathbb{N}\}$ ha cardinalità $2^{\#(\mathbb{N})}$.
+    \end{itemize}
+\end{proof}
+
+\noindent Abbiamo già visto nel capitolo 1.6 che possiamo associare un indice alle macchine di Turing codificandole (veramente avevamo una funzione solamente iniettiva, ma sappiamo che Gödel ne ha definito una anche surgettiva); analogamente nel capitolo successivo abbiamo accennato a come enumerare le funzioni ricorsive primitive e non è diﬃcile immaginare una sua estensione alle funzioni $\mu$-ricorsive.\
+Oltre alla superficialità con cui sono stati presentati, i due modi hanno in comune il fatto che si basano \textit{solamente} sui simboli usati nel definire gli algoritmi, il che è bene.\
+
+Infatti, sotto ipotesi molto ragionevoli, per i nostri scopi non c'è sostanziale differenza tra una enumerazione e un'altra, purché sia \textit{effettiva}.\
+Quindi siamo liberi di scegliere quella che più ci aggrada.\
+Basti qui dire che una buona enumerazione deve essere una funzione biunivoca che dipende \textit{solo} dalla sintassi con cui scriviamo gli algoritmi e \textit{non} dal significato che attribuiamo loro.\
+Di nuovo, la già ricordata enumerazione del capitolo 1.6 andrebbe bene se fosse surgettiva; invece una enumerazione che pretendesse, ad esempio, di elencare prima tutte le funzioni costanti e poi le altre non sarebbe effettiva.\
+L'osservazione appena fatta ci consente anche di fissare una volta per tutte un elenco di MdT (programmi \textit{\footnotesize WHILE}, funzioni $\mu$-ricorsive, \dots) e di indicare con $M_i$ la MdT (il programma, la funzione $\mu$-ricorsiva, \dots) che vi appare in posizione $i$-ma, o meglio l'algoritmo $i$-mo.\
+Ancor meglio, si può usare la seguente notazione, che finalmente evidenzia la differenza tra \textit{funzione} e \textit{algoritmo} che la calcola.
+
+\vspace{12pt}
+
+\noindent\textbf{NOTAZIONE}\quad Data un'enumerazione effettiva, indicheremo con $\varphi$ la funzione (parziale) che la macchina, o meglio l'algoritmo, $M_i$ calcola e chiameremo $i$ \textit{indice} (non della funzione, bensì della macchina!\ quindi può darsi benissimo che per $i \neq j$ sia $\varphi_i = \varphi_j$, mentre sicuramente $M_i \neq M_j$).
+
+\vspace{12pt}
+
+\noindent Entriamo adesso nel vivo della presentazione dei teoremi più importanti di questa prima parte del corso, ribadendo ancora una volta il seguente fatto:\ i risultati che riportiamo nel seguito sono tutti \textit{invarianti} rispetto all'enumerazione scelta.\
+
+\medskip
+
+\noindent Il primo teorema, che spesso è chiamato \textit{padding lemma}, ci dice che ci sono infinite (numerabili) MdT, ovvero infiniti numerabili algoritmi che calcolano la stessa funzione, e che \textit{alcuni} di essi si possono costruire ``facilmente'' da un algoritmo dato (ossia esprimibile con una funzione primitiva ricorsiva o un programma \textit{\footnotesize FOR}).
+
+\begin{theorem}[Padding Lemma]
+    \label{padding lemma}
+    Ogni funzione calcolabile $\varphi_x$ ha $\#(\mathbb{N})$ indici.\
+    Inoltre $\forall x$ si può costruire, mediante una funzione ricorsiva primitiva, un insieme infinito $A_x$ di indici tale che
+    \[\forall y \in  A_x.\ \varphi_y = \varphi_x\]
+    cioè $\varphi_y(n) = m$ sse $\varphi_x(n) = m$ (e ovviamente $\varphi_y(n) \uparrow$ sse $\varphi_x(n) \uparrow$).
+\end{theorem}
+
+\begin{proof}
+    Per ogni macchina $M_x$, se $Q = \{q_0,\dots,q_k\}$, ottieni la prima macchina $M_{x_1}$ con $x_1 \in A_x$ aggiungendo lo stato $q_{k+1} \notin Q$ e la quintupla $(q_{k+1}, \#, q_{k+1}, \#, -)$; ottieni la seconda $M_{x_2}$ aggiungendo lo stato $q_{k+2}$ e la quintupla $(q_{k+2}, \#, q_{k+2}, \#, -)$, \dots.
+\end{proof}
+
+\noindent Il prossimo teorema dice che tra tutti gli algoritmi che calcolano una data funzione ce n'è uno privilegiato, nel senso che ha una forma speciale.\
+Di conseguenza, ogni funzione ha una rappresentazione privilegiata.\
+
+\begin{theorem}[Forma normale]
+    \label{forma normale}
+    Esistono un predicato $T(i,x,y)$ e una funzione $U(y)$ calcolabili totali tali che $\forall i,x.\ \varphi_i(x) = U(\mu y.\ T(i,x,y))$.\
+    Inoltre, $T$ e $U$ sono primitive ricorsive.\
+\end{theorem}
+
+\begin{proof}
+    Definisci $T(i, x, y)$, detto comunemente \textit{predicato di Kleene},
+    vero se e solamente se $y$ è la codifica di una computazione terminante di $M_i$ con dato iniziale $x$.\
+    Per calcolare $T$, dato $i$ recupera $M_i$ dalla lista e comincia a scandire i valori $y$.\
+    Decodifica ognuno di essi uno alla volta e, avendo come ingresso $x$, controlla se il risultato è una computazione terminante della    forma $M_i(x) = c_0, c_1,\dots, c_n$.\
+    Questa sequenza di passi termina sempre e quindi $T$ è totale.\
+    Se $y$ è la codifica di una computazione terminante di $M_i(x)$, allora $c_n = (h, \triangleright z \underline{\#})$ e definisci $U$ in modo che $U(y) = z$ e i passi necessari a questo calcolo sono finiti e terminano tutti:\ quindi $U$ è totale.\
+    L'intero procedimento seguito è effettivo, e quindi $T$ e $U$ sono calcolabili per la tesi di Church-Turing.
+
+    Inoltre $U$ e $T$ sono ricorsivi primitivi perché le codifiche che usiamo lo sono e perché lo sono i controlli effettuati.
+\end{proof}
+
+\noindent Si noti che la versione del teorema di forma normale sulle MdT deterministiche è tale per cui se esiste un $y$ tale che $T(i, x, y)$ risulta vero, allora tale $y$ è anche unico.\
+Invece, se le MdT considerate fossero non-deterministiche (vedi Def.\ \ref{MdT_non-det}), ci potrebbero essere più computazioni che terminano nello stato \textit{h}, per cui l'operatore di minimizzazione darebbe come risultato il minimo intero che codifica una di esse (si veda la discussione sulle regole di valutazione fatta nel capitolo 1.6).\
+
+Un'immediata conseguenza del teorema di forma normale è che ogni funzione calcolata da una MdT ammette una definizione $\mu$-ricorsiva.\
+In altre parole, vale il seguente corollario.
+
+\begin{corollario}
+    Le funzioni T-calcolabili sono $\mu$-ricorsive.
+\end{corollario}
+
+\begin{lemma}
+    Le funzioni $\mu$-calcolabili sono T-calcolabili.
+\end{lemma}
+
+\noindent Ora è facile concludere l'equivalenza tra MdT e funzioni $\mu$-ricorsive.\
+\begin{theorem}
+    Una funzione è T-calcolabile se e solo se è $\mu$-calcolabile.\
+\end{theorem}
+
+\noindent Il teorema di forma normale e quello d'equivalenza tra MdT e funzioni $\mu$-ricorsive ha il seguente corollario interessante dal punto di vista informatico.\
+La sua rilevanza nel nostro campo è legata al fatto che le funzioni primitive ricorsive si possono rappresentare con un programma nel linguaggio \textit{\footnotesize FOR} e quelle $\mu$-ricorsive con uno nel linguaggio \textit{\footnotesize WHILE} (v.\ capitolo precedente); pertanto, si deduce che \textit{ogni programma} può essere scritto (in forma normale) usando un comando di tipo \texttt{while} e due di tipo \texttt{for} (ciò è particolarmente rilevante quando il programma in questione sia l'interprete di un linguaggio, come vedremo più avanti).
+
+\begin{corollario}
+    Ogni funzione calcolabile parziale può essere ottenuta da due funzioni primitive ricorsive e una sola applicazione dell'operatore $\mu$.
+\end{corollario}
+
+\noindent Adesso arriva un teorema molto importante.\
+Dice che un formalismo universale, cioè uno che esprima \textit{tutte} le funzioni calcolabili, è così potente da riuscire a esprimere \textit{l'interprete dei propri programmi}.\
+Vedremo più avanti che questa capacità può essere usata ``alla rovescia'', cioè per mostrare che un formalismo è universale.\
+Vediamo il semplice caso con funzioni a una variabile e la sua dimostrazione; l'estensione al caso generale per funzioni a $n$ variabili è immediata.\
+
+\begin{theorem}[Enumerazione]
+    \label{teo-enumerazione}
+    Esiste una funzione calcolabile parziale $\varphi_z(i,x)$ tale che $\varphi_z(i,x) = \varphi_i(x)$.\
+
+    (Si noti l'ordine dei quantificatori:\ $\exists z$ tale che $\forall i,x$ si ha $\varphi_z(i,x) = \varphi_i(x)$.)
+\end{theorem}
+
+\begin{proof}
+    Poiché la funzione $U(\mu y.\ T(i, x, y))$ usata nel teorema di forma normale è definita per composizione e $\mu$-ricorsione a partire da funzioni (meglio da una funzione e un predicato) primitive ricorsive, essa stessa è una funzione calcolabile in due argomenti $i$ e $x$.\
+    Avrà quindi un indice che chiamiamo $z$, cioè sia $\varphi_z(i, x) = U(\mu y.\ T(i, x, y))$.\
+    Applichiamo allora il teorema di forma normale, da cui $U(\mu y.\ T(i, x, y)) = \varphi_i(x)$.\
+    Per ottenere la tesi basta la transitività dell'uguaglianza.\
+
+    Più intuitivamente e informalmente:\ $M_z$ recupera la descrizione di $M_i$ e la applica a $x$.\
+\end{proof}
+
+\noindent Il teorema di enumerazione garantisce che esiste la MdT Universale, $M_z$, che ha in ingresso la descrizione di una MdT $M_i$, il dato $x$ e ``si comporta come $M_i$''.\
+È esattamente quanto avviene ogni giorno con i nostri programmi:\ li diamo in pasto a una macchina realizzata in parte H/W, in parte S/W (si tratta di una macchina reale, e quindi solo ``quasi-universale'', perché, tra l'altro, ha memoria limitata).\
+La macchina in questione esegue i nostri programmi, ovvero si comporta esattamente come dettato dai suoi dati, i programmi in ingresso:\ finché l'istruzione corrente non è {\small STOP} prende i suoi argomenti, esegue l'istruzione, ne memorizza il risultato e aggiorna il puntatore all'istruzione corrente.
+
+Intuitivamente, il teorema di enumerazione ci ``libera'' dalla necessità di avere un esecutore umano delle MdT, così come previsto da Alan Turing:\ \textit{esiste una macchina che esegue gli algoritmi}.
+
+\begin{theorem}[Parametro, s-1-1]
+    Esiste una funzione calcolabile totale (iniettiva) $s_1^1$ con due argomenti, tale che $\forall i,x$
+    \[\varphi_{s_1^1(i,x)} = \lambda y.\ \varphi_i(x,y)\]
+\end{theorem}
+
+\noindent Intuitivamente, la macchina $M_{s(i,x)}$, o più liberamente l'algoritmo o il programma $P_{s(i,x)}$ (omettiamo d'ora in poi l'indice e l'apice 1, per leggibilità) opera su $y$ soltanto, mentre $P_i$ opera su $x$ e $y$.\
+Quindi $x$ è un \textit{parametro} di $P_i$.\
+Ad esempio, sia $\varphi_i(x,y)$ la funzione $x \times f(y)$ (con $f$ qualunque); allora, a partire da $i$ e da 2, mediante la $s$ trovo in \textit{modo effettivo} l'indice del programma che calcola la funzione $2 \times f(y)$, cioè determino $\varphi_{s(i,2)}$.\
+
+Il teorema \textit{s-m-n} è importante in informatica perché è la base per la tecnica di ``valutazione parziale'' secondo la quale si specializza via via un programma generale per ottenerne versioni più eﬃcienti in casi particolari (compilatori/interpreti per architetture parametriche, ecc.).\
+Questo teorema è inoltre utilissimo nella teoria della calcolabilità sia perché ci offre uno strumento potentissimo da usare nelle dimostrazioni, sia per le ragioni espresse dal teorema di espressività, riportato più avanti.\
+Vediamo la dimostrazione della sua versione \textit{s-1-1}, cioè con $m, n = 1$, e poi l'enunciato generale.
+
+\begin{proof}[Dimostrazione intuitiva del teorema s-1-1]
+    Per calcolare $\varphi_{s_1^1(i,x)}(y)$ si prenda $M_i$ decodificando $i$ e si predisponga lo stato iniziale, cioè $M_i(x, y)$, dove $x$ è fissato in anticipo.\
+    (Se vi fosse più familiare, prendete il programma $P_i$ che avrà un'istruzione per leggere il valore $k$ del parametro $x$:\ allora rimuovetela e inserite al suo posto l'assegnamento $x := k$.)
+    Quella delineata (in entrambi i casi) è una procedura effettiva, cioè algoritmica, che termina sempre, quindi per la tesi di Church-Turing esiste una funzione calcolabile totale $s = s_1^1$.\
+    Se tale funzione non fosse iniettiva, allora si costruisca $s'$ con $\varphi_{s(i,x)} = \varphi_{s'(i,x)}$ in modo tale che $s'(i, x)$ generi indici (che esistono perché gli indici delle MdT che calcolano $s(i, x)$ sono $\#(\mathbb{N})$) in modo strettamente crescente, cioè tali che $s'(i_0, x_0 ) > s'(i_1, x_1)$ se la codifica della coppia $(i_0, x_0)$ è maggiore di quella di $(i_1, x_1)$.\
+    A questo punto basta notare che una funzione totale strettamente crescente è iniettiva.
+\end{proof}
+
+\begin{theorem}[Parametro, s-m-n]
+    \label{parametro}
+    $\forall m,n > 0$ esiste una funzione calcolabile totale (iniettiva) $s_n^m$ con $m+1$ argomenti tale che $\forall i, x_1, \dots, x_m$
+    \[\varphi_{s_n^m(i, x_1,\dots x_m)}^{(n)} = \lambda y_1, \dots y_n.\ \varphi_i^{(m+n)}(x_1,\dots, x_m, y_1, \dots, y_n)\]
+\end{theorem}
+
+\noindent Si noti come il teorema del parametro e quello di enumerazione siano in un certo senso l'inverso l'uno dell'altro.\
+Infatti uno ``abbassa'' un argomento nella posizione di indice, mentre l'altro ``innalza'' un indice nella posizione di argomento.
+
+L'importanza dei teoremi del parametro e di enumerazione può essere compresa ancora meglio considerando il seguente teorema che non dimostreremo.\
+
+\begin{theorem}[Espressività]
+    Un formalismo è Turing-equivalente (calcola tutte e sole le funzioni T-calcolabili, è universale) se e solamente se
+    \begin{itemize}
+        \item ha un algoritmo universale (cioè vale il teorema di enumerazione),
+        \item vale il teorema del parametro.
+    \end{itemize}
+\end{theorem}
+
+\noindent Grazie al teorema \textit{s-m-n} si dimostra un teorema molto elegante, che ha un ruolo fondamentale, sia in informatica che nella pura teoria della calcolabilità.\
+
+\begin{theorem}[Ricorsione, Kleene II]
+    $\forall f$ funzione calcolabile totale $\exists n$ tale che $\varphi_n = \varphi_{f(n)}$.
+
+    (Un tale indice viene detto \textbf{punto fisso} di $f$.)
+\end{theorem}
+
+\noindent Prima della dimostrazione, diamo un po' di intuizione:\ la funzione $f$ ``trasforma'' programmi in programmi, come fanno i compilatori.\
+Infatti $f$ trasforma indici:\ dato $n$, ovvero il programma $P_n$ lo trasforma in $P_{f(n)}$.\
+Quando consideriamo il punto fisso, la trasformazione operata da $f$ \textit{non cambia} la funzione calcolata, ovvero trasforma un programma $P_n$ nel programma $P_{f(n)}$ con la \textit{stessa} semantica.\
+Si noti che l'accezione ``punto fisso'' usata qui è diversa da quella solita in cui il punto fisso $x$ di un funzione $g$ è tale che $g(x) = x$:\ qui il punto fisso riguarda la \textit{funzione}, e non l'indice delle macchine che la calcolano.\
+
+Questo teorema fornisce in un certo senso la ``base'' della semantica denotazionale; garantisce la realizzabilità di macchine che eseguono programmi ricorsivi o delle funzioni di crittografia o di molte altre diavolerie infernatiche.\
+Nella dimostrazione del teorema si fa uso del fatto che le funzioni calcolabili sono chiuse rispetto alla trasformazioni di indici introdotte dal teorema del parametro.\
+
+\begin{proof}
+    Definiamo la seguente funzione calcolabile ``diagonale''
+    \[\psi(u,z) = \left\{\begin{array}{l l}
+            \varphi_{\varphi_u(u)}(z) & \mathrm{se}\ \varphi_u(u) \downarrow \\
+            \mathrm{indefinita}       & \mathrm{altrimenti}                  \\
+        \end{array}\right.\]
+    Poiché $\psi$ è calcolabile, per Church-Turing avrà un indice $\varphi_i(u,z) = \psi(u,z)$.\
+    A questo punto per il teorema del parametro si ha $\varphi_i(u,z) = \varphi_{s(i,u)}(z)$, ma $s(i,u)$ dipende \textit{solo} da $u$, quindi ponendo $d(u) = \lambda u.\ s(i,u)$ si ottiene che
+    \begin{equation}
+        \tag{1}
+        \psi(u,z) = \varphi_i(u,z) = \varphi_{s(i,u)}(z) = \varphi_{d(u)}(z) = \left\{\begin{array}{l l}
+            \varphi_{\varphi_u(u)}(z) & \mathrm{se}\ \varphi_u(u) \downarrow \\
+            \mathrm{indefinita}       & \mathrm{altrimenti}                  \\
+        \end{array}\right.\
+    \end{equation}
+    Per il teorema \textit{s-m-n}, $d(u)$ è totale e iniettiva (e \textit{non} dipende da $f$).\
+    Data $f$, $f \circ d$ è calcolabile e sia $v$ proprio un indice tale che
+    \begin{equation}
+        \tag{2}
+        \varphi_v(x) = f(d(x))
+    \end{equation}
+    Tale funzione è totale (perché sia $d$ che $f$ lo sono), e quindi $\varphi_v(v)\downarrow$.\
+    Pertanto, in accordo con la definizione (1) abbiamo $\varphi_{d(v)} = \varphi_{\varphi_v(v)}$.\
+    Calcoliamo adesso $d(v)$ e supponiamo che il risultato sia $n$, cioè poniamo
+    \begin{equation}
+        \tag{3}
+        n = d(v)
+    \end{equation}
+    Dimostriamo che $n$ è un punto fisso di $f$.\
+    Infatti
+    \[\varphi_n \stackrel{(3)}{=} \varphi_{d(v)} \stackrel{(1)}{=} \varphi_{\varphi_v(v)} \stackrel{(2)}{=} \varphi_{f(d(v))} \stackrel{(3)}{=} \varphi_{f(n)}\]
+    Si noti come nell'eguaglianza più a sinistra si sfrutti l'iniettività della funzione $d$ garantitaci dal teorema del parametro.\
+
+\end{proof}
+
+\noindent Ci sono due fatti interessanti che sono correlati con il teorema di ricorsione.\
+\begin{property}
+    Nelle ipotesi del teorema di ricorsione,
+    \begin{itemize}
+        \item il punto fisso è calcolabile mediante una funzione totale (iniettiva) $g$ e a partire da(ll'indice di) $f$;
+        \item ci sono $\#(\mathbb{N})$ punti fissi di $f$.
+    \end{itemize}
+\end{property}
+
+\noindent C'è un altro modo per dimostrare il teorema di ricorsione, o meglio per specificare come deve essere implementata la ricorsione nei linguaggi di programmazione.\
+Supponete di avere una procedura ricorsiva $P$ il cui corpo sia $C$, all'interno del quale ovviamente appare la chiamata a $P$ stessa.\
+La tecnica usata per definire la semantica operazionale consiste nel memorizzare in un componente, di solito chiamato \textit{ambiente} e rappresentato da una funzione $\rho$, l'associazione tra $P$ e $C$, cioè $\rho(P) = C$.\
+Al momento della chiamata si cerca nell'ambiente il significato di $P$, che appunto è $C$, e si trasferisce il controllo all'inizio di $C$, dopo aver ovviamente legato i parametri formali con quelli attuali.\
+Il significato di $P$ viene mantenuto nell'ambiente, cosicché alla successiva chiamata si possa recuperare $\rho(P) = C$.\
+
+Questa tecnica a volte viene chiamata \textit{copy rule}, perché in effetti si copia il corpo $C$ della procedura $P$ al posto di $P$ stesso, tante volte quanto è necessario.\
+Si noti che non si tratta di una macro-espansione, né si potrebbe macro-espandere per sempre la chiamata a $P$, perché non è noto a priori quante volte si debba chiamare la $P$ stessa.\
+Per rendersene conto, si consideri di nuovo la funzione fattoriale.\
+Il suo corpo viene ``usato'' $n + 1$ volte se $n$ è l'argomento:\ di fatto si approssima la definizione della funzione dove la macro-espansione è ripetuta per sempre, avendo definito il suo comportamento sull'intervallo $[0\dots n]$, mentre per valori maggiori di $n$ il risultato è lasciato indefinito.

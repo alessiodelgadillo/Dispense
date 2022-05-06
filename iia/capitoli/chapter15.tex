@@ -1,0 +1,140 @@
+\chapter{K-NN, apprendimento senza supervisione e altri approcci}
+
+\section{K-Nearest Neighbors}
+
+Si tratta di un modello supervisionato.\
+Memorizza semplicemente i dati di allenamento $\langle x_p, y_p\rangle\ p = 1\dots l$.\
+Dato un input $x$ (con dimensione $n$) trova l'esempio di training più vicino $x_i$, cioè trova $i$ t.c.\ abbiamo \[\min d (x, x_i) \rightarrow i(x) = \mathrm{arg}\min_p\ d (x, x_p)\]
+Per esempio la distanza euclidea:
+\[d(x,x_p) = \sqrt{\sum_{t=1}^n (x_t -x_{p,t})^2} = ||x-x_p||\]
+Quindi ritorna $y_i$.\
+
+Un modo naturale per classificare un nuovo punto è dare un'occhiata ai suoi vicini e fare una media:
+\[\mathit{avg}_k (x) = \frac{1}{k} \sum_{x_i \in N_k (x)} y_i\]
+dove $N_k (x)$ è un intorno di $x$ che contiene esattamente $k$ vicini (pattern più vicini secondo $d$):\ k-nearest neighborhood (\textbf{K-nn}).
+
+Se c'è una chiara dominanza di una delle classi nelle vicinanze di un'osservazione $x$, allora è probabile che anche l'osservazione stessa appartenga a quella classe.\
+Quindi la regola di classificazione è il \textbf{voto a maggioranza} tra i membri di $N_k (x)$.\
+Come prima,
+\[h(x) = \left\{\begin{array}{ll}
+		1 & \mathrm{se}\ \mathit{avg}_k(x) > 0.5 \\
+		0 & \mathrm{altrimenti}                  \\
+	\end{array}\right.\quad \mathrm{per}\ y_i = \{0,1\}\ (\mathit{targets})\]
+Per l'attività di regressione utilizzare direttamente $\mathit{avg}$:\ media su K-nn.
+
+\vspace{12pt}
+
+\noindent Ancora una volta c'è un compromesso tra underfitting e overfitting dai possibili valori di K.\
+Classica curva a forma di U dell'errore di test che si sposta tra a
+\begin{itemize}
+	\item caso estremamente flessibile ($K = 1$)
+	\item fino a un modello molto rigido ($K = l$):\ 1 media per tutti i dati
+\end{itemize}
+
+\noindent Nearest Neighbor non fa nessuna ipotesi globale (per tutte le istanze), non c'è nessun modello che va a fare un fitting:\ non c'è un modello parametrico, è in contrasto al modello lineare che era parametrico con un insieme fissato di parametri $w$.\
+Fa delle stime locali (mediante funzioni costanti locali), rispetto a un'approssimazione/stima lineare globale della funzione target (nello spazio dell'istanza).
+\begin{flushleft}
+	È un metodo pigro, basato sulla memoria sull'istanza e sulla \textbf{distanza}.
+\end{flushleft}
+
+\subsection{Limitazioni}
+
+\subsubsection{Costo computazionale}
+
+Si noti che K-NN effettua l'approssimazione locale alla funzione target per ogni nuovo esempio da prevedere:\ il costo computazionale è rimandato alla \textbf{fase di previsione}!
+Inoltre c'è un alto costo di recupero:
+\begin{itemize}
+	\item Computazionalmente intensivo per ogni nuovo input:\ calcolo delle distanze dal campione di prova a tutti i vettori memorizzati e il tempo è proporzionale al numero di modelli memorizzati, anche se possono essere usati algoritmi di ricerca di prossimità ``ad-hoc'' da ottimizzare.
+	\item Costo in spazio (tutti i dati vengono memorizzati).
+\end{itemize}
+
+\subsubsection{Curse of dimensionality}
+
+Quando abbiamo molte variabili di input ($n$ grande), i metodi K-NN spesso falliscono a causa della \textbf{\textit{curse of dimensionality}}:\ quando la dimensionalità $d$ aumenta, il volume dello spazio aumenta così velocemente che i dati disponibili diventano scarsi, ovvero la quantità di dati necessari a supportare il risultato spesso cresce \textit{esponenzialmente} con la dimensionalità.
+
+\textit{Features irrilevanti} (\textbf{\textit{Curse of Noisy}}):\ se il target dipende solo da poche delle molte features in $x$, si potrebbe recuperare un ``modello simile'' con la somiglianza dominata dal gran numero di features irrilevanti.\
+
+\subsubsection{Metodi basati sulla distanza: considerazione e bias induttivo}
+
+Approcci basati sulla \textbf{\textit{distanza}} o sulla \textbf{\textit{metrica}}:\ linea comune tra ad es.\ K-means, K-NN e approcci basati sul kernel; cosa c'è di \textbf{\textit{simile}}?\ Misura quando un paio di pattern sono \textit{simili}.\
+
+Dare una metrica (ad esempio la metrica euclidea è stata assunta fino ad ora) pone un \textbf{\textit{bias}} rilevante sulla soluzione (molto più dei dettagli dell'algoritmo).\
+La metrica dipende in genere dal dominio (per esempio due stringhe in una lingua, in biologia,\ \dots), è basata sulla conoscenza preliminare dell'esperto del dominio e in qualche modo è la stessa cosa dell'\textit{ingegnerizzazione delle features} per rappresentare il problema.
+
+\section{Unsupervisioned learning}
+
+\subsubsection{Clustering}
+
+Partizione dei dati in cluster (sottoinsiemi di dati ``simili''):\ i modelli all'interno di un cluster valido sono più simili tra loro di quanto non lo siano a un modello appartenente a un cluster diverso.\
+Inoltre è possibile individuare dei punti particolari chiamati centroidi (o prototipi), ossia i ``\textit{rappresentanti}''.
+
+\subsubsection{Spazio delle ipotesi per il clustering}
+
+Obiettivo:\ partizionamento ottimale della distribuzione sconosciuta nello spazio $x$ in regioni (cluster) approssimate da un centro o \textit{prototipo} del cluster.\
+$H: x \rightarrow c(x)$, dove $x$ è un insieme di vettori di quantizzazione e $c(x)$ è il vettore che rappresenta il cluster.
+\[\mathit{spazio\ continuo} \rightarrow \mathit{spazio\ discreto}\]
+Un esempio di funzione di loss è una funzione che misura l'ottimalità del vettore di quantizzazione:\ una \textbf{funzione di loss} \textit{comune sarebbe la \textbf{distorsione dell'errore al quadrato}}:
+\[ L(h(x_p)) = ||x_p - c(x_p)||^2\]
+Il valore medio sulla distribuzione degli input è l'errore medio di distorsione o ricostruzione o quantizzazione.
+
+\subsection{K-means}
+
+Il $k$-means è l'algoritmo più semplice e più comunemente usato che impiega un \textbf{\textit{criterio di errore quadrato}}:\ è popolare perché è facile da implementare e, in generale, efficiente; tuttavia, ha diversi inconvenienti e \textbf{limitazioni} che vedremo dopo la presentazione dell'algoritmo.
+
+\begin{enumerate}
+	\item Sceglie $k$ centri del cluster in modo che coincidano con $k$ pattern scelti a caso o $k$ punti definiti in modo casuale all'interno dell'ipervolume contenente l'insieme di pattern.
+	\item Assegna ogni modello al centro del cluster più vicino (il vincitore).
+	\item Ricalcola i centri del cluster (centroide geometrico, cioè la media) utilizzando le attuali appartenenze al cluster.
+	\item Se un criterio di convergenza non è soddisfatto, si ritorna al punto 2.
+\end{enumerate}
+
+\noindent Dati i centri del cluster $c_1,\dots,c_k$, per ogni $x$ il vincitore è (il prototipo più vicino):
+\[i^*(x) = \mathrm{arg}\min_i ||x-c_i||^2\]
+Adesso $x$ appartiene al cluster $i^*$.\
+Per ogni cluster $i$ la nuova media (centroide) è:
+\[c_i = \frac{1}{|\mathit{cluster}_i|}\sum_{j:x_j\in\mathit{cluster}_i} x_j\]
+
+\subsubsection{Limitazioni}
+
+\begin{itemize}
+	\item Il numero dei cluster deve essere fornito.
+	\item I minimi locali della loss $L(x)$ rendono il metodo dipendente dall'inizializzazione:\ è necessario eseguire più volte da diverse inizializzazioni casuali oppure inizializzare con un'euristica.\
+	\item Può funzionare bene per cluster compatti e ipersferici.
+	\item Nessuna proprietà di visualizzazione:\ $k$-means non consente di proiettare i dati in uno spazio più debole.
+\end{itemize}
+
+\section{Altri approcci per il preprocessing}
+
+Tra la moltitudine di approcci che meritano di essere menzionati in questo corso:
+\begin{itemize}
+	\item \textbf{Riduzione della dimensionalità} (nel learning non supervisionato) \[\langle x_1,x_2,\dots,x_n\rangle\rightarrow\langle x'_1,x'_2,\dots,x'_n\rangle\quad n>n'\] dove le nuove features possono essere una combinazione di quelle originali.
+	\item \textbf{Selezione delle features}:\ scegliamo un sottoinsieme di tutte le funzionalità in base alla conoscenza del dominio (\textit{features engineering}) oppure \textit{automaticamente} in base alla loro ridondanza o rilevanza nell'attività (la più informativa).\ Molti approcci:\ il problema è difficile come quello dell'apprendimento.
+	\item \textbf{Rilevamento dei valori anomali}:\ trova valori di dati insoliti che non sono coerenti con la maggior parte delle osservazioni (ad esempio a causa di errori di misurazione anormali).
+\end{itemize}
+
+\section{Altri task}
+\begin{itemize}
+	\item \textbf{Reinforcement Learning} (apprendimento con critica positiva{\slash}nega\-tiva), viene usato nell'adattamento dei sistemi autonomi (soprattutto nella robotica):\ ``l'algoritmo apprende una politica di come agire data un'osservazione del mondo; ogni \textbf{azione} ha un certo impatto sull'ambiente e l'ambiente fornisce un feedback che guida l'algoritmo di apprendimento''.\ Invece della supervisione per ogni passaggio, abbiamo informazioni su vittorie/sconfitte (premi o punizioni) per lo stato finale; le azioni devono massimizzare la quantità di ricompense ricevute.\ L'apprendimento decide quali azioni sono state maggiormente responsabili di vittorie/sconfitte
+	\item \textbf{Apprendimento semi-supervisionato}:\ combina esempi etichettati e non etichettati (in genere in numero maggiore) per generare una funzione o un classificatore appropriato.
+	\item \textbf{Learn to rank}:\ (ad es.\ per i motori di ricerca) quando l'input è un insieme di oggetti e l'output desiderato è un ranking di quegli oggetti.
+	\item \textbf{On-line learning}:\ nuovi esempi vengono appresi nel tempo.
+	\item \textbf{Apprendimento del dominio strutturato e apprendimento relazionale}:\ il dominio di input e/o output può essere strutturato sotto forma di sequenze (segnali, serie temporali,\ \dots) o anche qualcosa di più complesso come alberi, grafi e reti.
+\end{itemize}
+
+\section{Altri modelli}
+\textbf{Reti neurali}:\ per l'apprendimento sia supervisionato che non supervisionato.\
+Sono vicine alla nostra visione di Linear Threshold Unit (LTU), in effetti la LTU è vicina all'unità di base di una rete neurale artificiale, il \textit{perceptron} e una rete neurale è una \textit{rete} di tali unità \textit{non lineari} con capacità di approssimazione universale.\
+
+Approccio alla discesa in gradiente per l'apprendimento (backprogation).
+\vspace{12pt}
+
+.\noindent Lo strato interno (nascosto) con unità non lineari fornisce a NN la capacità di estrarre apprendendo una nuova rappresentazione dei dati (learning abstract features); le nuove rappresentazioni semplificano l'attività di classificazione all'ultimo strato.\
+È una \textbf{\textit{basis expansion}} non lineare in $w$ adattativa in cui \textbf{\textit{vengono appresi}} i $\phi$ (dipendono da $w$), ma sfortunatamente porta anche a un problema di ottimizzazione non lineare.\
+Usa una rappresentazione distribuita (contro simbolica):\ la somiglianza può essere trattata più facilmente da vettori di valori reali; approccio molto flessibile per attività non lineari, sia per attività di classificazione che di regressione (capacità di approssimazione universale).\
+\vspace{12pt}
+
+\noindent Aspetti comuni del \textbf{Deep Learning} (DL) tra diversi approcci:
+\begin{itemize}
+	\item \textit{Più strati} di unità di elaborazione non lineari
+	\item Apprendimento supervisionato o non supervisionato delle \textit{rappresentazioni delle features} in ogni livello, con i livelli che formano una gerarchia dalle caratteristiche/rappresentazioni di livello basso a quelle di alto livello (\textit{diversi livelli di \textbf{astrazione}}).
+\end{itemize}

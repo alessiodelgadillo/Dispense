@@ -1,0 +1,317 @@
+\section{Funzioni ricorsive primitive}
+
+Cominciamo a vedere un paio di esempi di funzioni definite per ricorrenza che sono molto popolari.\
+In seguito introdurremo la classe delle funzioni \textit{ricorsive primitive}, della cui debolezza e del modo di sopperirvi si discuterà nel prossimo capitolo.\
+
+La prima funzione che consideriamo è il fattoriale, definita come spesso si fa, da una coppia di equazioni, una nel caso (base) in cui l'argomento sia 0, l'altra nel caso (ricorsivo) in cui l'argomento non sia nullo.
+\[ \mathit{Fattoriale} = \left\{\begin{array}{l c l}
+        0!     & = & 1               \\
+        (x+1)! & = & (x+1) \times x! \\
+    \end{array}\right.\]
+Eccone una versione in \textit{\footnotesize WHILE}, che ``lascia'' il valore di $x!$ nella variabile \texttt{fatt}.
+
+\begin{verbatim}
+    fatt := 1;
+    while 0 < x do
+        fatt := fatt * x;
+        x := x - 1;
+\end{verbatim}
+
+\noindent La seconda funzione, ben nota agli informatici (e ai matematici, botanici, fisici, architetti, ecc.) è la funzione di Fibonacci, la cui definizione data qui sotto ha, per ovvie ragioni, due casi base
+\[ \mathit{Fibonacci} = \left\{\begin{array}{l c l}
+        \mathit{fib}(0)   & = & 0                                 \\
+        \mathit{fib}(1)   & = & 1                                 \\
+        \mathit{fib}(x+2) & = & \mathit{fib}(x+1)+\mathit{fib}(x) \\
+    \end{array}\right.\]
+La funzione di Fibonacci si può anche scrivere in forma chiusa, non ricorsiva:
+
+\[\mathit{fib}(x) = \frac{\sqrt{5}}{5}\left(\frac{1 + \sqrt{5}}{2}\right)^x - \frac{\sqrt{5}}{5}\left(\frac{1 - \sqrt{5}}{2}\right)^x\]
+
+\vspace{12pt}
+
+\noindent Adesso proviamo a formalizzare i modi diversi che abbiamo usato per definire le funzioni \textit{Fattoriale} e \textit{Fibonacci}.\
+Nel far ciò, usiamo quella che si chiama $\lambda$-notazione per individuare all'interno di un'espressione (scritta seguendo un'opportuna sintassi) che descrive una funzione quali sono i suoi argomenti.\
+Scriveremo quindi
+\[\lambda x,y,z.\ \mathit{espressione}\]
+quando gli argomenti della \textit{espressione} sono proprio $x$, $y$ e $z$; si dice anche che $x$, $y$ e $z$ appaiono \textit{legate} da $\lambda$ in \textit{espressione}.\
+Invece, un qualsiasi altro simbolo (di variabile) $w$ che appaia in \textit{espressione}, \textit{non} sarà da considerarsi un argomento della funzione rappresentata da \textit{espressione}; a volte un tale $w$ viene chiamato \textit{libero} in \textit{espressione}.\footnote{Più precisamente si dovrebbe parlare di apparizioni, o con un calco dall'inglese, \textit{occorrenze} legate o libere di quelle o questa variabile.\ Nell'ultimo caso, la funzione descritta da \textit{espressione} è da interpretarsi come una funzione \textit{parametrica} in $w$, nel senso dato alla parola nei corsi di Analisi.}
+Ad esempio,
+\[\lambda x,y.\ x+y\qquad (\mathrm{o\ pi\grave{u}\ precisamente}\ \lambda x.\lambda y.\ x + y)\]
+è ovviamente la funzione che somma $x$ ad $y$, una volta che si sia interpretato il simbolo $+$ come si suole.\
+In questo caso potremmo anche scrivere
+\[\mathit{somma}(x,y) = x + y\]
+dando così il nome \textit{somma} alla funzione, magari per usi futuri (si confrontino questi due modi di definire funzioni con nome o senza nome con i modi di definire e costruire funzioni, in voga nei linguaggi funzionali, tipo ML).
+
+Introduciamo adesso la prima classe di funzioni che ci interessano.\
+Per seguire l'uso corrente e per non appesantire eccessivamente la notazione, di seguito mescoleremo la sintassi e la semantica, dicendo che definiamo una funzione $f$ dai naturali ai naturali, mentre in realtà stiamo definendo un \textit{algoritmo} che \textit{rappresenta} la ``vera'' funzione $f$.
+
+\begin{definition}
+    La classe delle funzioni \textit{ricorsive primitive} è la minima classe di funzioni $\mathcal{C}$ da $\mathbb{N}^n$, $n >0$, in $\mathbb{N}$ cui appartengono:
+
+    \begin{itemize}
+        \item[I] \textit{Zero} \qquad\qquad\qquad\qquad $\lambda x_1,x_2,...,x_k.\ 0$ con $k\geq 0$
+        \item[II] \textit{Successore} \qquad\qquad\ \quad $\lambda x.\ x+1$
+        \item[III] \textit{Identità} (o \textit{proiezione}) $\lambda x_1,\dots,x_k.\ x_i$ con $1 \leq i \leq k$
+    \end{itemize}
+    dette anche \textit{schemi primitivi di base}, e che è chiusa per:
+    \begin{itemize}
+        \item[IV] \textit{Composizione}
+
+              Se $g_1,\dots,g_k \in \mathcal{C}$ sono funzioni in $m$ variabili, ed $h\in \mathcal{C}$ una funzione in $k$ variabili, appartiene a $\mathcal{C}$ anche la loro composizione
+              \[\lambda x_1,\dots,x_m.\ h(g_1(x_1,\dots,x_m),\dots,g_k(x_1,\dots,x_m))\]
+        \item[V] \textit{Ricorsione Primitiva}
+
+              Se $h \in \mathcal{C}$ è una funzione in $k+1$ variabili, $g\in \mathcal{C}$ è una funzione in $k-1$ variabili, allora appartiene a $\mathcal{C}$ anche la funzione $f$ in $k$ variabili definita da:
+              \[\left\{\begin{array}{l c l}
+                      f(0,x_2,\dots,x_k)     & = & g(x_2,\dots,x_k)                          \\
+                      f(x_1+1,x_2,\dots,x_k) & = & h(x_1,f(x_1,x_2,\dots,x_k),x_2,\dots,x_k) \\
+                  \end{array}\right.\]
+    \end{itemize}
+\end{definition}
+
+\newpage
+
+\noindent Si noti che, se $k = 1$, allora $g$ ha 0 argomenti ed è ricorsiva primitiva in quanto è una costante.\
+Così come avviene per le MdT, anche la definizione della classe delle funzioni ricorsive primitive ha moltissime varianti, tutte equivalenti tra loro, nel senso che le classi che esse definiscono coincidono tutte con la classe $\mathcal{C}$.\
+Per esempio, invece di avere lo schema I si può avere lo schema che introduce le costanti:
+\[\mathrm{I}'\ \mathit{Costanti}\ \lambda x_1, \dots, x_k.\ m\ \mathrm{con}\ k,m\geq 0\]
+Chiaramente, componendo un numero opportuno di volte la funzione successore a partire dalla funzione costante 0 si ottengono tutte le costanti $m$ introdotte in un sol colpo dallo schema appena definito.\
+Altre varianti piuttosto comuni riguardano la posizione in cui appare la chiamata ricorsiva alla funzione $f$ nella parte destra della seconda equazione nello schema V.
+
+Poiché $\mathcal{C}$ è la minima classe che soddisfa le condizioni espresse sopra, affinché $f$ sia ricorsiva primitiva, occorre e basta che ci sia una successione finita, o \textit{derivazione}, della seguente forma \[f_1, f_2, \dots,f_n\] tale che $f=f_n$ e $\forall i$ tale che $1 \leq i \leq n$ vale uno dei seguenti casi:
+\begin{itemize}
+    \item $f_i \in \mathcal{C}$ per I-III (ovvero $f_i$ è definita secondo i casi base);
+    \item $f_i$ è ottenibile mediante applicazione delle regole IV, V da $f_j,\ j<i$ (ovvero $f_i$ è definita da funzioni già definite precedentemente).
+\end{itemize}
+
+\begin{example}{\label{Somma}}
+    Vogliamo definire $f_5=f=\lambda x,y.\ x+y$ di cui una possibile derivazione è la seguente, in cui abbiamo indicato accanto ad ogni $f_i$ la regola applicata per ottenerla.
+
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{l l}
+            $f_1=\lambda x.\ x$             & \textit{III} \\
+            $f_2=\lambda x.\ x+1$           & \textit{II}  \\
+            $f_3=\lambda x_1,x_2,x_3.\ x_2$ & \textit{III} \\
+            $f_4=f_2(f_3(x_1,x_2,x_3))$     & \textit{IV}  \\
+            $\begin{cases}
+                    f_5(0,x_2) = f_1(x_2)                      \\
+                    f_5(x_1+1,x_2) = f_4(x_1,f_5(x_1,x_2),x_2) \\
+                \end{cases}$     & \textit{V}   \\
+        \end{tabular}
+    \end{table}
+
+    \noindent Vediamo adesso come si calcola $f_5(2,3)$, cioè la somma di $2+3$.\
+    Nel passare da un rigo al successivo, espandiamo la ``chiamata di funzione'' sottolineata (detta \textit{redex}).\
+    Si noti che usiamo la regola di valutazione \textit{interna sinistra}:\ il redex prescelto è quello più interno all'espressione da valutare più a sinistra.\
+
+    \begin{itemize}
+        \itemsep-0.5px
+        \item[] $\underline{f_5(2,3)}=$
+        \item[] $f_4(1, \underline{f_5(1,3)},3)=$
+        \item[] $f_4(1, f_4(0,\underline{f_5(0,3)},3),3)$
+        \item[] $f_4(1,f_4(0,\underline{f_1(3)},3),3) =$
+        \item[] $f_4(1, \underline{f_4(0,3,3)}, 3) =$
+        \item[] $f_4(1,f_2(\underline{f_3(0,3,3)}),3) =$
+        \item[] $f_4(1,\underline{f_2(3)},3) =$
+        \item[] $\underline{f_4(1,4,3)} =$
+        \item[] $f_2(\underline{f_3(1,4,3)}) =$
+        \item[] $\underline{f_2(4)} = 5$
+    \end{itemize}
+
+    \noindent Notare che invece di valutare prima le funzioni interne, avremmo potuto valutare prima le funzioni esterne tuttavia per far questo bisogna poter legare a una variabile $x$ non solo un numero naturale, ma anche un'intera espressione.\
+    Questa regola di valutazione viene chiamata \textit{esterna}; usiamola nell'esempio di sopra.
+
+    \begin{itemize}
+        \itemsep-0.5px
+        \item[] $\underline{f_5(2,3)}=$
+        \item[] $\underline{f_4(1, f_5(1,3), 3)}=$
+        \item[] $\underline{f_2(f_3(1, f_5(1,3), 3))}=$
+        \item[] $\underline{f_3(1, f_5(1,3), 3)}+1=$
+        \item[] $\underline{f_5(1,3)}+1=$
+        \item[] $\underline{f_4(0, f_5(0,3), 3)}+1=$
+        \item[] $\underline{f_2(f_3(0, f_5(0,3), 3))}+1=$
+        \item[] $\underline{f_3(0, f_5(0,3), 3)}+1 +1=$
+        \item[] $\underline{f_5(0,3)} + 2=$
+        \item[] $\underline{f_1(3)} + 2=$
+        \item[] $3 + 2 = 5$
+    \end{itemize}
+
+    \noindent In realtà si può dimostrare che la scelta del redex non è determinante, ovvero che le due regole di valutazione sono equivalenti.\footnote{Questo non è più vero in questi termini per la classe di funzioni che introdurremo tra due capitoli, in quanto la regola di valutazione esterna potrebbe portare a un risultato anche in presenza di un calcolo non terminante, eseguito usando la regola interna sinistra.\
+        In effetti, c'è un teorema che assicura che tutte le volte che, applicando la regola interna, si arriva a un risultato, si ottiene il medesimo risultato con la regola esterna; mentre il viceversa può non essere vero.\ Più in generale, si può dire che tale risultato è raggiungibile anche \textit{senza scegliere a priori alcuna regola} per selezionare il redex.}
+    In questo caso, le riduzioni necessarie, sia con la regola interna sinistra che con quella destra sono 9, se non contiamo le applicazioni della funzione primitiva successore.\
+    In generale questo può non essere vero e per rendersene conto si consideri la seguente espressione
+    \[f_3(f_5(2, 3), 0, f_5(2, 3))\]
+    la cui valutazione con la regola esterna richiede una sola riduzione e 19 con la    regola interna.\
+    (È sempre vero che in questo formalismo la regola esterna è più efficiente di quella interna, ovvero richiede meno o al più lo stesso numero di passi di calcolo?)
+
+    Naturalmente per noi informatici è di grande importanza usare una regola di valutazione che minimizzi il numero di passi necessari al calcolo e anche lo spazio necessario a conservare i risultati intermedi -- si pensi ad esempio alla realizzazione di interpreti o compilatori efficienti per linguaggi funzionali (e
+    le regole di valutazione \textit{by value}, \textit{by need}, \textit{lazy} ecc.).
+
+    Concludiamo l'esempio aggiungendo alla derivazione data sopra per la funzione di somma la seguente clausola, che ci permette di ottenere una definizione per la funzione che raddoppia il suo argomento $f_6 = \lambda x.\ 2 \times x$
+    \[f_6 = f_5(f_1(x), f_1(x))\quad \mathit{IV}\]
+    Bene, abbiamo un bel formalismo, semplice, elegante, anche se piuttosto verboso.\
+    È facile vedere che le usuali funzioni ($x \times y$, $x^y$, $x-y$, ecc.) sono tutte ricorsive primitive.\
+    Adesso rendiamoci la vita più comoda usando identificatori $x,y,z,\dots$ al posto di $x_1, x_2,\dots$ (quanti simboli servono per rappresentare le $x_i$?) e permettendo la ricorsione in posizioni diverse dalla seconda.\
+    Definiamo prima le funzioni proiezione (a due posti) che restituiscono il primo e il secondo argomento e quella che restituisce il predecessore del suo argomento, se maggiore di 0, altrimenti restituisce 0 (e chiamiamola \textit{pred}, dandogli un nome appena più evocativo di quelli usati finora e semplifichiamoci la vita stipulando che 0 è una funzione a nessun argomento):
+    \[f_7(x,y)=y \qquad f_8(x,y)= x \qquad \left\{\begin{array}{l c l}
+            \mathit{pred}(0)   & = & 0                        \\
+            \mathit{pred}(x+1) & = & f_8(x, \mathit{pred}(x)) \\
+        \end{array}\right.\]
+    Poi introduciamo la funzione ausiliaria che sottrae (limitatamente) 1 al secondo dei suoi tre argomenti per definire l'ultima funzione ausiliaria che sottrae (limitatamente) il primo argomento al secondo:
+    \[f_9(x,y,z) = \mathit{pred}(f_3(x,y,z)) \qquad \left\{\begin{array}{l c l}
+            f_{10}(0,y)   & = & f_1(y)                \\
+            f_{10}(x+1,y) & = & f_9(x, f_{10}(x,y),y) \\
+        \end{array}\right.\]
+    Finalmente ci siamo, il meno limitato è:
+    \[x\ \dot{-}\ y = f_{10}(f_7(x,y), f_8(x,y))\]
+\end{example}
+
+\noindent Il lettore avrà certamente notato un'ulteriore semplificazione:\ nell'ultima definizione abbiamo usato la notazione infissa che è assai più comune.\
+Semplifichiamoci ancora la vita:\ diamo per intese le necessarie composizioni e proiezioni e guardiamo alle seguenti definizioni, in cui riappare la definizione della somma, indicata da $+$ (da non confondersi con il successore +1), già vista in tutti i dettagli nell'esempio \ref{Somma}.\
+Le altre due funzioni sono il prodotto e l'esponente, in cui stipuliamo che $0^0 = 1$.\ \footnote{In alternativa a tale ipotesi sventurata si potrebbe porre come caso base $(x + 1)^0 = 1$, ma allora la funzione sarebbe indefinita sullo 0 (forse però i nostri professori di matematica sarebbero meno scandalizzati).}
+Una rapida ispezione, e forse un paio di esempi, dovrebbero convincerci che il ``+'' generalizza il successore +1, nel senso che questo viene applicato $x$ volte a $y$, e che il $\times$ generalizza il $+$ e infine che l'esponente generalizza il $\times$ (ci sarà una funzione che generalizza l'esponente?\ si veda la nota a pagina 27).
+
+\[
+    \left\{\begin{array}{l l}
+        0+y      & = y           \\
+        (x+1) +y & = (x + y) + 1 \\
+    \end{array}\right.\qquad
+    \left\{\begin{array}{l l}
+        0 \times y     & = 0                \\
+        (x+1) \times y & = (x \times y) + y \\
+    \end{array}\right.
+\]
+\[
+    \left\{\begin{array}{l l}
+        x^0       & = 1              \\
+        x^(y + 1) & = x \times (x^y) \\
+    \end{array}\right.
+\]
+
+\vspace{12pt}
+
+\noindent Per scopi futuri, definiamo anche le relazioni ricorsive primitive.
+
+\begin{definition}
+    Diciamo che la relazione $P(x_1,...,x_k) \subseteq \mathbb{N}^k$ è \textit{ricorsiva primitiva} se lo è la sua funzione caratteristica $\chi_P$ definita come:
+    \[
+        \chi_P(x_1,...,x_k) =
+        \begin{cases}
+            1 & \text{se } (x_1,...,x_k)\in P      \\
+            0 & \text{se } (x_1,...,x_k)\not \in P
+        \end{cases}
+    \]
+\end{definition}
+
+\noindent Come esempio di relazione ricorsiva primitiva vediamo l'eguaglianza, definendo la sua funzione caratteristica $\chi_=$ (ricorrendo su due argomenti contemporaneamente):
+\[\chi_=(0,0) = 1\quad \chi_=(x+1,y+1)=\chi_=(x,y)\quad \chi_=(0,y+1)=0\quad \chi_=(x+1,0)=0\]
+
+\noindent Inoltre ci servirà sapere che
+\begin{itemize}
+    \itemsep0px
+    \item $R=\{x \in \mathbb{N} \mid x $ è un numero primo\} è ricorsiva primitiva
+    \item (unica fattorizzazione) Se $p_0 < \dots < p_k \dots \in R$ (sono numeri primi), allora $\forall x \in \mathbb{N}$ esiste un numero \textit{finito} di esponenti $x_i \neq 0$ tali che
+          \[x=p_0^{x_0}p_1^{x_1}\dots p_k^{x_k}\dots \]
+    \item la funzione $(x)_i$ che restituisce l'esponente dell'$i$-esimo fattore $p_i$ della fattorizzazione di $x$ è ricorsiva primitiva.
+\end{itemize}
+
+\newpage
+
+\noindent Una conseguenza assai interessante è che ogni sequenza di numeri naturali $n_0n_1\dots n_k$ può essere codificata \textit{univocamente} come $n = p_0^{n_0 +1} p_1^{n_1 +1}\dots\ p_k^{n_k +1}$ (con $p_i$ primi), ovvero come il prodotto di un numero \textit{finito} di fattori, e viceversa.\
+In altre parole, data la sequenza $n_0n_1\dots n_k$ esiste un unico $n$ che verifica l'uguaglianza $n = p_0^{n_0 +1} p_1^{n_1 +1}\dots p_k^{n_k +1}$ e viceversa.\
+Questa è la base per dimostrare che le \textit{funzioni di codifica sono ricorsive primitive}.\
+
+Vediamo ora, intuitivamente e non in dettaglio, come si può sfruttare questo teorema per costruire una codifica delle macchine di Turing e delle loro computazioni.\
+A essere precisi \textit{non} faremo vedere una codifica, ma delineeremo a spanne una funzione che è iniettiva, ma \textit{non} surgettiva.\
+Ritorneremo più avanti su questo fatto, legato a pigrizia e desiderio di tenere le cose il più semplici possibile.\
+Sia
+\[M = (Q, \Sigma, \delta, q_0)\]
+una MdT con
+\[Q = \{q_0,\dots, q_n\}\ \mathrm{e}\ \Sigma = \{\sigma_0, \dots, \sigma_m\}\]
+Ogni quintupla $(q_i, \sigma_j, q_k, \sigma_l, D) \in \delta$ è codificata come
+\[p_0^{i+1} \times p_1^{j+1} \times p_2^{k+1} \times p_3^{l+1} \times p_4^{m_D}\]
+dove $p_0 < \dots < p_4$ sono numeri primi.\
+Inoltre, consideriamo i simboli di direzione $D$ come simboli veri e propri:\ $L = \sigma_{m+2},\ R = \sigma_{m+3},\ - = \sigma_{m+4}$ e poniamo allora $m_D \in \{m_L = m+2, m_R = m+3, m_- = m + 4\}$.\
+Infine, facciamo in modo che lo stato ``speciale'' $h$ sia identificato come lo stato $q_{n+1} $.\
+
+Grazie al teorema di unica fattorizzazione, a ogni quintupla è associato un \textit{solo} intero e viceversa; questa osservazione è la base per dimostrare che la funzione che stiamo proponendo è iniettiva.\
+
+Ora ordiniamo l'insieme di quintuple che caratterizza $M$, ponendo ad esempio $(q_i, \sigma_j, q_k, \sigma_l, D)$ minore di $(q_{i'}, \sigma_{j'}, q_{k'}, \sigma_{l'}, D')$ se $i < i'$ o se $i =i'$ e $j<j'$, e così via.\
+A questo punto, abbiamo una successione di quintuple e ciascuna di esse viene codificata come un numero, ottenendo una successione $a_0 a_1 \dots a_n$ di numeri naturali, tali che $a_i \neq a_j$ se $i\neq j$.\
+Adesso anche questa successione viene codificata, e si ottiene finalmente il numero $i$, detto anche \textit{indice}, che vogliamo associare alla macchina $M$.\
+
+Come già accennato sopra, è immediato rendersi conto che la funzione proposta non è surgettiva:\ non sempre da un numero $i$ posso recuperare una macchina $M$; ma il problema si aggira facilmente.\
+Infatti, uno decodifica l'indice $i$; se il risultato ottenuto è una MdT, bene; altrimenti $i$ non è nell'immagine (ovvero non è un vero e proprio indice) e butto via tutto, oppure restituisco un valore speciale.\
+In altre parole, ci si riduce a considerare la coppia codifica/decodifica come operanti rispettivamente dalle MdT a $\mathbb{N}$ e dalla \textit{immagine} della codifica alle MdT (oppure da $\mathbb{N}$ alle MdT più il valore speciale di cui sopra).\
+Si può certamente fare di meglio e avere una vera funzione di codifica che sia quindi biunivoca, al prezzo di una definizione molto astuta (e complicata):\ l'ha già fatto per noi Kurt G\"odel, seppure non per le MdT, tanto che il procedimento sopra delineato viene chiamato \textit{g\"odelizzazione} e \textit{numero di G\"odel} di $M$ il numero così ottenuto dalla macchina $M$ data.
+
+Basti qui notare che abbiamo un modo per \textit{enumerare} le macchine di Turing, ovvero di metterle in lista basandoci \textit{unicamente} sui simboli usati per definir(e le loro quintup)le; inoltre il modo è ``facile'', perché le funzioni ricorsive primitive lo sono, in un senso che sarà più chiaro nel seguito.\
+
+Naturalmente il procedimento accennato sopra può essere applicato alle configurazioni e poi anche alle computazioni, che non sono altro che successioni di configurazioni.\
+Un numero naturale allora può essere interpretato come la \textit{codifica di un'intera computazione}!\
+Del resto, un programma caricato in memoria può esser visto come una successione di bit, la quale rappresenta un numero naturale e così la sequenza di configurazioni attraversate.\
+
+Ovviamente il medesimo procedimento di enumerazione può essere applicato anche ai programmi \textit{\footnotesize FOR} e \textit{\footnotesize WHILE}, alle funzioni ricorsive primitive e a quelle $\mu$-ricorsive che introdurremo nel prossimo capitolo, nonché a ogni formalismo per rappresentare funzioni che rispetti i vincoli posti nel capitolo 1.1.\
+Quindi la codifica che ci ha regalato G\"odel è davvero un'arma potentissima, che permette di enumerare, o se volete di digitalizzare le rappresentazioni delle funzioni e il loro calcolo (e anche di altre realtà, per esempio immagini o musica!).
+
+\medskip
+\noindent Ritorniamo ora alle nostre funzioni definite per ricorsione primitiva.\
+È facile verificare con un ragionamento induttivo che tutte le funzioni definibili mediante gli schemi di ricorsione primitiva sono \textit{totali}.\
+
+Dal punto di vista informatico è interessante notare che le funzioni ricorsive primitive e il linguaggio \textit{\footnotesize FOR} sono equivalenti, nel senso che data una funzione ricorsiva primitiva si può scrivere un programma \textit{\footnotesize FOR} che, con gli stessi argomenti, produce lo stesso risultato e viceversa.
+
+\begin{question}
+    Abbiamo trovato il formalismo giusto, che esprime tutte le funzioni calcolabili?\ e per di più solo quelle totali?\ Purtroppo \textbf{NO}.\
+\end{question}
+
+\noindent Infatti esiste la funzione di Ackermann, che \textit{non è definibile} mediante gli schemi di ricorsione primitiva I-V, che è totale e ha una definizione che intuitivamente è accettabilissima.\
+Vediamola, osservando che una sola delle regole seguenti è applicabile una volta fissati gli argomenti $x, y, z$.\footnote{C'è una variante più semplice di questa funzione in cui si può eliminare la variabile $y$, dopo averla considerata identicamente uguale a 1:
+    \[\begin{array}{l c l}
+            A'(0,x)     & = & x + 1            \\
+            A'(z+1,0)   & = & A'(z,1)          \\
+            A'(z+1,x+1) & = & A'(z, A'(z+1,x)) \\
+        \end{array}\]}
+
+\[
+    \begin{array}{l c l}
+        A(0,0,y)     & = & y                 \\
+        A(0, x+1,y)  & = & A(0,x,y)+1        \\
+        A(1,0,y)     & = & 0                 \\
+        A(z+2, 0,y)  & = & 1                 \\
+        A(z+1,x+1,y) & = & A(z,A(z+1,x,y),y) \\
+    \end{array}
+\]
+
+\noindent\textbf{Nota}:\ C'è una ``doppia'' ricorsione, ma tutti i valori su cui si ricorre decrescono, e quindi i valori di $A(z,x,y)$ sono definiti in termini di un numero \textit{finito} di valori della funzione $A$ applicata ad argomenti $z'$ e $x'$ tali che $z' \leq z$ e $x' < x$.\
+Quindi intuitivamente $A$ è calcolabile.\
+
+Ma cosa calcola $A$?\
+Una sorta di esponenziale generalizzato (si tenga conto che il $+$ è la funzione \textit{successore} generalizzata, il $\times$ è il $+$ generalizzato, la funzione esponente è il $\times$ generalizzato).\
+\[
+    \begin{array}{l c l}
+        A(0,x,y) & = & y + x                                                            \\
+        A(1,x,y) & = & y \times x                                                       \\
+        A(2,x,y) & = & y^x                                                              \\
+        A(3,x,y) & = & y^{\left.y^{\cdot^{\cdot^{\cdot^{y}}}}\right\}x\ \mathrm{volte}} \\
+    \end{array}
+\]
+Sfortunatamente, la funzione di Ackermann cresce più velocemente di ogni funzione ricorsiva primitiva.\
+Per cui vale il seguente teorema, che non dimostriamo; intuitivamente, la dimostrazione si basa sul fatto che questa funzione mette in piedi un numero di chiamate a sé stessa maggiori di quante ne possa fare qualsiasi funzione ricorsiva primitiva.
+
+\begin{theorem}
+    La funzione di Ackermann non è ricorsiva primitiva.
+\end{theorem}
+
+\noindent Evidentemente tra le funzioni che si riescono a definire secondo gli schemi di ricorsione primitiva I–V (e che quindi sono calcolabili e totali) ne manca almeno una.\
+Di più e peggio:\ ne mancano moltissime, ad esempio tutte quelle che si ottengono dalla funzione di Ackermann sommandogli una costante.\
+Ma non si potrebbe aggiungere a forza la funzione di Ackermann tra le ricorsive primitive, o meglio estendere i suoi schemi con quella doppia ricorsione e ottenere un formalismo che esprime \textit{solo} le funzioni totali e le esprime \textit{tutte}?\
+La questione diventa allora la seguente.
+
+\begin{question}
+    Esiste un formalismo capace di esprimere \textit{tutte e sole} le funzioni totali?\
+    Sfortunatamente, o meglio fortunatissimamente \textbf{NO}.\
+\end{question}
+
+\noindent Per vederlo, definiremo nel capitolo seguente una tecnica di dimostrazione, detta \textit{diagonalizzazione} e la useremo nel caso delle funzioni ricorsive primitive.\
+Deve essere ben chiaro però che questo metodo si applica a \textit{qualsiasi} formalismo che esprime \textit{solo} funzioni totali.

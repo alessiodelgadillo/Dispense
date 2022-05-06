@@ -1,0 +1,227 @@
+\section{Misure di complessità non deterministiche}
+
+C'è un modo per risolvere i problemi che è un po' ottuso, ma funziona sempre benissimo, complessità a parte, soprattutto quando uno non conosca o non sappia definire l'algoritmo giusto.\
+Prendiamo come semplicissimo esempio il problema di calcolare il massimo numero naturale che sia minore della radice quadrata di 29 senza sapere né come fare né avere a disposizione la tabellina pitagorica:\ basterà allora cominciare a moltiplicare tra loro tutti i numeri tra 1 e 6 per scoprire che il risultato è 5 (se lo volete vedere come un problema di decisione, chiedetevi se $n \in \left\{\left\lfloor \sqrt{29}\right\rfloor\right\}$).\
+In alternativa, si può tirare un dado, calcolare il quadrato del numero uscito e controllare se è una soluzione, magari ripetendo il lancio (avendo per magia rimosso il numero appena uscito dalle facce del dado) e confrontando l'ultimo numero uscito con i precedenti e con 29 --- basta quindi che esista un lancio ``fortunato'' e la soluzione è trovata.\
+Quest'ultima modalità (e anche l'altra!) origina un albero di scelte i cui livelli rappresentano i lanci e nei cui nodi immaginiamo di aver scritto il numero uscito --- basta che esista un cammino nell'albero che porta a una soluzione.\
+
+Questo metodo di soluzione, seppure ottuso, non è così assurdo come può apparire a prima vista e ritorneremo più avanti sui problemi che sembra si possano risolvere solo ricorrendovi, perché non si conoscono o non si sanno sfruttare proprietà matematiche, strutturali del problema.\
+In entrambi i casi delineati nell'esempio, vi è un procedimento di tipo \textit{non deterministico} --- l'unica proprietà matematica usata per giustificare l'impiego di un dato a sei facce è che $\sqrt{29} \leq 6$.\
+Nel primo metodo, il non determinismo è meno evidente, essendo stato ridotto a una soluzione operazionalmente accettabile; infatti, si generano tutte le scelte, ovvero l'intero spazio di ricerca, e ciascuna di queste viene esaminata, cioè si fa una ricerca esaustiva della soluzione; questo metodo viene anche detto di \textit{forza bruta}.\
+Seguendo il secondo procedimento si prende una potenziale soluzione \textit{a caso} (si ricordi che basta che ne esista una!) e si controlla se essa lo è davvero; in inglese questo metodo si chiama \textit{guess-and-try} --- se c'è una soluzione, ci viene fornita per magia.\
+Si noti che questo metodo non richiede né di generare né di visitare l'intero spazio di ricerca se non \textit{implicitamente}, come sarà forse più chiaro in seguito.\
+Inoltre, l'albero delle possibili scelte è sempre finito, perché stiamo considerando solo problemi decidibili.\
+Quindi, una soluzione appare sempre a profondità finita o, sempre a profondità finita, \textit{tutti} i rami dell'albero di scelta finiscono su nodi che riportano fallimento (non è il caso nel nostro esempio, in cui tutti i rami terminano con successo al massimo dopo sei lanci del dado, cioè a profondità sei nell'albero; non è difficile immaginare casi in cui vi siano situazioni di successo e situazioni di fallimento e ne vedremo in seguito).\
+Si noti infine che un albero delle possibili scelte, per brevità \textit{albero non deterministico delle computazioni} o semplicemente \textit{albero non deterministico}, può sempre essere visitato in modo deterministico, livello per livello.\
+
+Per formalizzare le intuizioni descritte sopra, è opportuno introdurre una variante delle macchine di Turing, dette \textit{non deterministiche}.\
+Essenzialmente, una macchina non deterministica differisce da una deterministica per il fatto che la relazione di transizione $\delta$ non è necessariamente una funzione, cioè una configurazione può evolvere in più di una configurazione successiva, originando per così dire un albero (di computazioni) non deterministico (sia ben chiaro però che una computazione continua a essere una \textit{singola successione} di configurazioni).\
+L'osservazione fatta prima, che tale albero può esser visitato per livelli, ci assicura che introdurre le macchine non deterministiche non cambia affatto la classe dei problemi decidibili, né alcuno dei risultati di calcolabilità presentati nella prima parte del corso.\
+
+Con la stessa osservazione ci si può facilmente convincere che le macchine di Turing deterministiche simulano quelle non deterministiche con una perdita di efficienza \textit{esponenziale} (si ricordi che i nodi di un albero sono in numero esponenziale rispetto la profondità dell'albero stesso); per una formulazione esatta, si veda il teorema \ref{simulazione_non-deterministica}.\
+Quanto detto giustifica, almeno in parte, la tesi di Cook-Karp, cioè che la classe dei problemi decidibili in tempo polinomiale \textit{deterministico}, $\mathcal{P}$, è formata dai problemi \textit{facili}, mentre la classe dei problemi decidibili in tempo polinomiale \textit{non deterministico}, $\mathcal{NP}$, che definiremo precisamente in seguito, è quella dei problemi \textit{difficili}.\
+Torneremo più avanti su questa distinzione, analizzando più in dettaglio $\mathcal{P}$ e $\mathcal{NP}$.\
+
+Però a questo punto non possiamo non chiederci se l'introduzione del non-determinismo dia davvero un potere maggiore alle MdT dal punto di vista della complessità del calcolo, ovvero quanto sia fondata la tesi di Cook-Karp.\
+Abbiamo già toccato questo argomento introducendo un frammento di una gerarchia di complessità, concludendo col dire che è ancora irrisolto il famoso problema $\mathcal{P} \stackrel{?}{=} \mathcal{NP}$, ovvero se non vi sia differenza tra il tempo polinomiale non deterministico e quello deterministico, nel qual caso aver introdotto il non determinismo non separerebbe i problemi ``difficili'' da quelli ``facili''.\
+Per quanto riguarda lo spazio, preannunciamo che la classe dei problemi che richiedono spazio polinomiale \textit{deterministico} PSPACE coincide con NPSPACE, quella dei problemi risolubili in spazio polinomiale \textit{non deterministico}, ancora da definire.\
+Se valesse anche l'eguaglianza $\mathcal{P} = \mathcal{NP}$, il meccanismo del non determinismo, che sembra avere scarso significato computazionale, almeno dal punto di vista della sua concreta realizzabilità, sarebbe completamente irrilevante anche dal punto di vista della complessità.\
+
+\subsection{Macchine di Turing non deterministiche}
+
+Introduciamo di seguito l'estensione non deterministica alle macchine di Turing come definite in \ref{Macchina di Turing}, dando esplicitamente conto solo delle cose che cambiano.\
+Come detto sopra, una macchina non deterministica differisce da una deterministica per il fatto che la relazione di transizione $\delta$ non è necessariamente una funzione.\
+A differenza di altre estensioni viste, questo nuovo modello non appare però sufficientemente ``realistico''.\
+Infatti, le estensioni viste nel capitolo precedente si basano su meccanismi che hanno un'interpretazione computazionale immediata; ad esempio, le macchine con molti nastri sono una semplificazione accettabile dei calcolatori paralleli.\
+Invece, non si conoscono, almeno per ora, né ci riesce di immaginare, allo stato presente della tecnologia, macchine che siano davvero non deterministiche.
+\footnote{Tra le differenti varianti della macchina di Turing, introdotte allo scopo di confermare o confutare la tesi di Church-Turing, vanno citati alcuni modelli di computazione introdotti abbastanza recentemente e ispirati a meccanismi fisici o biologici.\
+
+Più precisamente, in alcuni articoli di Deutsch, Feynman ed altri autori, apparsi verso la metà degli anni ottanta, viene esaminata criticamente l'adeguatezza del sistema fisico (computer o agente umano) alla base del modello di macchina di Turing.\
+Senza entrare nei dettagli, appare chiaro che tale sistema fisico obbedisce alle leggi della meccanica classica laddove la comunità fisica è abbastanza concorde che il comportamento di un sistema fisico vada descritto sulla base delle leggi della fisica quantistica [magari facendo riferimento alla teoria delle stringhe].\
+Una macchina che modella un tale tipo di sistema (macchina di Turing quantistica) è stato formalizzato in un articolo di Deutsch.\
+Meccanismi computazionali basati su fenomeni biologici hanno invece conosciuto un particolare sviluppo soprattutto dopo un esperimento effettuato da Adleman e che consiste essenzialmente nell'utilizzare reazioni biologiche su molecole di DNA per ``codificare'' un algoritmo per la soluzione del problema del cammino hamiltoniano in un grafo.\
+C'è da dire che né tali meccanismi, né la macchina di Turing quantistica ampliano le capacità espressive delle macchine di Turing:\ la classe delle funzioni calcolate è quella delle funzioni T- [o $\mu$- o WHILE-] calcolabili.\
+Dato però il parallelismo estremo di tali dispositivi, quello che esse alterano è piuttosto la classificazione di alcuni problemi nelle varie classi di complessità; ad esempio, l'algoritmo quantistico di Shor che, con complessità di tempo polinomiale, fattorizza un intero in numeri primi.}
+
+L'importanza di queste macchine però, sia come le presentiamo qui, e a maggior ragione in versioni assai più elaborate studiate in letteratura, è rilevantissima per organizzare in modo adeguato una teoria quantitativa degli algoritmi, per cui, pur consci della loro astrattezza e apparente (?) irrealizzabilità, non esitiamo a usarle.
+
+\begin{definition}
+    \label{MdT_non-det}
+    Una MdT \textit{non deterministica} (a $k$ nastri, di tipo I/O) è una quadrupla $N = (Q, \Sigma, \Delta, q_0)$ dove
+    \begin{itemize}
+        \item $Q, \Sigma, q_0$ sono come nella definizione \ref{Macchina di Turing} (nella \ref{MdT_k-nastri} delle macchine con $k$ nastri, nella \ref{MdT_I/O} di quelle I/O);
+        \item $\Delta \subseteq (Q \times \Sigma) \times ((Q \cup \{\mbox{\textit{\footnotesize SI, NO}}\}) \times \Sigma \times \{L,R,-\})$ è la \textit{relazione} di transizione (estesa nel modo ovvio nel caso delle macchine a $k$ nastri e di tipo I/O).
+    \end{itemize}
+    Le configurazioni non vengono affatto modificate:\ esse hanno la stessa forma di quelle già viste:\ $(q, w\sigma u)$.\
+    Allo stesso modo non cambia il passo di computazione $(q, w \sigma v) \rightarrow_N (q', w'\sigma'v')$, e quindi le computazioni sono anche qui una \textit{successione} (\textit{non} un albero!)\ di configurazioni; infine continueremo a usare gli apici $n$ e $*$ per indicare computazioni di lunghezza $n$ o qualunque.\
+\end{definition}
+
+\noindent A rimarcare che nelle macchine di Turing non deterministiche si usa una relazione piuttosto che una funzione, abbiamo usato la lettera maiuscola $\Delta$ al posto di quella minuscola $\delta$.\
+Poiché la relazione di transizione $\Delta$ può contenere più quintuple associate allo stesso stato e allo stesso simbolo, ci possono essere molte configurazioni $(q', w' \sigma' u')$ che sono raggiungibili da $(q, w \sigma u)$ in un \textit{solo} passo.\
+Dovrebbe essere adesso più chiaro che le computazioni possono venir organizzate in un albero non deterministico del genere visto sopra.\
+Inoltre, la vera potenza del non determinismo appare nel modo in cui si accetta (o se preferite si calcola, il che richiede una semplice e ovvia estensione alla definizione seguente).\
+
+\begin{definition}
+    La macchina non deterministica $N$ (a $k$ nastri) decide $I$ tutte e sole le volte che
+    \begin{itemize}
+        \itemsep0px
+        \item[] $x \in I$ se e solamente se
+        \item[] esiste una computazione tale che $(q_0, \underline{\triangleright}x, \triangleright, \dots,\triangleright) \rightarrow^*_N (\mbox{\textit{\footnotesize SI}}, w_1, \dots,w_k)$
+    \end{itemize}
+\end{definition}
+
+\noindent Per accettare una stringa di ingresso, \textit{basta che esista} una computazione che porti a una configurazione il cui stato sia \textit{\footnotesize SI} -- ecco il pizzico di magia:\ basta che ci sia una configurazione che accetta e non è affatto rilevante che ci siano altre computazioni che rifiutano, finendo in configurazioni con stato \textit{\footnotesize NO} (o nel caso generale che non terminano).
+\footnote{Per questa ragione il non determinismo che abbiamo introdotto si chiama anche angelico; la versione demoniaca prevede che tutte le computazioni raggiungano uno stato di successo.}
+Si noti come questa definizione di accettazione introduca un'asimmetria rispetto a quella di non accettazione.\
+In quest'ultimo caso, infatti, per rifiutare una stringa di ingresso bisogna che \textit{tutte} le computazioni della macchina portino a configurazioni con stato \textit{\footnotesize NO} o siano non terminanti.\
+La situazione di non terminazione verrà esclusa nel seguito, perché parliamo solo di problemi decidibili; per avere un'idea di come ci possano essere computazioni non terminanti, si consideri di nuovo il banale esempio fatto all'inizio del capitolo, e si cerchi di determinare che 5 è una soluzione lanciando ripetutamente il dado da cui però nessun mago ha sottratto le facce che portano i numeri già usciti:\ vi saranno allora sequenze di lanci in cui esce sempre lo stesso numero.\
+Si noti tuttavia che, anche senza magia, le soluzioni si trovano \textit{sempre} a profondità finita.\
+Si noti anche che una computazione è \textit{completamente determinata} da una sequenza di scelte tra le varie configurazioni raggiungibili passo dopo passo.
+
+\subsection{Complessità in tempo e in spazio non deterministici}
+
+Introduciamo ora i corrispettivi non deterministici delle classi di complessità definite nel precedente capitolo, i cui nomi inizieranno tutti con la lettera $N$, per non determinismo.\
+Non si dimentichi che nel seguito considereremo \textit{solo} problemi decidibili, quindi le macchine che useremo terminano per ogni ingresso; ciò implica che se una di queste macchine $N$ decide $I$, non solo si ha che $\forall x \in I$ esistono $w_1, w_2, \dots, w_k$ tali che $N(x) = (q_0, \underline{\triangleright}x, \triangleright, \dots,\triangleright) \rightarrow_N^*(\mbox{\textit{\footnotesize SI}}, w_1, w_2, \dots, w_k)$, ma anche che $\forall x \notin I,\ \forall w_1, w_2, \dots, w_k$ tali che $N(x) \rightarrow_N^* (q, w_1, w_2, \dots, w_k) \not\rightarrow_N$ si ha che $q = \mbox{\textit{\footnotesize NO}}$, cioè si raggiunge lo stato di rifiuto.\
+
+\begin{definition}
+    La macchina non deterministica $N$ \textit{decide} $I$ \textit{in tempo non deterministico} $f(n)$ se e solamente se
+    \begin{itemize}
+        \itemsep 0px
+        \item $N$ decide $I$ e
+        \item $\forall x \in I,\ \exists t$ tale che $(q_0, \underline{\triangleright}x,\triangleright, \dots, \triangleright ) \rightarrow^t_N (\mbox{\textit{\footnotesize SI}}, w_1, \dots,w_k)$, $t \leq f(|x|)$.
+    \end{itemize}
+\end{definition}
+
+\noindent Intuitivamente, una MdT non deterministica $N$ accetta $x$ in tempo non deterministico $f(|x|)$ se e solo se c'è \textit{almeno una} computazione che termina in uno stato \textit{\footnotesize SI} in $t$ passi, $t \leq f(|x|)$; di fatto, occorre e basta che la più breve delle computazioni accettanti ci metta meno passi di $f(|x|)$, o altrettanti.\
+Invece, $N$ non accetta $x$ se \textit{tutte} le sue computazioni lunghe al massimo $f(|x|)$ conducono allo stato \textit{\footnotesize NO}.\
+Ecco di nuovo l'asimmetria:\ non basta che per un elemento $x \notin I$ ci sia una computazione che porta allo stato \textit{\footnotesize NO} in meno di $f(|x|) + 1$ passi, ma si richiede che lo debbano fare \textit{tutte} in meno di $f(|x|) + 1$ passi.\
+Quindi l'asimmetria tra il decidere $I$ e il decidere $\bar{I}$ che abbiamo visto nel caso generale viene rafforzata dal richiedere che ciò venga svolto in tempo $f(|x|)$.\
+Ripetiamo:\ affinché $N$ decida il problema $I$ basta che per \textit{ogni} suo elemento $x$ ci sia \textit{una} computazione che lo accetta.\
+Invece, affinché $N$ decida $\bar{I}$ bisogna che \textit{tutte} le computazioni sul dato di ingresso $x \notin I$ conducano allo stato \textit{\footnotesize NO} in meno di $f(|x|) + 1$ passi.\
+
+Come fatto per TIME$(f(n))$ possiamo ora definire la classe dei problemi decidibili da MdT (e da altri modelli ``ragionevolmente'' equivalenti) in tempo \textit{non deterministico} $f(n)$.
+
+\begin{definition}
+    Se una macchina di Turing non deterministica decide il problema $I$ in tempo $f$, allora $I \in \mathrm{NTIME}(f)$
+\end{definition}
+
+\noindent Adesso possiamo finalmente introdurre la classe dei problemi decidibili in tempo polinomiale non determistico.
+
+\begin{definition}
+    La classe dei problemi decidibili in tempo non determistico polinomiale è
+    \[\mathcal{NP} = \bigcup_{k \geq 1} \mathrm{NTIME}\left(n^k\right)\]
+\end{definition}
+
+\noindent Ovviamente $\mathcal{P} \subseteq \mathcal{NP}$, perché una macchina deterministica $M$ è anche non deterministica.\
+Sarebbe bello se fosse vero anche il contrario, cioè $\mathcal{P} \supseteq \mathcal{NP}$, da cui si dedurrebbe che $\mathcal{P} = \mathcal{NP}$.\
+Se così fosse, ci sarebbe un modo per trasformare un algoritmo non deterministico polinomiale in uno deterministico polinomiale, quindi ``facile e fattibile''.
+
+Come abbiamo già più volte detto, quello che si sa fare per ora è di simulare una macchina non deterministica $N$ che decide un problema in tempo polinomiale con una macchina deterministica $M$ con una perdita di efficienza in tempo \textit{esponenziale}.\
+L'idea è di generare prima le potenziali soluzioni e poi verificare se lo sono davvero; vedremo anche che il primo passo è difficile, nel senso che (solitamente) richiede un numero di passi esponenziale, mentre il secondo è facile e può essere eseguito in tempo deterministico polinomiale.\
+
+\begin{theorem}
+    \label{simulazione_non-deterministica}
+    Se I è deciso in tempo non deterministico $f(n)$ dalla macchina non deterministica $N$ (a $k$ nastri), allora, con una perdita esponenziale, è deciso in tempo $\mathcal{O}\left(c^{f(n)}\right)$ da una macchina deterministica $M$ (a $k+1$ nastri), con $c > 1$ dipendente solo da $N$.\
+    Più precisamente:
+    \[\mathrm{NTIME}\left(f(n)\right) \subseteq \mathrm{TIME}\left(c^{f(n)}\right)\]
+\end{theorem}
+
+\begin{proof}
+
+    Sia $d$ il grado di non-determinismo di $N$, cioè poniamo
+    \[d = \max \{\mathit{Grado}(q,\sigma) \mid q \in Q, \sigma \in \Sigma\}\]
+    dove $Grado(q, \sigma) = \#\{(q',\sigma',D) \mid ((q,\sigma),(q',\sigma',D)) \in \Delta\}$.\
+
+    \medskip
+    \noindent(Per semplicità di trattazione, supponiamo nel seguito che la macchina abbia sempre $d$ scelte; non è difficile modificare quanto segue al caso generale).
+    \medskip
+
+    \noindent Per ogni stato $q \in Q$ e ogni simbolo $\sigma \in \Sigma$, ordiniamo totalmente, p.e.\ lessicograficamente, l'insieme $\Delta (q, \sigma)$.\
+    Ogni computazione di $N$ è una sequenza di scelte; se tale sequenza è lunga $t$, la possiamo vedere come una successione di numeri naturali minori di $t$ nell'intervallo $[0 \dots d - 1]$, rappresentando con 0 la prima scelta.\
+    La macchina $M$ considera queste successioni una alla volta, in ordine crescente (ovvero visita l'albero per livelli) e per ciascuna di esse simula $N$.\
+    (Nota bene:\ la costruzione di $M$ deve essere indipendente da $f$ e quindi deve esser fatta a prescindere dal valore corrente di $f(n)$ --- se così non fosse, basterebbe generare tutte le computazioni lunghe al più $f(|x|)$).
+
+    La macchina $M$ riproduce la successione di scelte $(c_1 , \dots, c_t )$, tenendo l'ultima successione sul nastro aggiuntivo, ovvero vi mantiene il numero $t'$ in base $d$ che gli corrisponde.\
+    Se durante questa simulazione $M$ arriva in uno stato \textit{\footnotesize SI} allora $M$ termina accettando, altrimenti genera la prossima successione, usando come guida il prossimo numero in base $d$, cioè $t' + 1$.\
+    Se tutte le successioni terminano (ovvero è stato generato il numero $t$) portando allo stato \textit{\footnotesize NO}, allora $M$ termina rifiutando.\
+    È chiaro che $M$ termina con successo se e solamente se $N$ fa altrettanto.\
+
+    Rimane da verificare che il tempo impiegato da $M$ nella simulazione è quello dell'enunciato.\
+    Quante sono le successioni da visitare?\ al massimo $\mathcal{O}\left(d^{f(n)+1}\right)$, quindi il teorema è dimostrato ponendo $c = d$.\
+
+\end{proof}
+
+\noindent Terminiamo con la definizione di spazio non deterministico e della classe di problemi decidibili in spazio non deterministico polinomiale.\
+Si noti il quantificatore esistenziale nel secondo punto.
+
+\begin{definition}
+    La macchina di Turing $N$, non deterministica a $k$-nastri di tipo I/O, \textit{decide} $I$ \textit{in spazio non deterministico} $f(n)$ se e solamente se
+    \begin{itemize}
+        \itemsep0px
+        \item $N$ decide $I$
+        \item $\forall x \in I\ \exists w_1,\dots,w_k$ tali che $(q_0, \underline{\triangleright} x, \dots,\underline{\triangleright}) \rightarrow^*_N (\mbox{\textit{\footnotesize SI}}, w_1,w_2,\dots,w_k)$ e $\sum_{2\leq i \leq k-1} |w_i| \leq f(n)$
+    \end{itemize}
+    Se $N$ decide $I$ in spazio non deterministico $f(n)$, allora $I \in \mathrm{NSPACE}(f(n))$.\
+    Infine, la classe dei problemi decidibili (da MdT) in spazio non deterministico polinomiale è
+    \[\mathrm{NPSPACE} = \bigcup_{k \geq 1} \mathrm{NSPACE}\left(n^k\right)\]
+
+\end{definition}
+
+\noindent Abbiamo già preannunciato che l'estensione con il non determinismo non allarga la classe dei problemi trattabili polinomialmente, quando la misura della complessità riguardi lo spazio.\
+Enunciamo ora tale teorema, senza dimostrarlo.\
+
+\begin{theorem} [Savitch]
+    $\mathrm{NPSPACE} = \mathrm{PSPACE}$.
+\end{theorem}
+
+\noindent Nonostante nella soluzione di un problema $I$ ottenuta per forza bruta o procedendo per tentativi non si sfrutti affatto la struttura matematica di $I$, forse perché essa è troppo complessa, o perché essa sfugge al solutore del problema, vi sono numerosi esempi di problemi per cui quello è l'unico modo conosciuto di arrivare a una soluzione; ne menzioneremo alcuni più avanti e vi ritorneremo ancora nel prossimo capitolo.\
+Per ora limitiamoci a discutere brevemente un esempio paradigmatico per la soluzione del quale si conoscono solo algoritmi polinomiali non deterministici o esponenziali deterministici:\ il problema del commesso viaggiatore.
+\footnote{Stiamo parlando di soluzione esatta; nel caso in cui ci si accontenti di una soluzione approssimata vi sono algoritmi molto più furbi, sulla cui natura ritorneremo brevemente più avanti.}
+
+\begin{example} [Problema del commesso viaggiatore]
+    Vi sono $n$ città, ciascuna individuata da un intero e collegata a tutte le altre da una strada percorribile nei due sensi; sia allora $d(i, j)$ la distanza tra le città $i$ e $j$.\
+    \footnote{Una distanza $d$ è una funzione da coppie di punti, nel nostro caso città, nei reali positivi, tale che gode delle seguenti tre proprietà
+        \itemsep0px
+        \item[-]  riflessiva:\ $d(i, j) = 0$ se e solamente se $i = j$;
+        \item[-]  simmetrica:\ $d(i, j) = d(j, i)$;
+        \item[-]  triangolare:\ $d(i, j) \leq d(i, k) + d(k, j)$.
+    }
+    Il problema consiste nel trovare il cammino di costo minimo che attraversa tutte le città una e una volta sola --- ovvero dobbiamo trovare una permutazione di indici (o città) $\Pi : [1\dots n] \rightarrow [1\dots n]$ che minimizza la seguente quantità, in cui intendiamo $i = \Pi(h), i + 1 = \Pi(k)$ per qualche $h$ e $k$:
+    \[\sum_{1 \leq i \leq n-1} d(i,i+1)\]
+    Ovviamente, il problema si può rappresentare come un grafo (non diretto) i cui nodi sono le città e in cui c'è un arco tra ogni coppia di nodi $i$ e $j$, pesato da $d(i,j)$.\
+
+    Per vedere questo problema come un problema di decisione si abbia un valore limite $B$, da interpretarsi come il rimborso viaggi assegnato al commesso viaggiatore; allora il problema è risolto positivamente se c'è un cammino che tocca tutte le città una e una sola volta di costo minore o uguale a $B$.\
+
+    \medskip
+    \noindent Vediamo adesso di calcolare, in modo assai spiccio, la complessità prima di una (tipica) procedura che impiega il metodo di forza bruta per risolvere il problema del commesso viaggiatore e poi di una (tipica) MdT non deterministica che risolve la sua variante di decisione; entrambe procedono in due fasi separate.\
+    Il dato iniziale delle due macchine è ovviamente la rappresentazione della rete stradale e del costo $B$ (per esempio come matrice di incidenza determinata dalle distanze).
+
+    Come tutte le procedure a forza bruta, il primo metodo ha la seguente struttura:
+    \begin{itemize}
+        \item[i)] genera tutte le potenziali soluzioni come permutazioni di tutti gli interi fino a $n$ il che costa $\frac{(n-1)!}{2}$
+        \item[ii)] scegli tra tutte le permutazioni la prima che ha costo accettabile, ovvero minore di $B$, e questo controllo può essere fatto in tempo deterministico cubico (bisogna accedere $\mathcal{O}(n)$ volte alle $\mathcal{O}(n^2)$ coppie $(i,j)$ per ottenere la distanza $d(i,j)$ memorizzata nel nastro di ingresso).
+    \end{itemize}
+    (Può essere interessante vedere che lo spazio necessario alla procedura sopra delineata è in $\mathcal{O}(n)$, perché è sufficiente generare una permutazione alla volta e memorizzare in uno spazio di lavoro la permutazione in esame.)
+
+    Costruiamo adesso una macchina di Turing non deterministica $N$ che decide il problema in $\mathcal{O}(n^3)$.\
+    $N$ procede con le due fasi seguenti:\
+    \begin{itemize}
+        \item[i)] $N$ scrive su un nastro di lavoro una stringa di $n$ numeri naturali compresi tra 1 e $n$; cioè vi sono $n$ transizioni possibili a partire dalla configurazione iniziale, ciascuna che scrive un numero nell'intervallo $[1 \dots n]$ sul nastro di lavoro e dalle configurazioni così raggiunte vi sono $n$ transizioni, che scrivono un numero in $[1 \dots n]$, e così via --- ovviamente la scelta della transizione da effettuare viene fatta a caso (naturalmente la macchina potrebbe esser più furba).\ Questa fase richiede $\mathcal{O}(n)$ passi;
+        \item[ii)] $N$ verifica se la stringa è un cammino accettabile, cioè è una permutazione degli indici, usando un altro nastro di lavoro, in tempo $\mathcal{O}(n^2)$; $N$ verifica di seguito (o contemporaneamente) se il costo del cammino è minore o uguale a $B$, di nuovo in tempo $\mathcal{O}(n^3)$, nel qual caso risponde positivamente; altrimenti risponde negativamente.
+    \end{itemize}
+
+    \noindent Si noti come la prima fase che compiono entrambe le procedure consiste nel generare una delle soluzioni, le quali sono in numero esponenziale; la differenza è che nel primo algoritmo si procede costruttivamente, generandole tutte, mentre nel secondo si tira a indovinare e si sfrutta il meccanismo non deterministico della macchina usata.\
+    In altre parole, in entrambi i casi si genera esaustivamente tutto lo spazio del problema su cui fare poi la ricerca della soluzione, ma nel primo modo ciò avviene \textit{esplicitamente}, nel secondo \textit{implicitamente}.\
+    È importante osservare che la seconda fase è una \textit{certificazione in tempo polinomiale} fatta in modo \textit{deterministico} che la stringa di naturali sia davvero una soluzione.\
+    Uno potrebbe, e spesso viene fatto, definire allora la classe $\mathcal{NP}$ come l'insieme dei problemi che ammettono una certificazione in tempo polinomiale.\
+    Tuttavia, dovrebbe a questo punto essere chiaro che i due modi per definire tale classe, o via MdT non deterministiche o via certificazione polinomiale, sono del tutto equivalenti e differiscono solo dal punto di vista con cui si esaminano i problemi che vi appartengono.\
+    Infine, notiamo che, quando il cammino in esame non è una soluzione, il metodo esaustivo esplicito ci dice che dobbiamo visitare tutto lo spazio degli stati, che sono in numero esponenziale, quindi la certificazione del fallimento avviene in tempo esponenziale:\ \textit{tutti} i tentativi falliscono.\
+
+    Come già detto più volte, questo modo di procedere trova applicazioni in molti campi.\
+    Ad esempio, in logica per dimostrare che una formula, decidibile e lunga $n$, è un teorema, uno può generare ``tutte le dimostrazioni'' le cui ultime formule sono lunghe $n$ e se ci trova la formula di partenza, allora questa è un teorema.\
+    Oppure, per decidere se c'è un assegnamento di valori di verità alle variabili di una formula che la rende vera, si considerano tutti i possibili assegnamenti e poi si calcola il valore della formula in ciascun caso.\
+    Strettamente correlato a quest'ultimo problema, c'è, in teoria dei circuiti, il problema di decidere quando in un dato circuito passa un segnale.\
+    Nell'area dell'ottimizzazione combinatoria, oltre al problema del commesso viaggiatore e di quelli ad esso correlati, si risolvono in modo esatto con questa tecnica i problemi di assegnazione di risorse, tra i quali l'allocazione dei task (non pre-rilasciabili) ai processori, compito fondamentale dei sistemi operativi.\
+    Infine, nel campo dell'intelligenza artificiale, ci sono tutti i problemi legati ai giochi o alla ricerca e all'estrazione di informazione da grosse collezioni di dati, anche non strutturate.
+\end{example}
+

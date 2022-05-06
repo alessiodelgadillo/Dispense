@@ -1,0 +1,134 @@
+\chapter{Algoritmi randomizzati}
+
+Sono algoritmi alimentati non solo dai dati del problema ma anche da una sequenza di valori casuali così da poter compiere passi randomici.\
+Si dividono in due classi:
+
+\begin{itemize}
+    \item  \textbf{Las Vegas}:\ generano un risultato \textit{sicuramente corretto} in un tempo \textit{probabilmente breve} (quicksort).
+    \item  \textbf{Monte Carlo}:\ generano un risultato \textit{probabilmente corretto} in un tempo \textit{sicuramente breve} (test di primalità) e impongono che la probabilità di errore sia arbitrariamente piccola e matematicamente misurabile.
+\end{itemize}
+
+\section{Test di primalità (Miller e Rabin, `80)}
+
+$N$ è un numero intero dispari di $n$ bit da testare.\
+$N-1$ è pari e si può rappresentare come $2^wz$, dove $z$ è dispari e $w$ è l'esponente della potenza di 2 più grande che divide $N-1$:\ esempio
+\[N=17,\ N-1=16 = 2^4\cdot 1\quad\rightarrow\quad z=1,w=4\]
+Si osservi che $z$ e $w$ si calcolano in tempo polinomiale nel numero di cifre perché è possibile dividere $N$ per 2 al massimo $\lceil\log_2N\rceil$ prima di trovare 1 (nel caso peggiore in cui $N =$ potenza di 2).
+
+\vspace{12pt}
+Sia $N$ un numero primo e $2\leq y \leq N-1$:
+\begin{enumerate}
+    \item $\mathrm{MCD}(N,y)=1$;
+    \item $y^z\ \mathit{mod}\ N = 1$ oppure $\exists i,\ 0\leq i\leq w - 1$ t.c.\ $y^{2^iz}\ \mathit{mod}\ N = -1$
+\end{enumerate}
+
+\vspace{12pt}
+\noindent Si osservi che entrambe sono condizioni sufficienti:\ se un numero è primo allora soddisfa le due suddette condizioni, ma esistono numeri non primi che le soddisfano.\
+Fortunatamente quei numeri non primi che soddisfano i predicati sono pochi e ciò conferisce al metodo una probabilità di errore molto bassa.\
+
+\subsubsection{Lemma 1 (Miller, Rabin)}
+
+Se $N$ è un numero composto, il numero di interi compresi fra 2 e $N - 1$ che soddisfano entrambi i predicati è minore di $\frac{N}{4}$.\
+
+\vspace{12pt}
+\noindent Dato un intero $N$ e scelto un $y$ a caso che appartiene a $[2, N - 1]$:
+\begin{itemize}
+    \item Se uno dei due predicati è falso, allora $N$ è certamente composto.
+    \item Se i predicati sono entrambi veri, allora $N$ è composto con probabilità $< \frac{1}{4}$, dunque $N$ è primo con probabilità $> \frac{3}{4}$.\
+\end{itemize}
+\vspace{12pt}
+
+\noindent Una probabilità di errore del 25\% è troppo alta.\
+Per ridurla si itera $k$ volte e in questo modo la probabilità di errore diventa $< \left(\frac{1}{4}\right)^k$.\
+
+\subsubsection{Algoritmo del test di primalità}
+
+\begin{verbatim}
+Verifica(N, y){ //controlla la validità del certificato y
+    if(P1 == F or P2 == F) return 1;
+    //certificato valido: N è certamente composto
+    else return 0;
+    //certificato falso: N è probabilmente primo (errore < 1/4)
+}
+
+TestMR(N, k){
+    for(i = 1; i <= k; i++){
+        scegli a caso y in [2, N - 1]
+        if(Verifica(N, y) == 1) return 0; //N è composto
+        scegli nuovo y
+    }
+    return 1; //N è probabilmente primo (P < k/4)
+}
+\end{verbatim}
+
+\subsubsection{Costo del test di primalità}
+
+\texttt{TestMR} ripete $k$ volte \texttt{Verifica}, vediamo quanto costa \texttt{Verifica}.\
+Esso va a valutare i due predicati e il primo è un MCD, non costa granché, mentre il secondo è un po' più costoso, quindi vediamone il costo.\
+È necessario calcolare
+\[y^z\ \mathit{mod}\ N = 1\ \mathrm{oppure}\ \exists i,\ 0\leq i\leq w - 1\ \mathrm{t.c.}\ y^{2^iz}\ \mathit{mod}\ N = -1\]
+L'esponente massimo per $y$ si ottiene quando $i=w-1 \Rightarrow y^{\frac{N-1}{2}}\ \mathit{mod}\ N$.\
+
+Per avere un algoritmo polinomiale si vuole eseguire al massimo $\log N$ moltiplicazioni, quindi si usa l'algoritmo \textit{delle quadrature successive} (\textit{esponenziazione veloce}).\
+Immaginiamo di dover calcolare $x = y^z\ \mathit{mod}\ s$ con $x,y,s$  dello stesso ordine di grandezza.\
+
+\begin{enumerate}
+    \item Si scompone l'esponente $z$ in una somma di potenze di 2:
+          \[z = \sum_{i=0}^t k_i\cdot 2^i\qquad k_i \in \{0,1\}\]
+          Si noti che $t = \lfloor\log_2 z\rfloor = \Theta(\log z)$.\
+    \item Si calcolano tutte le potenze
+          \[y^{2^i}\ \mathit{mod}\ s\qquad 1 \leq i \leq t = \lfloor\log_2 z\rfloor\]
+          ciascuna come il quadrato della precedente:
+          \[y^{2^i}\ \mathit{mod}\ s = \left(y^{2^{i-1}}\right)^2\ \mathit{mod}\ s\]
+\end{enumerate}
+
+\noindent Esempio:
+\[x = 9^{45}\ \mathit{mod}\ 11 \qquad 45 = 32 + 8+ 4 + 1\]
+\[y^2\ \mathit{mod}\ s = 9^2\ \mathit{mod}\ 11 = 4\]
+\[y^4\ \mathit{mod}\ s = 4^2\ \mathit{mod}\ 11 = 5\]
+\[y^8\ \mathit{mod}\ s = 5^2\ \mathit{mod}\ 11 = 3\]
+\[y^{16}\ \mathit{mod}\ s = 3^2\ \mathit{mod}\ 11 = 9\]
+\[y^{32}\ \mathit{mod}\ s = 9^2\ \mathit{mod}\ 11 = 4\]
+
+\noindent A questo punto calcoliamo $x = y^z\ \mathit{mod}\ s$:
+\[x = \prod_{\{i\ |\ k_i \neq 0\}}y^{2^i}\ \mathit{mod}\ s\]
+
+\noindent Esempio:
+\[y^z\ \mathit{mod}\ s = 9^{45}\ \mathit{mod}\ 11 = 9^{32 + 8 + 4 + 1}\ \mathit{mod}\ 11 = \]
+\[= \left(\left(9^{32}\ \mathit{mod}\ 11\right) \cdot \left(9^8\ \mathit{mod}\ 11\right) \cdot \left(9^4\ \mathit{mod}\ 11\right) \cdot \left(9^1\ \mathit{mod}\ 11\right)\right)\  \mathit{mod}\ 11 = \]
+\[= (4 \cdot 3 \cdot 5 \cdot 9)\ \mathit{mod}\ 11 = 1\]
+
+\noindent Costo:
+\begin{itemize}
+    \item $\Theta(\log_2z)$ quadrature.
+    \item $O(\log_2z)$ moltiplicazioni.
+\end{itemize}
+Ogni moltiplicazione ha un costo al più quadratico nel numero di cifre e quindi si ottiene un algoritmo polinomiale nella dimensione dei dati.\
+
+\section{Generazione di numeri primi}
+
+Si genera un numero intero casuale dispari, seguito dal test di primalità e si ripete fino a quando si trova un numero \textit{dichiarato} primo.\
+Gli interi da testare in realtà sono pochi a causa della \textbf{densità dei numeri primi sull'asse degli interi}:\ il numero di interi primi e minori di $N$ sono
+\[\frac{N}{\log N}\ \mathrm{per}\ N \to \infty\]
+Per $N$ sufficientemente grande, in un suo intorno di ampiezza $\log N$ cade mediamente un numero primo e questo significa che testiamo al massimo una quantità logaritmica, ovvero \textit{polinomiale} nel numero delle cifre di $N$, di numeri prima di trovarne uno primo.\
+
+\begin{verbatim}
+Primo(n, k) //genera un numero primo almeno n bit
+    S = sequenza binaria di n-2 bit generata pseudocasualmente
+    N = concatenazione(1, S, 1)         //N contiene n bit
+    while(TestMR(N, k) == 0) N = N + 2  //10 in binario
+    return N
+\end{verbatim}
+Si noti che $P_{err} < \left(\frac{1}{4}\right)^k$.\
+
+\texttt{TestMR} ha costo polinomiale in $n = \log N$, in particolare è $O(n^3)$, e il corpo del \texttt{while} viene ripetuto $O(n)$ volte, quindi è un algoritmo complessivamente polinomiale.\
+
+\section{Classe RP (Random Polinomial)}
+
+Si tratta della classe dei problemi decisionali \textbf{verificabili in tempo polinomiale randomizzato}.\
+
+Preso un problema $\Pi$ con l'istanza di input $x$, si definisce un certificato probabilistico $y$ di $x$ che ha una lunghezza al più polinomiale in $|x|$ ed è estratto perfettamente a caso da un insieme associato ad $x$.\
+Questo certificato è utile se associato a un algoritmo di verifica polinomiale:\ \verb|A(x, y)| attesta con certezza, in \textit{tempo polinomiale}, che $x$ \textbf{non} possiede la proprietà ($\Pi(x) =0$) oppure attesta che $x$ possiede la proprietà esaminata dal problema con probabilità $> \frac{1}{2}$.\
+\[\mathit{P \subset RP\subset NP}\]
+Si congettura che
+\[\mathit{P \subseteq RP\subseteq NP}\]

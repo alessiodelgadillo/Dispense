@@ -1,0 +1,353 @@
+\chapter{Crittografia su curve ellittiche}
+
+Oggi si parla di una nuova generazione di cifrari a chiave pubblica facendo riferimento alla crittografia sulle \textbf{curve ellittiche}, la quale sta via via sostituendosi ai sistemi basati sull'algebra modulare (RSA, Diffie-Hellman, El Gamal) per i problemi relativi alla pesantezza computazionale delle elaborazioni.\
+Gli attacchi a questi cifrari non sono più attacchi puramente esponenziali, ci sono delle tecniche che permettono di ridurre il costo della fattorizzazione e del calcolo del logaritmo discreto.\
+Quindi si è diffuso un nuovo tipo di crittografia che usa delle operazioni definite sulle curve ellittiche:\ la funzione one-way trap-door è facile da calcolare, ma per l'inversione si hanno a disposizione solo algoritmi con costo esponenziale nel numero di bit e quindi sono più sicuri.\
+
+La crittografia su curve ellittiche (\textit{Elliptic Curve Cryptography}) permette di avere un livello di sicurezza molto più elevato a parità di lunghezza della chiave e di usare chiavi più corte a parità di sicurezza.\
+
+\section{Curve ellittiche}
+
+Si chiamano curve ellittiche, ma non sono delle ellissi:\ sono delle curve algebriche descritte da equazioni che somigliano a quelle usate per calcolare la lunghezza degli archi delle ellissi.\
+Sono uno strumento matematico abbastanza recente; sono studiate dalla metà del XIX secolo, mentre le applicazioni alla crittografia sono più recenti.\
+
+A metà degli anni `80, Miller (IBM) e Koblitz (Università di Washington) hanno proposto di prendere i protocolli noti della cifratura a chiave pubblica e modificare gli algoritmi sostituendo le operazioni dell'algebra modulare con le operazioni sui punti delle curve ellittiche.\
+
+\begin{definition}
+    Preso un campo $k$, una \textbf{curva ellittica} è un insieme di punti $(x, y) \in k^2$ tale che
+    \[y^2 + axy + by = x^3 + cx^2 + dx + e\qquad a,b,c,d,e \in k \]
+\end{definition}
+
+\noindent Se la \textit{caratteristica}\footnote{La \textbf{caratteristica} di un campo è il numero di volte che l'elemento neutro moltiplicativo (1) deve essere sommato per ottenere l'elemento neutro additivo (0):\ nel campo $\mathbb{Z}_p$, la caratteristica è proprio $p$} di $k \neq 2,3$ allora è possibile ridurre l'equazione in \textit{forma normale di Weierstrass}:
+\[y^2 =  x^3 + ax + b \qquad a,b \in k\]
+Quindi scriveremo
+\[E_k(a,b) = \{(x,y) \in k^2 \mid y^2 = x^3 + ax + b\} \cup \{O\}\]
+È interessante lavorare sulle curve ellittiche perché è possibile dare a $E_k(a,b)$ la struttura algebrica di \textit{gruppo abeliano} (non di campo) ed quindi è possibile definirvi un'operazione interna associativa e commutativa con esistenza dell'inverso:\ combinando due punti della curva tramite questa funzione si ottiene un terzo punto appartenente alla curva.\
+Per poter poter essere un gruppo abeliano è necessario anche l'elemento neutro $\{O\}$, chiamato \textit{punto all'infinito} (a seconda del campo $k$ tale elemento potrebbe essere già presente).\
+
+Supponiamo $k=\mathbb{R}$
+\[E_{\mathbb{R}}(a,b) = \{(x,y) \in \mathbb{R}^2 \mid y^2 = x^3 + ax + b\} \cup \{O\}\]
+Per poter definire la struttura di gruppo abeliano è richiesto che $x^3 + ax + b$ non abbia radici multiple.\
+Quindi assumiamo che \[4a^3 +27b^2 \neq 0\]
+in questo caso la cubica non ha radici multiple e perciò è garantita l'esistenza della tangente in ogni punto della curva ellittica.\
+
+Nel caso in cui vi siano radici multiple la curva potrebbe assumere una forma a ``nodo'' o a ``cuspide''.\
+
+\subsubsection{Simmetria orizzontale}
+
+Assumiamo di avere un punto $P = (x,y) \in E(a,b)$.\
+Allora $P$ soddisfa $y^2 = x^3 + ax + b$ e quindi anche il punto $-P = (x,y) \in E(a,b)$, infatti
+\[\left(-y \right)^2 = y^2 = x^3 + ax + b\]
+$-P$ è detto ``\textit{opposto}'', l'inverso di $P$.\
+
+Per il \textit{punto all'infinito} si pone $O = -O$.\
+
+\subsection{Somma sulle curve ellittiche}
+
+Si chiama \textit{somma}, ma non ha relazioni con la somma delle coordinate.\
+
+Se si prende una curva ellittica e se ne studia l'intersezione si vede che i punti di intersezione sono al massimo tre; infatti, mettendo a sistema una curva ellittica di Weierstrass con una retta, si ottiene un sistema in $x^3$ che ha al massimo tre soluzioni.\
+\[ \left\{\begin{array}{l}
+        y = mx + q \\
+        y^2 = x^3 + ax + b
+    \end{array}\right.\]
+Esiste anche il caso in cui c'è una sola soluzione reale e le altre due sono complesse coniugate.\
+Una cosa molto interessante è che se una retta interseca $E(a,b)$ in due punti, allora la interseca anche in un terzo punto:\ questa caratteristica viene usata per definire l'operazione di ``somma''.\
+
+\begin{definition}
+    Siano $P, Q, R \in E(a,b)$.\
+    Se $P, Q, R$ sono disposti su una retta, si pone $P+Q+R = O$.\
+\end{definition}
+
+\noindent Siano $P,Q \in E(a,b)$ e supponiamo che $Q \neq \pm P$.\
+Si consideri la retta $\overline{PQ}$ e il punto generato $R$ con l'intersezione di $E(a,b)$.\
+Si pone $P+Q = -R$ e
+\[\left\{ \begin{array}{l}
+        R \in E(a,b)  \\
+        -R \in E(a,b) \\
+    \end{array}\right.\]
+Se $Q = -P$, allora la retta $\overline{PQ}$ è parallela all'asse $y$ e quindi incontra $E(a,b)$ nel punto all'infinito, perciò $P + (-P) = O$ ($O$ è l'elemento neutro).\
+
+Nel caso in cui $Q = P$ si hanno due radici uguali nella risoluzione del sistema fra curva e retta.\
+Si considera la tangente alla curva nel punto $P$ (sempre definita per costruzione, in quanto $4a^3 +27b^2 \neq 0$) e si prende l'opposto del punto di intersezione tra la tangente in $P$ e la curva ellittica (questo punto può essere $O$).\
+
+\subsubsection{Proprietà della somma}
+
+\begin{itemize}
+    \item \textbf{Chiusura}:\ $\forall\ P,Q \in E(a,b) \Rightarrow P + Q \in E(a,b)$
+    \item \textbf{Elemento neutro}:\ $\forall\ P \in E(a,b) \Rightarrow P + O = O + P = P$
+    \item \textbf{Inverso}:\ $\forall\ P \in E(a,b),\ \exists !\ Q \in E(a,b)$ t.c. $P + Q = O = Q + P$
+    \item \textbf{Proprietà commutativa}:\ $\forall\ P,Q \in E(a,b),\ P + Q = Q + P$
+    \item \textbf{Proprietà associativa}:\ $\forall\ P,Q,R \in E(a,b),\ (P + Q) + R = P + (Q + R)$
+\end{itemize}
+
+\subsubsection{Formulazione algebrica}
+
+Prendiamo i punti $P=(x_p, y_p)$, $Q=(x_q, y_q)$ e si vuole formulare $S = P + Q$.\
+
+\vspace{12pt}
+
+\noindent Se $Q \neq \pm P \Rightarrow S = (x_s, y_s)$
+\[x_s = \lambda^2 - x_p - x_q \quad \mathrm{e} \quad y_s = -y_p + \lambda (x_p-x_s), \qquad \lambda = \frac{y_q - y_p}{x_q -x_p}\]
+
+\vspace{12pt}
+
+\noindent Se $Q = P$ le formule sono le stesse di prima ma
+\[\lambda = \frac{3x_p^2 + a}{2 y_p}\]
+
+\vspace{12pt}
+
+\noindent Si noti che se $y_p = 0$ allora siamo nel caso in cui la retta che passa per i due punti è proprio quella tangente in $P$ che ha come terzo punto il punto all'infinito, perciò $P + P = O$
+
+\vspace{12pt}
+\noindent Se $Q = -P$ allora $P + Q = O$.\
+
+\section{Curve ellittiche su campi finiti}
+
+La crittografia ha bisogno di un'aritmetica veloce e assolutamente precisa, senza errori di arrotondamento; di conseguenza, non possono essere usate le curve ellittiche sui reali, ma vengono utilizzate le curve definite su un campo finito:\
+
+\begin{itemize}
+    \item \textbf{Prime}:\ $k = \mathbb{Z}_p$, dove $p$ è un numero primo.
+    \item \textbf{Binarie}:\ $k = \mathit{GF}(2^m)$, dove $m \in \mathbb{N}$.
+\end{itemize}
+
+\noindent Si osservi che nel caso delle curve binarie, siccome la caratteristica di campo è uguale a due ($k=2$), la forma normale di Weierstrass non può essere usata.\
+
+Per semplicità si considereranno solo le curve prime e poiché la caratteristica di $\mathbb{Z}_p = p$, si pone $p > 3$, primo.\
+E quindi
+\[E_{p}(a,b) = \{(x,y) \in \mathbb{Z}_p^2 \mid y^2\ \mathit{mod}\ p = x^3 + ax + b\ \mathit{mod}\ p\} \cup \{O\}\]
+Perché il gruppo di punti della curva sia un gruppo abeliano è necessario che $4a^3 +27b^2 \neq 0$.\
+A questo punto, la curva non è più una figura continua, ma una nuvola di punti perché i punti stessi sono presi da un campo finito e si lavora solo nel quadrante positivo (intervallo $[0, p - 1]$).\
+Inoltre, se $P \in E_p(a,b) \Rightarrow -P = (x, p-y) \in E_p(a,b)$.\
+Si noti che non essendo più un normale piano cartesiano, l'asse di simmetria viene spostato in $y =\frac{p}{2}$.
+
+\subsubsection{Formule}
+
+Le formule sono identiche a quelle viste sui campi non finiti; le uniche differenze sono la presenza di $\mathit{mod}\ p$ e il fatto che la divisione equivale a moltiplicare per l'inverso a meno della presenza di una semplificazione (e l'inverso si può sempre fare perché si lavora modulo numero primo).\
+
+\subsection{Ordine}
+
+La cardinalità del numero di punti appartenenti alla curva è detto \textbf{ordine}.\
+Non esiste un modo per definirlo, ma dipende tutto da come è fatta la cubica.\
+
+Considerando \[y^2 \equiv x^3 + ax + b\ \mathit{mod}\ p\quad x\in\mathbb{Z}_p\]
+si hanno $p$ valori per $x$ e per ogni $x$ esiste anche il suo opposto, quindi ci si aspetterebbe che il numero di punti $\simeq 2p + 1$.\
+Tuttavia, non tutti i $p$ valori di $x$ della cubica danno origine a un \textit{residuo quadratico}\footnote{I \textbf{residui quadratici} sono gli elementi del campo $\mathbb{Z}_p$ che ammettono radici nel campo.}:\ i valori di $x$ che non danno luogo a un residuo quadratico, non definiscono punti sulla curva.\
+
+\begin{center}
+    In un campo finito $\mathbb{Z}_p$, solo $\frac{p-1}{2}$ sono residui quadratici.\
+\end{center}
+
+\begin{theorem}[Hasse]
+    Preso $N =$ ordine di una curva prima $E_p(a,b)$
+    \[ | N- (p+1) | \leq 2\sqrt p\]
+\end{theorem}
+
+\begin{example}
+
+    \[ y^2 \equiv x^3 + 4x + 4\ \mathit{mod}\ 5\]
+    Calcoliamo prima di tutto i punti che possono essere residui quadratici nel campo:
+
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{|c|c|}
+            \hline
+            $y$ & $y^2$ \\\hline\hline
+            0   & 0     \\
+            1   & 1     \\
+            2   & 4     \\
+            3   & 4     \\
+            4   & 1     \\\hline
+        \end{tabular}
+    \end{table}
+
+    \noindent Solo 0, 1 e 4 sono residui quadratici.\
+
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{ l c l }
+            $x = 0,\ y = 4$ & $\rightarrow$ & $(0,2), (0,3) \in E_5(4,4)$ \\
+            $x = 1,\ y = 4$ & $\rightarrow$ & $(1,2), (1,3) \in E_5(4,4)$ \\
+            $x = 2,\ y = 0$ & $\rightarrow$ & $(2,0) \in E_5(4,4)$        \\
+            $x = 3,\ y = 3$ & $\rightarrow$ & nessuna soluzione           \\
+            $x = 4,\ y = 4$ & $\rightarrow$ & $(4,2), (4,3) \in E_5(4,4)$ \\
+        \end{tabular}
+    \end{table}
+
+    \noindent $\rm Ordine = 7 + 1 = 8$ (compreso il punto $O$).\
+
+\end{example}
+
+\subsection{Funzione one-way trap-door}
+
+Esiste una sorta di parallelismo tra le operazioni dell'algebra modulare e le operazioni sulle curve ellittiche:
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{ l c l }
+        moltiplicazione                         & $\rightarrow$ & somma di punti                   \\
+                                                &               &                                  \\
+        \multirow{3}{9em}{elevazione a potenza} &               & \textit{moltiplicazione scalare} \\
+                                                & $\rightarrow$ & di un punto $P$ della curva      \\
+                                                &               & per un intero $k$                \\
+    \end{tabular}
+\end{table}
+
+\noindent e quindi
+\[ y^k = y \times y \times \dots \times y \quad \rightarrow \quad kP = P+ P+ \dots + P\]
+Come l'elevamento a potenza, anche la \textit{moltiplicazione scalare} ha un costo polinomiale.\
+È one-way perché calcolare $Q = kP$ dati $k$ e $P$ è facile e si può fare in $\Theta(\log k)$ operazioni grazie all'algoritmo dei \textbf{raddoppi ripetuti}.\
+
+\subsubsection{Algoritmo generale}
+
+\[ k =\sum_{i=0}^t k_i2^i \quad \rightarrow \quad k= (k_t k_{t-1}\dots k_{1} k_{0})_2\]
+\[\Rightarrow \# \mathrm{bit}: t + 1 = \lfloor \log_2 k \rfloor + 1\]
+\begin{enumerate}
+    \item Si calcolano i punti $2P, 4P,\dots, 2^tP$ ciascuno come raddoppio del punto precedente.\ Quindi si eseguono $t = \Theta(\log k)$ raddoppi.\
+    \item Si calcola $Q$ come \[Q = \sum_{i: k_i = 1} 2^iP\] Si eseguono al più $O(t)$ somme:\ $O(\log k)$.\
+\end{enumerate}
+
+\subsubsection{Operazione inversa della moltiplicazione}
+
+Dati $P$ e $Q$ sulla curva $E_p(a, b)$, trovare se esiste il più piccolo $k$ tale che $Q = kP$.\
+
+Sostanzialmente si tratta del problema di trovare $k = log_p Q$ noto come \textbf{problema del logaritmo discreto per le curve ellittiche}, nonché un problema difficile in quanto non esistono algoritmi polinomiali e addirittura sub-esponenziali in grado di risolverlo, ne esistono solo esponenziali.\
+
+\section{Protocollo DH su curve ellittiche}
+
+Alice e Bob scelgono una curva ellittica che soddisfa la condizione che tutti i suoi punti formino un gruppo abeliano e un punto $B$ della curva di ordine molto grande.\
+
+\vspace{12pt}
+\noindent\textbf{Osservazioni}
+\begin{itemize}
+    \item Per ordine $n$ di un punto $B$ si intende il più piccolo intero tale che $nB = 0$.\
+    \item $B$ ``corrisponde'' al generatore $g$ in Diffie-Hellman standard.\
+    \item Curva e punto $B$ sono pubblici.\
+\end{itemize}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{l|l}
+        \multicolumn{1}{c}{Alice}                      & \multicolumn{1}{c}{Bob}                        \\\hline
+        estrae $n_A < n$ casuale ($k_{\mathit{priv}}$) & estrae $n_B < n$ casuale ($k_{\mathit{priv}}$) \\
+        calcola $k_{\mathit{pub}}$:\ $P_A = n_AB$      & calcola $k_{\mathit{pub}}$:\ $P_B = n_BA$      \\
+                                                       &                                                \\
+        manda $P_A$ in chiaro a Bob                    & manda $P_B$ in chiaro a Alice                  \\
+                                                       &                                                \\
+        riceve $P_B$ e calcola                         & riceve $P_A$ e calcola                         \\
+        $S = n_A P_B = n_A n_B B$                      & $S = n_B P_A = n_B n_A B$                      \\
+                                                       &                                                \\
+        \multicolumn{2}{c}{$k_{\mathit{sessione}} = x_S\ \mathit{mod}\ 2^{256}$}                        \\
+    \end{tabular}
+\end{table}
+
+\subsubsection{Crittoanalista}
+
+Il crittoanalista conosce $E_p(a, b), B, P_A, P_B$, ma non può ricavarne niente di interessante in tempo polinomiale:\ per calcolare $S$ deve trovare $n_A$ tale che $n_A B = P_A $ (oppure $n_B \mid n_B B = P_B $) quindi deve risolvere il problema del logaritmo discreto su curve ellittiche, di cui non ne esistono algoritmi inferiori al puro esponenziale.\
+Rimane il problema degli attacchi \textit{man-in-the-middle}, perciò è sempre bene usare i certificati.\
+
+\section{Scambio di messaggi cifrati}
+
+La prima cosa da fare è trasformare $m$ in un punto $P_m$ della curva ellittica $E_p(a, b)$, il quale verrà trasformato in un altro punto della curva ellittica che sarà il crittogramma.\
+
+Vediamo come eseguire $m \rightarrow P_m$:\ considerando l'equazione della curva ellittica
+\[y^2 \equiv x^3 + ax + b\ \mathit{mod}\ p\]
+potremmo essere tentati di sostituire il messaggio $m$ al posto di $x$, ma non abbiamo la sicurezza che $m$ sia un residuo quadratico nel campo.\
+In particolare, sappiamo con certezza che $\mathit{prob}(m^3 + am + b\ \mathrm{sia\ un\ R.Q.}) \simeq \frac{1}{2}$ e non possiamo accettare un metodo corretto per la metà delle volte (se $m$ non è un residuo quadratico, $P_m$ non è un punto della curva).\
+
+\subsubsection{Algoritmo di Koblitz}
+
+È un algoritmo polinomiale randomizzato che permette di eseguire $m \rightarrow P_m$.\
+
+Dato $m < p \rightarrow P_m \in E_p(a, b)$, si sceglie un intero $h$ tale che $(m + 1)h < p$ e successivamente si calcola come ascissa $x = mh + i$ con $0 \leq i < h$.\
+L'idea è di riuscire a fare $h$ tentativi.\
+
+\begin{flushleft}
+    \ttfamily
+    Koblitz(m, h, a, b, p) //$(m + 1)h < p$
+
+    \quad for(i = 0; i < h; i++)\{
+
+    \qquad $x = mh + i$;
+
+    \qquad $z = (x^3 + ax + b)\ \mathit{mod}\ p$;
+
+    \qquad if($z$ è un residuo quadratico)\{ //costo polinomiale
+
+    \quad\qquad $y = \sqrt z$
+
+    \quad\qquad return $P_m = (x, y)$;
+
+    \qquad \}
+
+    \quad \}
+
+    \quad return failure;
+\end{flushleft}
+
+\noindent L'algoritmo di Koblitz ha una probabilità di fallimento di circa $\left(\frac{1}{2}\right)^h$ e di successo di circa $1 - \left(\frac{1}{2}\right)^h$.\
+
+Per risalire a $m$ da $x$, il destinatario può eseguire l'operazione
+\[\left\lfloor \frac{x}{h}\right\rfloor = \left\lfloor \frac{mh + i}{h}\right\rfloor = \left\lfloor m +\frac{i}{h}\right\rfloor= m\]
+poiché $0 \leq i < h$.
+
+\subsubsection{Scambio di messaggi}
+
+Dopo aver trasformato il messaggio in un punto dobbiamo capire come mandarlo.\
+Supponendo di avere una curva $E_p(a, b)$, $B$ di ordine elevato ($n$) con $B \in E_p(a, b)$, e $h$ per algoritmo di Koblitz, ogni utente genera:
+\[k_{U}[\mathit{priv}] = n_U < n\]
+\[k_{U}[\mathit{pub}] = n_U B\]
+Alice mappa $m$ su $P_m \in E_p(a,b)$ (per esempio usando l'algoritmo di Koblitz), dopodiché sceglie un \textbf{intero casuale} $r$ e calcola $V = rB$.\
+A questo punto Alice calcola $W = P_m + r \cdot k_{\mathrm{Bob}}[\mathit{pub}]$ (poiché $r$ è un numero casuale, $r \cdot k_{\mathrm{Bob}}[\mathit{pub}]$ è un punto ``scelto a caso'' su $E_p(a,b)$) e invia a Bob $\langle V, W\rangle$.\
+
+Bob riceve $\langle V, W\rangle$ da Alice e decifra $P_m$:
+\[W - k_{\mathrm{Bob}}[\mathit{priv}]\cdot V = (P_m + r\cdot k_{\mathrm{Bob}}[\mathit{priv}]) - k_{\mathrm{Bob}}[\mathit{priv}]\cdot V = \]
+\[ = P_m + r\cdot n_{\mathrm{Bob}}\cdot B - r\cdot n_{\mathrm{Bob}}\cdot B = P_m \]
+Adesso può ricavare $m$
+\[m = \left\lfloor \frac{x}{h}\right\rfloor\]
+
+\subsubsection{Crittoanalista}
+
+La sicurezza si basa sulla difficoltà del logaritmo discreto su curve ellittiche.\
+Se trova $r$, decifra:
+\[W - k_{\mathrm{Bob}}[\mathit{pub}] = (P_m + r\cdot k_{\mathrm{Bob}}[\mathit{pub}]) - r\cdot k_{\mathrm{Bob}}[\mathit{pub}] \]
+Tuttavia, $r$ viaggia ben protetto all'interno di $V = rB$, quindi deve risolvere il logaritmo discreto che ha un costo almeno esponenziale.\
+
+Se trova $k_{\mathrm{Bob}}[\mathit{priv}]$ decifra come farebbe Bob.\
+Tuttavia $k_{\mathrm{Bob}}[\mathit{priv}] = n_{\mathrm{Bob}}$ viaggia protetta in $k_{\mathrm{Bob}}[\mathit{pub}] = n_{\mathrm{Bob}} \cdot B$:\ deve risolvere comunque il logaritmo discreto.\
+
+\section{Motivazioni}
+
+Il problema matematico che garantisce la sicurezza della crittografia su curve ellittiche è molto più difficile della fattorizzazione e del calcolo del logaritmo discreto:\ non esiste alcun limite inferiore esponenziale per i problemi sulle curve ellittiche, però, ad oggi non esistono algoritmi inferiori agli esponenziali.\
+
+I \textbf{cifrari in algebra modulare} soffrono gli attacchi \textbf{index calculus} poiché sfruttano il fatto che il campo $\mathbb{Z}_p$ è sia un gruppo abeliano che un campo (questo permette di dare un concetto di moltiplicazione di punti e facilitare l'index calculus).\
+I cifrari su curve ellittiche non hanno il concetto di moltiplicazione e non è possibile estendervi l'applicazione degli attacchi index calculus.\
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|}
+        \hline
+        Algebra modulare                   & Curve ellittiche                \\
+        (bit del modulo)                   & (bit dell'ordine)               \\\hline
+        $O\left(2^{\sqrt{b\log b}}\right)$ & $O\left(2^{\frac{b}{2}}\right)$ \\\hline
+    \end{tabular}
+\end{table}
+
+\noindent Questi vantaggi si ripercuotono in termini molto pratici sulla dimensione delle chiavi.\
+
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|c|}
+        \hline
+        TDEA, AES          & RSA e DH         & ECC               \\
+        (bit della chiave) & (bit del modulo) & (bit dell'ordine) \\\hline
+        80                 & 1024             & 160               \\
+        112                & 2048             & 224               \\
+        128                & 3072             & 256               \\
+        192                & 7680             & 384               \\
+        256                & 15360            & 512               \\\hline
+    \end{tabular}
+\end{table}
+
+\noindent La tabella riporta la dimensione in bit delle chiavi che garantiscono livelli di sicurezza equivalenti nei tre diversi sistemi, dove due sistemi si considerano di sicurezza equivalente se è richiesto lo stesso costo computazionale per forzarli.\

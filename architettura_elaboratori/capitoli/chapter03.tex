@@ -1,0 +1,227 @@
+\chapter{Il Livello Hardware:\ Reti Logiche}
+
+\section{Reti combinatorie}
+
+Una rete combinatoria è una rete logica che ha $n$ ingressi binari $x_1, \dots, x_n$ ed $m$ uscite binarie $z_1, \dots, z_n$.\
+A ciascuna combinazione dei valori degli ingressi corrisponde una e una sola combinazione dei valori delle uscite:\ la corrispondenza definisce la funzione implementata dalla rete combinatoria.
+
+$x_1, \dots, x_n$ e $z_1, \dots, z_n$ sono dette \textbf{\textit{variabili logiche}}, di ingresso e di uscita rispettivamente.\
+Tutte le combinazioni possibili delle variabili logiche sono dette \textbf{\textit{stati}}, di ingresso (in numero di $2_n$) e di uscita (in numero di $2_m$) rispettivamente.
+
+\subsection{Elementi di algebra booleana della commutazione}
+
+L'algebra della commutazione è un sistema algebrico in cui ogni variabile può assumere uno solo tra due valori, 0 e 1, nel quale sono applicate alle variabili le operazioni binarie di \textit{moltiplicazione logica} e \textit{somma logica} e l'operazione unaria di \textit{complementazione} o \textit{negazione}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{immagini/Proprietà.png}
+    \caption*{Proprietà notevoli}
+\end{figure}
+
+\noindent Una funzione logica può essere rappresentata sia da una \textbf{tabella di verità}, sia un'\textbf{espressione algebrica}.\
+Tuttavia, \textit{mentre c'è una sola tabella per ogni funzione, vi sono molte espressioni che possono rappresentare una stessa funzione}.\
+Due espressioni che rappresentano la stessa funzione sono chiamate \textit{equivalenti}.
+
+Chiamiamo \textit{lettera} una variabile affermata o complementata e \textit{termine} un prodotto di lettere (termine prodotto) una somma di lettere (termine somma) che compare in un'espressione.\
+Chiamiamo \textit{mintermine} un termine prodotto e \textit{maxtermine} un termine somma che contengono un numero di lettere di variabili distinte uguale al numero \textit{n} delle variabili della funzione rappresentata dall'espressione.
+
+Indichiamo con SP e PS un'espressione in Somma di termini Prodotto (o Somma di Prodotti) e Prodotti di termini Somma (o Prodotti di Somma), rispettivamente.\
+Chiamiamo infine \textit{forma normale} la forma di un'espressione SP.
+
+Chiameremo \textbf{forma canonica} di una funzione in n variabili l'espressione in SP o Ps in cui ogni termine è un mintermine o un maxtermine.
+
+\subsection{Definizione di reti combinatorie, loro formalizzazione e comportamento}
+
+Una volta ricavata l'espressione logica dalla tabella di verità, è immediato realizzare lo \textit{schema logico} utilizzando \textit{i componenti hardware elementari}, detti anche \textbf{\textit{porte logiche}}, \texttt{AND}, \texttt{OR}, \texttt{NOT}.
+
+Partendo da un'espressione logica in forma SP, la rete combinatoria ottenuta è ``\textbf{\textit{a due livelli di logica}}'', con questo intendendo che esiste un primo livello di porte AND operanti in parallelo, seguite da una porta OR finale.
+
+\subsection{Specifica di reti combinatorie}
+
+Le seguenti sono le specifiche di alcune reti combinatorie che supporremo standard, o primitive, cioè componenti che è possibile usare (al pari delle porte AND, OR, NOT) come blocchi basici nella progettazione di strutture più complesse:
+
+\begin{itemize}
+    \item \textbf{\textit{confrontatore}} ($\oplus$) a due ingressi $x$, $y$ ed una uscita $z$ ($z$ è vero se $x$, $y$ sono diversi):\ $z= x \oplus y =\ \mathbf{not}\ (x=y) \rightarrow$ \textit{rete a due livelli di logica}.
+    \item \textbf{\textit{commutatore}} (K) a due ingressi primari $x$, $y$, un ingresso secondario di controllo $\alpha$, ed una uscita $z$ ($z$ assume il valore di $x$ o $y$ a seconda che $\alpha$ sia falso o vero rispettivamente):\ $z = \mathbf{if\ not}\ \alpha\ \mathbf{then}\ x\ \mathbf{else}\ y \rightarrow$ \textit{rete a due livelli di logica}
+    \item \textbf{\textit{selezionatore}}, o selettore (S), con un ingresso primario $x$, un ingresso secondario o di controllo $\alpha$, e due uscite $z_1, z_2$ (se $\alpha$ è falso $z_1$ assume il valore di $x$ e $z_2$ vale falso (0), se $\alpha$ è vero $z_1$ vale falso (0) e $z_2$ assume il valore di $x$):\ $\mathbf{if\ not}\ \alpha\ \mathbf{then}\ (z_1 = x, z_2 = 0)\ \mathbf{else}\ (z_1 = 0, z_2 = x)  \rightarrow$ \textit{rete a un solo livello di logica}.
+\end{itemize}
+
+\subsection{Procedimento di sintesi}
+
+Una volta data la specifica di una rete (di una funzione logica), nel \textit{caso più generale} il procedimento di sintesi della rete stessa è il seguente:
+
+\begin{enumerate}
+    \item traduzione della specifica nella tabella di verità, per enumerazione di tutti i casi ($2_n$, per $n$ variabili di ingresso);
+    \item per ogni variabile di uscita, scrittura della espressione logica in forma canonica SP (i termini \texttt{AND} corrispondono agli stati d'ingresso per i quali la variabile di uscita assume valore vero);
+    \item eventuale riduzione delle espressioni logiche;
+    \item traduzione di ogni espressione logica in uno schema di rete a due livelli di logica.
+\end{enumerate}
+
+\noindent Questo procedimento ha complessità $O(2^n)$, ed è quindi praticamente applicabile solo nei casi in cui il numero degli ingressi $n$ assuma un valore ``contenuto''.
+
+\subsection{Comportamento temporale delle reti combinatorie}
+
+Ogni rete reale è caratterizzata da un \textit{ritardo} $t_r$, necessario affinché, in seguito ad una variazione dello stato d'ingresso, si produca la corrispondente variazione dello stato di uscita.\
+Solo dopo questo tempo si dice che la rete si è \textbf{\textit{stabilizzata}}:\ durante l'intervallo di durata $t_r$, detto appunto \textbf{\textit{ritardo di stabilizzazione}}, il comportamento della rete, in ogni suo punto, è impredicibile e, in particolare, il valore delle uscite non è significativo.
+
+Nel seguito supporremo che
+
+\begin{enumerate}
+    \item Le variazioni dello stato d'ingresso siano sincronizzate, cioè avvengano ad istanti discreti ed equidistanti, di una sequenza temporale;
+    \item gli istanti di tale sequenza siano distanziati di un periodo $\geq t_r$.
+\end{enumerate}
+
+\noindent Per una porta logica, indichiamo con $t_p$ il ritardo di stabilizzazione.\
+Nel seguito supporremo che le porte \texttt{NOT} abbiano ritardo nullo, o meglio inglobato nel ritardo delle porte \texttt{AND}/\texttt{OR} connesse alle uscite delle porte \texttt{NOT}.
+
+È importante ricordare che $t_p$ è il massimo valore che può assumere il ritardo di stabilizzazione di una porta.
+
+Dalle assunzioni 1), 2) deriva che il massimo ritardo di stabilizzazione di una rete a $L$ \textit{livelli di logica} è dato da $t_r = Lt_p$.\
+\textit{Il valore di $t_p$ dipende dal numero d'ingressi $n$ della porta}.\
+La funzione $tp(n)$ ha un andamento monotono crescente; la crescita è relativamente lenta per $n\leq n_0$, tale da poter considerare $t_p$ costante, mentre è molto più rapida per $n>n_0$.\
+Valori tipici di $n_0$ allo stato attuale variano da 4 a 8.\
+Il valore $t_p$ che si associa a una porta logica è quello per $n\leq n_0$.
+
+La conseguenza di questa caratteristica è che, ove l'espressione logica di una variabile di uscita contenga un termine \texttt{AND} con più di $n_0$ variabili di ingresso, la porta \texttt{AND} della rete deve essere decomposta in più porte secondo una struttura ad albero, ognuna con al più $n_0$ ingressi.\
+Lo stesso vale per una porta \texttt{OR} finale.
+
+\subsection{Reti combinatorie operanti su parola}
+
+Capita spesso che la funzione che definisce la rete è applicata a parole di $N$ bit (ad esempio, 32) invece che a semplici variabili booleane.\
+In questi casi, la complessità del procedimento di sintesi delle reti combinatorie impedisce di ricorre al metodo generale basato sulla tabella di verità.\
+Si cerca invece di \textit{comporre reti a 1 bit, del tipo corrispondente, per ottenere la rete a N bit}; ad esempio, realizzare un commutatore ad $N$ bit utilizzando commutatori ad 1 bit.
+
+\begin{itemize}
+    \item Per alcune reti la composizione è \textbf{\textit{parallela}}:\ la rete a $N$ bit è composta da $N$ reti a 1 bit tutte indipendenti, cioè nessuna utilizza in ingresso le uscite di altre.\ Il ritardo della rete a $N$ bit è dunque uguale a quello della rete a 1 bit.\ È il caso del \textit{commutatore}, \textit{selezionatore}, \textit{confrontatore}.
+    \item Per altre reti, la composizione può essere \textbf{\textit{in cascata}}:\ la rete a $N$ bit è composta da $N$ reti ad 1 bit tali che le uscite dell'$i$-esima costituiscono ingressi della $(i+1)$-esima.\ Il ritardo della rete a $N$ bit è ora $N$ volte quello della rete a 1 bit.\ È il caso dell'\textit{addizionatore}, a causa della propagazione del riporto.
+    \item Un altro caso molto significativo è quello della composizione \textbf{\textit{ad albero}}:\ la rete a $N$ bit è composta da $\log_k N$ reti a 1 bit disposte ad albero di arietà $k$.
+\end{itemize}
+
+\section{Reti sequenziali}
+
+\subsection{Definizione di reti sequenziali, loro formalizzazione e comportamento}
+
+Un \textbf{\textit{automa a stati finiti}} è una macchina caratterizzata da
+\begin{itemize}
+    \item $n$ variabili logiche di ingresso, e corrispondentemente $h = 2^n$ \textbf{\textit{stati d'ingresso}} $X_1, \dots, X_h$;
+    \item $m$ variabili logiche di uscita, e corrispondentemente $k = 2^m$ \textbf{\textit{stati d'uscita}} $Z_1, \dots, Z_k$;
+    \item $r$ variabili logiche dello stato interno, e corrispondentemente $p = 2^r$ \textbf{\textit{stati interni}} $S_1, \dots, S_p$;
+    \item una \textbf{\textit{funzione di transizione dello stato interno}}:
+          \[\sigma:\ X \times S \rightarrow S\]
+          Tale funzione definisce la trasformazione dello stato interno dal valore \textbf{\textit{presente}} al valore \textbf{\textit{successivo}} in corrispondenza del valore dello stato d'ingresso;
+    \item una \textbf{\textit{funzione delle uscite}}:
+          \[\omega:\ X \times S \rightarrow Z \]
+          Tale funzione definisce la trasformazione dello stato di uscita in corrispondenza del valore dello stato d'ingresso e dello stato interno \textit{presente}.
+\end{itemize}
+
+Una rete logica sequenziale implementa, a livello hardware, un automa a stati finiti.
+
+In un \textit{modello strutturale ideale} la rete sequenziale di tipo \textbf{\textit{sincrono}}, le variazione degli stati avvengono in corrispondenza degli istanti di una sequenza temporale discreta $t_0, t_1, \dots, t_n, \dots$ di intervallo (periodo) costante $\Delta = t_{i+1}-t_i$.
+
+Si possono definire due distinti \textbf{\textit{modelli matematici di automa}}, e quindi di rete sequenziale:\ il modello di \textit{Mealy} e il modello di \textit{Moore}.
+
+\begin{itemize}
+    \item In entrambi i modelli, considerando il comportamento dell'automa al tempo \textit{t}, lo stato interno successivo \textit{S(t+1)} dipende tanto dallo stato d'ingresso al tempo \textit{t}, \textit{X(t)}, quanto dallo stato interno presente, \textit{S(t)}:
+          \[S(t+1) = \sigma(X(t), S(t))\]
+    \item Nel modello di Mealy, lo stato di uscita al tempo \textit{t}, \textit{Z(t)}, dipende tanto dallo stato d'ingresso al tempo \textit{t}, \textit{X(t)}, quando dallo stato interno presente, \textit{S(t)}:
+          \[Z(t) = \omega(X(t), S(t))\]
+    \item Nel modello di Moore, \textit{Z(t)} dipende solo da \textit{S(t)}:
+          \[Z(t) = \omega(S(t))\]
+\end{itemize}
+
+\noindent Nel modello di Moore la dipendenza tra stati di uscite e stati d'ingresso è quindi espressa da:
+\[Z(t) = \omega(S(t)) = \omega(\sigma(X(t-1), S(t-1))) = \omega_1((X(t-1), S(t-1)))\]
+Ne discende che, dati due automi di Mealy e di Moore equivalenti, con stati interni iniziali equivalenti e per la stessa sequenza d'ingresso si ha che la sequenza di uscite dell'automa di Moore è ritardata, rispetto a quella dell'automa di Mealy, di un intervallo $\Delta$ della sequenza temporale.
+
+In generale, il numero di stati interni dell'automa di Moore è maggiore o uguale del numero di stati interni dell'automa di Mealy equivalente.
+
+\subsection{Reti sequenziali sincrone LLC}
+
+Il modello strutturale di rete sequenziale sincrona reale comprende le due reti combinatorie reali $\omega$ (funzione delle uscite) e $\sigma$ (funzione di transizione dello stato interno), e le richiusure dello stato interno sono realizzate con $k$ registri in parallelo impulsati dallo stesso segnale di clock (registro di $k$ bit).
+
+Il modello è detto LLC (\textbf{L}evel input, \textbf{L}evel output, \textbf{C}locked), a significare che i segnali su cui si applicano le funzioni $\omega$ e $\sigma$ sono ancora livelli, mentre l'unico segnale impulsivo è quello per la sincronizzazione dei (per provocare la scrittura dei) registri.
+
+Il periodo $\tau$ dell'impulso è detto \textbf{ciclo di clock} della rete sequenziale.\
+Per tenere conto della durata $\delta$ dell'impulso, e quindi per evitare il fenomeno dello stato metastabile dei registri, si ha che il \textit{ciclo di clock della rete va determinato come}
+\[\tau \geq t_r+\delta\]
+La durata $\delta$ dell'impulso di clock può essere assunta uguale a $t_p$.
+
+\subsection{Reti sequenziali realizzate con componenti standard}
+
+Nella parte dedicata al firmware saremo interessati a sintetizzare, per ogni unità di elaborazione, due specifiche reti sequenziali:\ la Parte Controllo e la Parte Operativa, per ognuna delle quali adotteremo due diverse metodologie.
+
+La \textit{Parte Controllo} ha spesso un numero relativamente basso di stati (interno, d'ingresso, di uscita); inoltre, dal microprogramma è possibile ricavare formalmente una sua descrizione tipo grafo di stato.\
+Di conseguenza, la sua sintesi è effettuata con il metodo classico visto finora; le reti combinatorie $\omega$ e $\sigma$ sono realizzate mediante porte \texttt{AND}, \texttt{OR}, \texttt{NOT}.
+
+La \textit{Parte Operativa} presenta, anche per le unità più semplici, un numero di stati (interni, d'ingresso, d'uscita) relativamente molto grande; basti pensare che i dati su cui si opera sono tipicamente a parola a $N$ bit:\ per $N=32$ il numero di stati è sull'ordine di molti miliardi.\
+In questo caso l'approccio è completamente diverso e si basa sulla composizione di componenti standard a partire dalla specifica delle operazioni elementari delegate alla Parte Operativa, specifica ricavata formalmente dal microprogramma.
+
+\section{Componente logico memoria}
+
+Nella realizzazione di unità di elaborazione è spesso conveniente, o necessario, fare uso di un ulteriore componente logico ``standard'':\ il componente memoria.
+
+\subsection{Realizzazione logica}
+
+In versione \textbf{\textit{RAM}} (lettura-scrittura) un componente logico memoria è definito come un \textit{array unidimensionale M di registri} su cui sono definite le seguenti operazioni fondamentali:
+
+\begin{itemize}
+    \item lettura sull'uscita \textit{out} del contenuto della cella d'indirizzo $i$:\ $\mathit{out} = \mathtt{M[i]}$;
+    \item scrittura del valore presente sull'ingresso \textit{in} nella locazione di indirizzo i:\ $\mathtt{M[i]} = \mathit{in}$.
+\end{itemize}
+
+\noindent L'operazione di lettura è realizzata dal \textit{commutatore} K di uscita, i cui ingressi primari sono le uscite dei registri e i cui ingressi secondari sono i bit dell'indirizzo.
+
+L'operazione di scrittura, invece, è realizzata dal \textit{selezionatore} S d'ingresso, avente anch'esso come ingressi secondari i bit dell'indirizzo.\
+Come ingresso primario ha il segnale di controllo $\beta$ per l'abilitazione alla scrittura.\
+Inoltre, l'ingresso \textit{in} viene collegato a tutti gli ingressi dei registri; di conseguenza, se $\beta = 1$, il valore di \textit{in} viene scritto solo nel registro indirizzato.
+
+Nel caso di una memoria \textbf{\textit{ROM}}, è ovviamente presente solo il commutatore di uscita.
+
+Si possono avere RAM \textit{a più ingressi e più uscite} utilizzando il numero corrispondenti di selezionatori e commutatori.
+
+\subsection{Realizzazione fisica e ritardi}
+
+Oltre alle modalità in cui verranno realizzati il commutatore e il selezionatore per indirizzare le celle, il tempo di accesso è influenzato in modo significativo dal \textit{tipo} di tecnologia elettronica utilizzato:
+
+\begin{itemize}
+    \item le memorie RAM più economiche sono quelle così dette \textbf{\textit{dinamiche}} (DRAM), in quanto, per ragioni di potenza del segnale relativo al contenuto delle celle, ogni cella necessita di un ``rinfresco'' periodico (la cella va letta e quindi riscritta con lo stesso valore letto);
+    \item le memorie \textbf{\textit{statiche}} (SRAM), che non necessitano di rinfresco, presentano tempi di accesso decisamente più bassi, ma a parità di generazione tecnologica, sono anche assai meno ``dense'' delle dinamiche e quindi caratterizzate da una minore capacità per chip.
+\end{itemize}
+
+\subsection{Numero massimi d'ingressi per porta nelle reti combinatorie}
+
+Ricordiamo che, in generale, per una porta logica \texttt{AND}/\texttt{OR} è fissato un \textit{numero massimo d'ingressi}, $N_0$, ad esempio $N_0 = 8$.\
+Il valore del massimo ritardo di stabilizzazione della porta, $t_p$, vale per un numero di ingressi $N \leq N_0$, in quanto per $ N > N_0$ il ritardo di stabilizzazione aumenterebbe linearmente con forte pendenza.\
+In pratica, non esistono porte con $N > N_0$.\
+Di questa caratteristica tecnologica occorre tenere conto nella realizzazione di una \textit{qualunque rete combinatoria}, in particolare, nella realizzazione di commutatori (selezionatori) con un elevato numero d'ingressi, come si ha anche (ma non solo) nell'implementazione dei componenti logici memoria.
+
+Dal punto di vista tecnologico, occorre tener conto del vincolo che, per ogni porta, deve essere $N \leq N_0$.\
+Se questa condizione non si verifica, \textbf{\textit{occorre sostituire la singola porta con una struttura ad albero di arietà}} $N_0$ che, di tutte le possibili realizzazioni, è quella che garantisce il minimo ritardo di stabilizzazione.
+
+In generale, quindi, \textit{il ritardo di stabilizzazione comportato dalla realizzazione di un termine} \texttt{AND}/\texttt{OR} \textit{vari in modo logaritmico con il numero delle sue variabili d'ingresso}.
+
+\subsection{Memorie realizzate a partire da memorie preesistenti}
+
+Di regola, le memorie di grande capacità sono realizzate a partire da componenti logici base dati, che vanno combinati opportunamente in quella che prende il nome di \textbf{memoria modulare}.
+
+\subsection{Organizzazione di memoria modulare}
+
+La memoria modulare \textbf{sequenziale} è caratterizzata dalla distribuzione degli indirizzi sequenzialmente all'interno di un modulo:\ quando si esaurisce la capacità di un modulo, si passa a distribuire gli indirizzi sequenzialmente nel modulo successivo.
+
+\begin{center}
+    \textit{identificatore del modulo} = \textit{indirizzo{\slash}C} \\
+    \textit{indirizzo interno del modulo} = \textit{indirizzo\%C}
+\end{center}
+
+\noindent (dove $C$ è la capacità del singolo modulo).
+
+\noindent L'organizzazione alternativa di memoria modulare è detta organizzazione \textbf{interallacciata}, per la quale si ha
+
+\begin{center}
+    \textit{identificatore del modulo} = \textit{indirizzo{\slash}m} \\
+    \textit{indirizzo interno del modulo} = \textit{indirizzo\%m}
+\end{center}
+
+\noindent Dove $m$ è il numero dei moduli.\
+Ciò significa che, nella memoria modulare interallacciata, $m$ parole aventi indirizzi consecutivi sono allocate in altrettanti moduli di memoria distinti e consecutivi.
+

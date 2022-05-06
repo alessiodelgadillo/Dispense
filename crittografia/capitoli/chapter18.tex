@@ -1,0 +1,75 @@
+\chapter{Bitcoin e Cryptovalute}
+
+Nasce nel 2008 dopo l'uscita dell'articolo \textit{``Bitcoin'':\ a peer to peer Electronic Cash System} di Satoshi Nakamoto (pseudonimo).\
+Nel 2009 viene rilasciato il primo software che permette di utilizzare il suddetto protocollo di pagamento e il 3 Gennaio dello stesso anno nasce il ``\textit{blocco genesi}'' della \textbf{block chain} che porta alla nascita dei primi 50 BTC (ogni volta che viene aggiunto un blocco alla block chain viene creata nuova moneta).
+
+La prima transazione eseguita è del 12 Gennaio 2009:\ Satoshi manda 10 Bitcoin a Hal Finney; mentre la prima transazione commerciale è avvenuta nel 2010.\
+
+\subsubsection{Idea}
+
+Ogni utente $A$ possiede una coppia di chiavi $\langle k_A[\mathit{pub}], k_A[\mathit{priv}]\rangle$ appartenenti a un sistema crittografico basato sulle curve ellittiche e per ogni transazione viene generata una nuova coppia di chiavi.\
+A partire dalla chiave pubblica si calcola l'\textbf{indirizzo}, ossia l'identificatore di $A$, che serve per inviare pagamenti all'utente e verificarne la firma.\
+La chiave privata serve invece per firmare le transazioni.\
+Il \textbf{wallet} è l'insieme delle credenziali che attestano la proprietà in BTC di un utente ($\langle \rm indirizzo, chiave\ privata\rangle$ e software di gestione).\
+
+\section{Transazione}
+
+Una transazione è un movimento di Bitcoin da un utente ad un altro.\
+Supponendo che Alice voglia mandare $x$ BTC a Bob, la transazione è un messaggio $m$
+\[ m = \mathrm{add}_A - x - \mathrm{add}_B\]
+firmato tramite $h = \mathrm{SHA\textrm{-}256}(m)$
+\[ f = D(h, k_A[\mathit{priv}]) \]
+Dopodiché $A$ diffonde in rete (\textbf{broadcast}) la coppia $\langle m, f\rangle$.\
+Tuttavia, essendo in un sistema distribuito senza un'unità centrale di controllo, Bob deve aspettare ($\sim$ 10 minuti) che la rete convalidi la transazione.\
+
+Inoltre, non è nemmeno sicuro che la transazione sia parte della block chain giusta dopo 10 minuti; esiste il fenomeno dei \textbf{blocchi orfani}:\ due utenti potrebbero aggiungere un blocco alla block chain contemporaneamente e a questo punto solo il blocco che sviluppa una catena più consistente viene considerata ``la vera'' block chain.\
+Tutti i blocchi che facevano parte del blocco orfano sono da considerarsi annullati.\
+Tipicamente, dopo l'aggiunta di sei blocchi dopo quello della transazione in questione, essa può essere considerata valida (un'ora di tempo).
+
+\subsubsection{Struttura di una transazione}
+
+Una transazione si usa come banconota:\ se qualcuno riceve un input di 0.8 BTC è come se ricevesse una banconota da 0.8 BTC; quindi se deve pagare a qualcuno 1.1 BTC deve possedere una ``banconota'' da 0.8 BTC e una da 0.3 BTC.\
+Alternativamente può usare una banconota da 2 BTC mandando 1.1 BTC al destinatario e 0.9 BTC a un wallet secondario che usa come ``banca resti''.
+
+Tipicamente nelle transazioni deve valere che $\sum \mathit{input} \geq \sum \mathit{output}$ e nel caso in cui sia strettamente maggiore, la differenza andrà a colui che confermerà il blocco della block chain che la contiene:\ l'utente dovrebbe lasciare una piccola differenza per incentivare i miner a confermare proprio il suo blocco.\
+
+\subsubsection{Validazione di una transazione}
+
+I nodi controllano un vario numero di transazioni e controllano che siano valide (controllano in particolare se esiste la transazione di input per verificare se è disponibile la liquidità in BTC).\
+Quando si sono raccolte un discreto numero di transazioni valide (centinaia o migliaia), esse diventano un blocco di transazioni e gli utenti cercano di aggiungerlo alla block chain.
+
+Aggiungere il blocco alla block chain è un processo molto laborioso poiché i vari nodi della catena si mettono d'accordo sul fatto che le transazioni siano valide o meno e questo richiede un po' di tempo; questo fa nascere il problema del double spending:\ un utente furbetto potrebbe approfittarsi di questi 10 minuti di accordi per effettuare due transazioni e ``pagarne solo uno''.\
+Supponiamo che egli abbia 2 BTC ed esegua due pagamenti da 2 BTC uno subito dopo l'altro.\
+Al momento in cui devono essere validate le suddette transazioni in un blocco, nessuno ha rimosso i 2 BTC dal suo wallet perché il blocco dove esse sono contenute non è stato ancora confermato e quindi entrambe le richieste di pagamento risultano valide sulla carta.\
+Tuttavia, l'architettura della block chain mitiga bene questo problema.
+
+\section{Architettura della block chain}
+
+Nel blocco $i$-esimo della block chain sono contenuti vari componenti:
+\begin{itemize}
+    \item Le transazioni da confermare (a cui viene aggiunta la transazione ``premio'' destinata a chi conferma il blocco).
+    \item La funzione hash del blocco $i-1$.\ È importante perché l'$i$-esimo blocco deve essere collegato al blocco $(i-1)$-esimo.
+    \item Il numero intero \textbf{nonce} che è sconosciuto e trovarlo è compito dell'utente che vuole confermarlo.
+\end{itemize}
+
+\noindent Queste tre componenti entrano all'interno di una funzione SHA-256 che andrà a produrre un certo valore hash $h$ che è richiesto essere inferiore ad una certa soglia e che abbia una sequenza iniziale di $t$ zeri.\
+L'utente che conferma il blocco, deve trovare il valore \textit{nonce} tale che $h <$ soglia.\
+Il \textit{nonce} può essere trovato solo con una ricerca enumerativa (computazionalmente difficile), ma per verificarlo lo si può fare in maniera molto semplice (computazionalmente facile).\
+
+Il parametro $t$ è calibrato dal sistema in base a quanto sono potenti e a quante sono le macchine che stanno cercando il \textit{nonce} di modo che il tempo medio per trovarlo sia di 10 minuti.\
+
+\section{Miner}
+
+È il nome degli utenti o nodi che validano le transazioni e aggiungono i blocchi alla block chain (\textbf{validazione tramite mining}).\
+I miner provano continuamente a raggruppare transazioni per poi calcolarne il \textit{nonce}, ovviamente sono tutti ``in competizione'' fra loro, quindi vince chi lo trova per primo.
+Chi riesce a trovarlo, lo diffonde in broadcast a tutti gli altri nodi.\
+
+A questo punto essi dovranno verificare se il \textit{nonce} è valido
+\[\mathit{nonce} + h_{i-1} + \mathrm{transazioni} = 0_1 0_2 \dots 0_t \{0,1\}^{n-t}\]
+e in caso affermativo dovranno esprimere il loro consenso, col quale ``ammettono'' che è stato aggiunto un nuovo blocco valido alla block chain, cercando di creare nuovi blocchi da attaccare.\
+
+Dato che il \textit{nonce} non è semplicissimo da trovare, è difficile che due miner ne trovino due contemporaneamente.\
+Tuttavia, qualora succeda, tipicamente i blocchi nati successivamente alla biforcazione, vengono attaccati al blocco che ha più transazioni e quella diventerà la block chain ufficiale.\
+Anche questo processo si ripete sempre uguale per le poche volte che succede.\
+
+\textbf{Nota bene}:\ le uniche transazioni a cui è concesso di non specificare la transazione di input da cui prendere i BTC sono quelle aggiunte dai miner alla fine un blocco di transazioni.\

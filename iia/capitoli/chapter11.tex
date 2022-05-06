@@ -1,0 +1,291 @@
+\chapter{Modelli Lineari}
+
+\section{Regressione}
+
+La \textit{regressione} è quel processo di stima di una funzione a valori reali sulla base di un insieme finito di campioni rumorosi.\
+
+Considereremo il caso semplificato della regressione lineare a una variabile:\ iniziamo con una variabile di input \textit{x}, una variabile di output \textit{y}.\
+Assumiamo un modello $h_w(x)$ espresso come $out = w_1 x + w_0$, dove $w_i$ è il coefficiente/parametro libero (peso) a valori reali.\
+\textbf{\textit{Adattamento}} dei dati con una ``linea retta''.\
+
+\subsubsection{Esempio}
+
+Trovare \textit{h} (modello lineare) che si \textit{adatta} meglio ai dati (partendo da i dati osservati di valore \textit{x} e \textit{y}).\
+Supponendo che la variabile data (\textit{y}) sia (linearmente) correlata a un'altra variabile (\textit{x}) o variabili per $y = w_1 x + w_0 + rumore$, dove \textit{w} è il parametro libero e il \textit{rumore} è l'errore nella misurazione dei target (con distribuzione normale), costruiamo un modello (trovando valori \textit{w}) per prevedere/stimare il prezzo (\textit{y}) di punti per altri valori \textit{x} (non osservati).\
+
+Spazio ipotesi infinito (valori \textit{w} continui), ma abbiamo una bella soluzione dalla matematica classica (risalendo a Gauss/Legendre $\sim$1795!).\
+Sorprendentemente possiamo ``imparare'' da questo strumento di base; sebbene semplice, include molti concetti rilevanti della moderna ML ed è una base di metodi evoluti nel campo.\
+Definiamo una funzione di perdita/errore e utilizziamo l'approccio Least Mean Square (LMS).
+
+\begin{flushleft}
+	\textbf{Dato} un insieme di training $(x_p, y_p)\quad p = 1\dots l$
+
+	\textbf{Trovare} $h_w(x)$ nella forma $w_1x + w_0$ tale che si minimizzi la perdita attesa sui dati di training.
+
+\end{flushleft}
+
+\noindent Per la perdita si usa l'errore quadratico.
+
+\begin{flushleft}
+	\textbf{Least (Mean) Square}:\ trovare \textit{w} che minimizzi la somma dei quadrati degli errori
+	\[
+		Loss(h_w) = E(w) = \sum_{p=1}^l(y_p - h_w(x_p))^2 = \sum_{p=1}^l(y_p -(w_1x + w_0))^2
+	\]
+
+	dove $x_p$ è il $p$-esimo input, $y_p$ l'output per \textit{p}, \textit{w} i parametri liberi e \textit{l} il numero di esempi.
+
+	\textit{Per ottenere la media dividere per l}.
+\end{flushleft}
+
+\noindent Il metodo Least Mean Square è un approccio standard alla soluzione approssimativa di sistemi sovradeterminati, cioè insiemi di equazioni in cui ci sono più equazioni che incognite.
+
+\begin{flushleft}
+	Si ricordi che il minimo locale corrisponde a un punto stazionario:\ il \textit{gradiente} è nullo
+	\[
+		\frac{\partial E(w)}{\partial w_i} = 0, \qquad i=1, \dots, dim\_input+1
+	\]
+\end{flushleft}
+
+\noindent Regole di base:
+
+\[
+	\frac{\partial}{\partial w}k = 0,\quad \frac{\partial}{\partial w}w = 1,\ \frac{\partial}{\partial w}w^2 = 2w,\quad \frac{\partial(f(w))^2}{\partial w} = 2f(w) \frac{\partial(f(w))}{\partial w}
+\]
+
+\noindent quindi
+
+\[	\frac{\partial E(w)}{\partial w_i} = \frac{\partial(y-h_w(x))^2}{\partial w_i} = 2(y-h_w(x)) \frac{\partial(y-h_w(x))}{\partial w_i}\]
+\[ = 2(y-h_w(x)) \frac{\partial (y-(w_1 x + w_0))}{\partial w_i} \]
+allora
+\[ \frac{\partial E(w)}{\partial w_0} = -2(y-h_w(x))\quad e \quad \frac{\partial E(w)}{\partial w_1} = -2(y -h_w(x)) \cdot x \]
+da cui si ottiene
+\[ \Rightarrow w_1 = \frac{\sum x_py_p - \frac{1}{l}\sum x_p \sum y_p}{\sum x^2_p - \frac{1}{l} (\sum x_p)^2} = \frac{\mathit{Cov}[x,y]}{\mathit{Var}[x]}, \quad p =1 \dots l\]
+\[\Rightarrow w_0 = \bar{y} - w_1 \bar{x}, \qquad con\ \bar{y} = \frac{1}{l} \sum_{p=1}^{l}y_p, \quad \bar{x} = \frac{1}{l} \sum_{p=1}^{l}x_p\]
+La derivazione precedente suggerisce la linea per costruire un algoritmo itera\-tivo sulla base di $\frac{\partial E(w)}{\partial w_i}$.\
+Gradiente = direzione di salita:\ possiamo muoverci verso il minimo con una discesa del gradiente ($\Delta w = - \mathit{gradiente\ di}\ E (w))$.\
+
+\vspace{12pt}
+
+\noindent Ricerca locale:\ inizia con il vettore di peso iniziale e lo diminuisce iterativamente fino a ridurre al minimo la funzione di errore (discesa più ripida).\
+\[w_{new} = w + \eta \cdot \Delta w\]
+dove \textit{eta} ($\eta$) è una costante (dimensione del passo), chiamata \textbf{\textit{velocità di apprendimento}}.\
+
+\subsection{Gradient Descent}
+Prima abbiamo ottenuto
+
+\[\Delta w_0 = - \frac{\partial E(w)}{w_0} = 2(y-h_w(x)) \qquad \Delta w_1 = - \frac{\partial E(w)}{w_1} = 2(y-h_w(x))\cdot x \]
+
+\noindent Questa è una regola di ``correzione di errore" (chiamata \textbf{\textit{regola delta}}) che modifica \textit{w} proporzionalmente all'errore ($target-output$):
+\begin{itemize}
+	\item $(target\ y - output) = err = 0 \rightarrow$ nessuna correzione
+	\item $output > target \rightarrow (y-h) < 0$ l'output è troppo alto:\ $\Delta w_0$ negativo $\rightarrow$ si riduce  $w_0$ e se (input $x>0$) $\Delta w_1$ negativo $\rightarrow$ riduci $w_1$, altrimenti aumenta $w_1$
+	\item $output < target \rightarrow (y-h)> 0$ l'output è troppo basso
+\end{itemize}
+
+\noindent L'approccio di discesa a gradiente è un approccio di ricerca locale semplice ed efficace alla soluzione LMS e ci permette di cercare attraverso uno spazio di ipotesi infinito!\
+Può essere facilmente applicato sempre per H continua e perdite differenziabili:\ non solo per modelli lineari, ad esempio reti neurali e modelli di deep learning.\
+È efficiente?\ Sono possibili molti miglioramenti, ad esempio metodi di Newton, gradiente coniugato,\ \dots
+
+\subsubsection{Estensione a \textit{l} dati}
+
+\[\Delta w_0 = - \frac{\partial E(w)}{w_0} = 2 \sum_{p=1}^l(y_p-h_w(x_p)) \]
+\[\Delta w_1 = - \frac{\partial E(w)}{w_1} = 2\sum_{p=1}^l(y_p-h_w(x_p))\cdot x_p \]
+dove $x_p$ è il $p$-esimo input, $y_p$ l'output per \textit{p}, \textit{w} i parametri liberi e \textit{l} il numero di esempi.
+\vspace{12pt}
+
+\noindent Possiamo aggiornare \textit{w} dopo un'``epoca'' di \textit{l} dati di addestramento, \textit{algoritmo batch} (come usato sopra), oppure possiamo aggiornare \textit{w} dopo ogni pattern \textit{p}, \textit{algoritmo on-line} (discesa del gradiente stocastico):\ può essere il più veloce, ma richiede un passo più piccolo.\
+
+\subsubsection{Estensione a input di vettori}
+
+Questo è il caso standard, utilizzando da due a centinaia di variabili{\slash}features di input $x = [x_1, x_2, \dots, x_n]$.\
+Il pattern di input è un vettore:\ tante tante possibilità in una vasta gamma di campi applicativi.\
+
+\subsubsection{Notazione}
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|l||l|l|l|l|}
+		\hline
+		Pattern        & $x_1$     & $x_2$     & $x_i$     & $x_n$     \\\hline\hline
+		Pat 1          & $x_{1,1}$ & $x_{1,2}$ & $x_{1,i}$ & $x_{1,n}$ \\\hline
+		\dots          &           &           &           &           \\\hline
+		Pat \textit{p} & $x_{p,1}$ & $x_{p,2}$ & $x_{p,i}$ & $x_{p,n}$ \\\hline
+		\dots          &           &           &           &           \\\hline
+	\end{tabular}
+\end{table}
+
+\textit{X} è una matrice $l \times n$:\ \textit{l} righe, \textit{n} colonne (features/variabili).\
+Supponiamo il vettore colonna per \textit{x} e \textit{w}.\
+
+\begin{flushleft}
+	\textbf{\textit{l}}:\ numero di dati
+
+	\textbf{\textit{n}}:\ dimensione del vettore di input
+
+	$y_p, \quad p = 1\dots l$:\ target
+
+	\[ w^Tx +w_0 = w_0 +w_1x_1 + w_2x_2 + \dots + w_nx_n = w_0 + \sum_{i=1}^n w_ix_i \]
+
+	Notare che spesso, come prima, la notazione di trasposizione \textit{T} in $w^T$ viene omessa.
+
+	$w_0$ è l'\textit{intercept}, \textit{threshold}, \textit{bias}, \textit{offset}\dots
+\end{flushleft}
+
+\noindent Spesso è conveniente includere la costante $x_0 = 1$ in modo da poterla scrivere come:\ $w^Tx = x^Tw, \qquad x^T = [1, x_1, x_2, \dots, x_n]$
+
+\noindent Quindi
+
+\[ h(x_p)= x_p^Tw = \sum_{i=0}^n x_{p,i}w_i\]
+
+\subsubsection{Riepilogo}
+
+\textbf{Dato} un insieme di training $(x_p, y_p)$ con $p = 1\dots l$, \textbf{trovare} $h_w(x)$ nella forma $w_1x + w_0$ tale che si minimizzi la perdita attesa sui dati di training.
+
+\[ E(w) = \sum_{p=1}^l (y_p -x_p^Tw)^2 = || y -Xw||^2 \]
+\[ \Delta w_i = -\frac{\partial E(w)}{\partial w_i} = 2 \sum_{p=1}^l (y_p -h_w(x_p)) \cdot x_{p,i} = 2 \sum_{p=1}^l (y_p - x_p^Tw) \cdot x_{p,i}\]
+
+\noindent Un algoritmo semplice:
+
+\begin{enumerate}
+	\item Inizia con il vettore peso \textit{w} iniziale (piccolo), fissa \textit{eta} ($0 < \eta <1$).
+	\item Calcola $\Delta w = - gradient \ of\ E(w) = - \frac{\partial E(w)}{\partial w}$.
+	\item Calcola $w_{new} = w + \eta \cdot \Delta w$ (cioè per ogni $w_i$), dove $\eta$ è il parametro ``dimensione del passo'' (velocità di apprendimento).
+	\item Ripeti (2) fino a quando la convergenza o $E(w)$ è ``sufficientemente piccolo''.
+\end{enumerate}
+
+\subsubsection{Vantaggi dei modelli lineari}
+
+Se funziona bene è un modello ``meraviglioso''
+\begin{itemize}
+	\item Molto semplice
+	\item Tutte le informazioni sui dati sono in $w$
+	\item Facile da interpretare:\ pratica quotidiana in medicina, biologia, chimica, economia,\ \dots
+	\item Sono consentiti dati rumorosi
+\end{itemize}
+Gli statistici sono felici (belle proprietà).\
+Fenomeni lineari:\ un sogno per la scienza, ideale per fare una ``legge naturale''.\
+Una linea di base per l'apprendimento, viene utilizzato/incluso nei modelli più complessi.
+
+\subsubsection{Limitazioni}
+
+Nota che $h_w(x) = w_1 x + w_0$ e $h_w(x) = w^T \cdot x$, come i modelli parametrici statistici, sono detti ``\textbf{lineari}'':\ tale termine non si riferisce al fatto che generano una retta, ma piuttosto al modo in cui i coefficienti di regressione \textit{w} si verificano nell'equazione di regressione.\
+Quindi, possiamo usare anche input trasformati, come $x,\ x_2,\ x_3,\ x_4,\ \dots$ con input e output di relazione \textbf{\textit{non lineare}}, tenendo il macchinario di apprendimento (soluzione del Least Square) sviluppato finora:
+\[ h_w(x) = w_0 + w_1x + w_2 x^2 + \cdots + w_Mx^M = \sum_{j=0}^M w_j x^j\]
+
+\subsection{Una generalizzazione:\ LBE}
+
+\textbf{\textit{Linear basis expansion}}:
+\[ h_w(x) = \sum_{k=0}^K w_k\phi_k(x) \]
+Aumenta il vettore di input con variabili aggiuntive che sono trasformazioni di $x$ secondo una funzione phi ($\phi_k: \mathbb{R}^n \rightarrow \mathbb{R}$).\
+
+\vspace{12pt}
+
+\noindent Il modello è lineare nei parametri (anche in phi, non in $x$):\ possiamo usare lo stesso algoritmo di apprendimento di prima!
+
+%Number parameters K > n (before it was n)
+%vedere altri esempi
+\subsubsection{Critica}
+Quale phi ($\phi$)?\
+Verso i cosiddetti approcci ``\textbf{dizionario}''.\
+\begin{flushleft}
+	\textbf{PRO}:\ è più espressivo, può modellare relazioni più complicate (rispetto a quelle lineari).
+
+	\textbf{CONTRO}:\ con un'ampia base di funzioni, richiediamo metodi per controllare la \textit{complessità} del modello.
+\end{flushleft}
+
+\noindent Un modello troppo semplice non si adatta bene ai dati, soluzione parziale:\ \textbf{underfitting}; un modello troppo complesso è altamente sensibile a lievi perturbazioni dei dati, soluzione ad alta varianza (``\textit{Bias-variance}''):\ \textbf{overfitting}.\
+
+Si vuole scegliere una regolarizzazione per bilanciare bias e varianza attraverso il controllo della complessità del modello (vista come flessibilità).\
+
+La regolarizzazione può controllare l'overfitting penalizzando le funzioni ``complesse'' (pesi elevati), cioè riducendo i valori dei coefficienti $w$, pur mantenendo la flessibilità dello spazio delle ipotesi.
+
+\vspace{12pt}
+\noindent Rasoio di Ockham [1300]:
+\begin{center}
+	``\textit{La spiegazione più semplice è più probabilmente quella corretta}''
+\end{center}
+oppure
+\begin{center}
+	``\textit{Preferisci l'ipotesi più semplice che si adatta ai dati}''
+\end{center}
+
+\noindent Questo concetto fondamentale in ML verrà ritrovato e alla fine lo ``razionalizzeremo'', per quantificarlo.\
+Considereremo la complessità non come costo computazionale ma come misura della flessibilità del modello per adattarsi ai dati.\
+
+\subsection{Regolarizzazione da Ridge Regression}
+
+Ridge regression/\textbf{regolarizzazione di Tikhonov},\ \textit{smoothed models}:\ è possibile aggiungere vincoli alla somma del valore di $|w_j|$ favorendo modelli ``sparsi'', ad esempio con meno termini a causa dei pesi $w_j = 0$ (o $w_j \to 0$) (significa un modello meno complesso).
+
+\begin{flushleft}
+	Termine dati errore + \textbf{Termine regolarizzazione}/\textbf{penalità}
+
+	\[Loss(h_w) = \sum_{p=1}^l (y_p - h_w (x_p))^2 + \lambda ||w||^2 \]
+
+	dove $||w|| = \sum_i w_i^2$ e \textit{lambda} ($\lambda$) è chiamato coefficiente di regolarizzazione (un parametro costante o iperparametro).\
+\end{flushleft}
+
+\noindent Effetto:\ \textbf{decadimento del peso}, in pratica aggiunge $2\lambda w$ al gradiente della perdita
+\[ w_{new} = w + \eta \cdot \Delta w - 2 \lambda w \]
+Per esempio, con gradiente zero diminuisce il valore di ogni $w$ con una frazione del vecchio $w$.
+
+Applicabilità generale (non solo per polinomi), per esempio possiamo controllare la complessità del modello semplicemente usando lambda, senza conoscere M per i polinomi, o anche quando la complessità del modello non è nota.\
+Notare il bilanciamento (trade-off) tra i due termini:\
+il termine dei dati di piccolo errore (minimizza solo l'errore di addestramento) non è sufficiente per noi, vogliamo anche controllare la complessità del modello per controllare l'\textbf{\textit{overfitting}} e quindi introduciamo il secondo termine nella minimizzazione.\
+D'altra parte possiamo sforare perché un peso eccessivo al secondo termine (valore lambda alto) porta a focalizzare la minimizzazione solo o prevalentemente sulla regolarizzazione, quindi l'errore dei dati (primo termine) potrebbe crescere troppo, ovvero passare all'\textbf{\textit{underfitting}}.\
+Il compromesso è regolato dal valore di \textit{lambda} ($\lambda$).\
+
+\subsection{Limitazioni delle Fixed Basis Functions}
+
+Avendo una funzione di base lungo ogni dimensione D, lo spazio di input richiede un numero combinatorio di funzioni:\ \textit{la maledizione della dimensionalità}.\
+Ad esempio i polinomi generali di ordine 3 utilizzano tutte le combinazioni di variabili di input dovute ai prodotti $x_1 x_2, x_2 x_3, \dots, x_1 x_2 x_3, \dots \rightarrow D^3$ (approssimazione all'aumentare di D).\
+I Phi vengono \textit{fissati} prima di osservare i dati di allenamento.\
+In altri modelli, vedremo come possiamo farla franca con meno funzioni di base, scegliendole utilizzando i dati di addestramento:\ phi (in uno strato computazionale nascosto) dipende da $w$ e il modello non è lineare nei parametri, per esempio le \textbf{\textit{reti neurali}}.\
+In altri modelli ancora, il calcolo del nuovo spazio di incorporamento (trasformazione dell'input) viene effettuato implicitamente attraverso le funzioni del kernel e controllando la complessità del modello, per esempio \textbf{\textit{SVM}}.\
+
+\section{Classificazione}
+
+Gli stessi modelli (utilizzati per la regressione) possono essere utilizzati per la \textbf{classificazione}:\ \textit{target categorici}, ad es. 0/1 o -1/+ 1.\
+In questo caso utilizziamo un iperpiano ($wx$) che assume valori negativi o positivi:\ sfruttiamo tali modelli per decidere se un punto $x$ appartiene alla zona positiva o negativa dell'iperpiano (per classificarlo), quindi vogliamo impostare $w$ (imparando) in modo tale da ottenere una buona precisione di classificazione.\
+
+\begin{definition}
+	Il \textbf{decision boundery} è il luogo geometrico dei punti dove $wx=0$
+\end{definition}
+
+\noindent Se si desidera una funzione che restituisce valori $\in \{0,1\}$ si usa
+\[h(x) = \left\{ \begin{array}{ll}
+		1 & \mathrm{se}\  wx + w_0 \geq 0 \\
+		0 & \mathrm{altrimenti}           \\
+	\end{array} \right.\]
+altrimenti per valori $\in \{-1,+1\}$
+\[h(x) = sign(w^Tx + w_0)\]
+\[ h(x_p) = sign (x_p^Tw) = sign \left( \sum_{i=0}^n x_{p,i}w_i\right) \]
+
+\noindent Si noti che, dato il bias $w_0$, nella LTU dire $h_x = w^T x + w_0 \geq 0$ è equivalente a dire $h_x = w^T x \geq - w_0$ con $-w_0$ come valore di ``soglia''.\
+Le due forme identificano la stessa zona positiva del classificatore:\ la seconda enfatizza il ruolo del bias come valore di soglia per ``attivare'' l'uscita $+1$ del classificatore.
+
+\subsubsection{Riepilogo}
+
+I modelli sono \textbf{sottoposti a training} (tramite il training set) secondo LMS (\textit{Least Medium Square}) su $wx$ attraverso la semplice discesa di gradiente usato per la regressione lineare.\
+È possibile applicare anche la \textit{linear basis expansion} e \textit{Tikhonov} per regolarizzare.\
+
+In seguito i modelli possono essere \textbf{usati} per costruire classificazioni applicando la funzione di soglia $h(x) = sign(wx)$.\
+L'errore può essere calcolato come errore di classificazione o numero di modelli classificati erroneamente (non solo dall'errore quadratico medio):
+
+\[L(h(x_p, d_p)) = \left\{\begin{array}{l l}
+		0 & \mathrm{se}\ h(x_p) = d_p \\
+		1 & \mathrm{altrimenti}
+	\end{array}\right.
+	\qquad \mathrm{Errore\_medio} = \frac{1}{l} \sum_{p=1}^l L(h(x_p, d_p)) \]
+
+\begin{definition}
+	L'\textbf{\textit{accuracy}} (accuratezza del modello) è la media dei correttamente classificati, ossia  $(l -\#\mathrm{err})/l$.\
+\end{definition}
+
+\noindent \textbf{Nota}:\ l'algoritmo converge asintoticamente al minimo di LS, tuttavia per il classificatore non ottiene il numero minimo di errori di classificazione (proprio perché la \textit{Loss} non teneva conto della classificazione).
+
+\subsubsection{Limitazioni}
+
+In geometria, due insieme di punti in uno spazio bidimensionale sono \textbf{\textit{linearmente separabili}} quando i due insieme possono essere completamente separati da una linea; più in generale, due gruppi sono \textit{linearmente separabili} in uno spazio \textit{n-dimensionale} se possono essere separati da un iperpiano (\textit{n}-1)-dimensionale.\
+
+\vspace{12pt}
+\noindent Il decision boundery lineare fornisce soluzioni esatte solo per insiemi di punti linearmente separabili.

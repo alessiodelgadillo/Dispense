@@ -1,0 +1,106 @@
+\chapter{Rappresentazione Binaria e Strutture di Calcolo}
+
+\section{Rappresentazione binaria delle informazioni}
+
+\subsection{Conversione decimale-binario e binario-decimale}
+
+La conversione da binario a decimale si effettua, nel modo più semplice, applicando lo sviluppo
+polinomiale.\
+La conversione da decimale in binario può essere fatta in due modi:
+
+\begin{enumerate}
+    \item dal numero decimale viene sottratta la massima potenza di 2 minore del numero stesso e lo stesso processo è ripetuto sulla differenza risultante.\ Una volta decomposto il numero in potenze di due, si ottiene il numero binario ponendo 1 nelle posizioni di bit corrispondenti alla potenza di due usata nella decomposizione e 0 nelle restanti posizioni;
+    \item dividere ripetutamente il numero decimale per 2, considerando i resti, finché si ottiene come quoziente il numero 0.\ Il numero binario è dato dalla stringa dei resti in ordine inverso rispetto a come sono stati ottenuti.
+\end{enumerate}
+
+\subsection{Numeri binari con segno}
+
+Per la rappresentazione dei numeri con segno sono usati principalmente tre metodi.\
+In tutti, il bit più significativo è (anche) il bit del segno:\ $0 = +$, $1 = -$.
+
+\begin{itemize}
+    \item \textbf{Modulo e segno}:\ i bit restanti, tolto il bit del segno, rappresentano il valore assoluto (modulo) del numero.
+    \item \textbf{Complemento a uno}:\ se il numero è positivo, il numero in complemento a uno è uguale a quello modulo e segno, mentre, se il numero è negativo, si ottiene complementando bit a bit la rappresentazione modulo e segno.
+    \item \textbf{Complemento a due}:\ se il numero è positivo, il numero in complemento a due è uguale a quello del modulo e segno, mentre, se il numero è negativo, si ottiene sommando 1 alla rappresentazione in complemento a uno.
+\end{itemize}
+
+\noindent Sia il sistema modulo e segno che quello del complemento a uno hanno due rappresentazioni possibili per il valore zero, cioè $+0$ e $-0$.\
+Questa situazione è indesiderata.\
+\textit{Il sistema del complemento a due non ha questo problema} perché il complemento a due di $+0$ è ancora $+$.\
+Anche questo sistema presenta una singolarità:\ il numero costituito da un 1 seguito da tutti 0 è il complemento di sé stesso e questo fatto rende \textit{l'intervallo dei numeri positivi asimmetrico rispetto a quelli dei negativi}; esiste cioè un numero negativo senza il corrispondente controvale positivo.
+
+Nell'aritmetica in complemento a due il riporto generato dall'addizione sul bit più a sinistra è semplicemente scartato.\
+Se due addenti sono di segno opposto, non può capitare un errore di traboccamento (overflow), mentre se sono di ugual segno e il risultato è di segno opposto significa che si è avuto un errore di overflow e il risultato non è corretto.\
+L'errore di overflow può capitare se e solo se il riporto che arriva al bit di segno differisce dal riporto che esce dal bit del segno.\
+Normalmente in uscita da un addizionatore si ha sia il riporto sul bit del segno che uno speciale bit di overflow.
+
+\section{Sull'utilizzazione della rappresentazione}
+
+\subsection{Proprietà fondamentali}
+
+Una proprietà fondamentale dei numeri binari è la seguente:
+
+\begin{itemize}
+    \item Con \textit{k} bit si possono rappresentare tutti i numeri naturali che vanno da 0 a $2^k - 1$, estremi inclusi.
+\end{itemize}
+
+\noindent Altrettanto fondamentale è la seguente proprietà:
+
+\begin{itemize}
+    \item Sia un insieme di \textit{m} oggetti dello stesso tipo.\ Vogliamo denotare ogni oggetto con un numero naturale distinto, cioè un \textbf{\textit{identificatore unico}} dell'oggetto, rappresentato in binario.\ Il minimo numero di bit necessario per rappresentare un qualunque identificatore è $n = \lceil lg_2m \rceil $.
+\end{itemize}
+
+\subsection{Alcune proprietà utili}
+
+\subsubsection{\textit{a) Quoziente e resto della divisione per potenze di due}}
+
+Siano A e B due numeri binari corrispondenti a numeri naturali, e sia $B = 2^h$.\
+In questa ipotesi, è molto facile il calcolo del quoziente della divisione intera e del resto (modulo):
+
+\begin{itemize}
+    \item il valore di A\%B (\textit{A mod B}) è dato dagli \textit{h} bit meno significativi di A,
+    \item il valore di A/B (\textit{A div B}) è dato dai rimanenti bit più significativi di A.
+\end{itemize}
+
+\noindent Come caso particolare notevole:\ un numero binario \textit{pari} (\textit{dispari}) ha il bit meno significativo uguale a 0 (1).
+
+\subsubsection{\textit{b) Operazioni di traslazione(shift)}}
+
+Dato un numero binario naturale A, la sua traslazione destra (\textit{shift destro}) di 1 bit $sh_R^1(A)$ è il numero naturale che si ottiene spostando tutti i suoi bit a destra di una posizione e inserendo il valore 0 nel bit più significativo; il vecchio bit meno significativo viene perso.
+
+Dato un numero binario naturale A, la sua traslazione sinistra (\textit{shift sinistro}) di 1 bit $sh_L^1(A)$ è il numero naturale che si ottiene spostando tutti i suoi bit a sinistra di una posizione e inserendo il valore 0 nel bit meno significativo; il vecchio bit più significativo viene perso.
+
+Valgono le seguenti proprietà, facilmente dimostrabili:
+
+\begin{enumerate}
+    \item $sh_R^k(A) = A/2^k$
+    \item $sh_L^k(A) = A \cdot 2^k$ mod $2^n$
+\end{enumerate}
+
+\section{Strutture di calcolo, tipi di dato e memorie}
+
+\subsection{Parole d'informazione}
+
+Le informazioni a livello di macchina firmware e di macchina assembler sono rappresentate come \textit{stringhe di bit}, che possono avere il significato più vario a seconda dell'uso che intendiamo farne.\
+In generale, useremo il termine \textbf{\textit{parola}} per denotare una stringa di bit significativa.
+
+\subsection{Registri}
+
+Fondamentale per la strutturazione a livello firmware e a livello assembler è il registro, che funge da \textit{componente con memoria} (\textit{con stato}).\
+
+Un registro di un bit ha il compito di memorizzare, per tutto il tempo che si ritiene necessario, l'informazione presente sull'ingresso \textit{in} e di rendere disponibile tale informazione (\textit{contenuto}) sull'uscita \textit{out}.\
+Per scrivere (memorizzare) il valore \textit{in}, è necessario che sia presente un \textit{segnale di controllo}:\ la scrittura avviene se $\mathit{enable} = 1$.\
+Finché $\mathit{enable} = 0$, successivi valori che si presentino su \textit{in} vengono perduti (non memorizzati), mentre appena $\mathit{enable} = 1$ il valore che in quel momento è presente sull'ingresso \textit{in} viene memorizzato (diviene il \textit{contenuto} del registro) e comparirà sull'uscita \textit{out}.\
+Il valore su \textit{out} può sempre essere letto ed elaborato (un valore è \textit{sempre} presente, non occorre abilitazione per utilizzarlo in lettura).
+
+Nella trattazione delle reti logiche e delle unità di elaborazione, faremo uso di \textit{registri impulsati} nei quali il segnale \textit{enable} è messo in \texttt{AND} con un segnale, detto \textit{clock}, impulsivo e periodico.\
+Il periodo, cioè l'intervallo tra l'inizio di due impulsi di clock consecutivi, è detto \textbf{\textit{ciclo di clock}}.\
+La scrittura nel registro avviene in corrispondenza di un impulso di clock a condizione che contemporaneamente $\mathit{enable} = 1$.\
+Questa caratteristica permetterà un funzionamento sincrono delle reti (Parte Operativa e Parte Controllo) costituenti ogni unità di elaborazione.
+
+\subsection{Funzioni e reti combinatorie}
+
+A livello hardware implementeremo funzioni ``pure'' (computazioni senza stato:\ per ogni valore dell'ingresso sia ha sempre e un solo valore dell'uscita) mediante opportune strutture dette \textbf{\textit{reti combinatorie}}, ottenute a loro volta come composizioni di componenti più elementari.\
+Ad esempio una funzione molto utilizzata è la \textbf{ALU}:\ si tratta di \textbf{reti di calcolo multifunzione}.\
+A seconda del valore di alcune variabili d'ingresso secondarie (\textit{variabili di controllo}), il valore dell'uscita è dato dall'applicazione agli ingressi primari di una ben specifica funzione:\ addizione, sottrazione, confronto, shift, \texttt{AND} bit a bit, \texttt{OR} bit a bit, ecc.
+

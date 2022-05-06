@@ -1,0 +1,150 @@
+\chapter{Generatore di sequenze pseudocasuali}
+
+Una \textbf{sorgente binaria casuale} genera una sequenza di bit con le seguenti caratteristiche:
+
+\begin{enumerate}
+    \item $P(0) = P(1) = \frac{1}{2}$ (si può indebolire richiedendo $P(0), P(1) > 0$ e immutabili durante il processo di generazione);
+    \item la generazione di un bit è indipendente da quella degli altri bit:\ non si può prevedere il valore di un bit osservando quelli già generati.\
+\end{enumerate}
+
+\noindent Si supponga di avere $P(0)>P(1)$, è sempre possibile bilanciare la sequenza:\ si generi una sequenza come
+\[0\ 0\ 1\ 1\ 0\ 0\ 1\ 1\ 1\ 0\ 0\ 0\ 0\ 1\ 0\ 0\]
+Si dividono i bit a coppie e si scartano le coppie con bit uguali:
+\[1\ 0\ 0\ 1\]
+e associamo alle coppie discordi un valore:\ $01 \rightarrow 0,\ 10\rightarrow 1$
+
+Nella pratica è impossibile garantire la perfetta casualità di una sorgente e, soprattutto, l'indipendenza; non si può garantire che la generazione di un bit avvenga in modo assolutamente indipendente dalla generazione di altri bit:\ ogni esperimento modifica l'ambiente, quindi si va a influenzare l'esperimento successivo.\
+Perciò, si accettano compromessi.\
+
+Ci sono varie tecniche per generare sequenze casuali brevi.\
+È possibile sfruttare alcuni \textbf{fenomeni casuali} presenti in natura (decadimento di particelle, \dots), ma il problema di questo approccio è che nessuno deve avere accesso ai dispositivi utilizzati per sfruttare queste sorgenti; inoltre più il fenomeno è lungo, più tende a ripetersi periodicamente e quindi è accettabile solo per sequenze casuali molto brevi.\
+Può essere sfruttata anche la casualità presente in alcuni \textbf{processi software}, come la posizione della testina sull'hard disk, lo stato dell'orologio interno del calcolatore, \dots
+
+\section{Generatori di numeri pseudocasuali}
+
+Si genera la casualità mediante un algoritmo, cercandola all'interno di processi matematici:\ si parla di \textbf{generatori pseudo-casuali} perché sono programmi brevi e, quindi, per Kolmogorov non sono casuali.\
+I generatori di numeri pseudo-casuali partono da una sequenza piccola chiamata \textit{seme} (che può essere generata con processi come i due citati sopra) e generano una sequenza molto più lunga.\
+
+Un \textbf{generatore} prende in input un \textit{seme} e restituisce in output un flusso di bit arbitrariamente lungo e periodico:\ al suo interno contiene una sottosequenza che si ripete (\textit{periodo}) ed è quella che viene usata come sequenza casuale; un generatore è tanto migliore tanto è più lungo il periodo.\
+Si tratta di un ``\textit{amplificatore di casualità}'':\ prende la casualità all'interno del seme iniziale e la ``estende'', la ``amplifica''.\
+
+\subsubsection{Limitazioni}
+
+Si supponga che $S$ sia il numero di bit del seme e che si generi una sequenza di lunghezza $n$; tipicamente $n>>S$.\
+Una volta che il seme di $S$ bit è stato scelto, la sequenza lunga $n$ che ne deriva è già determinata implicitamente dal seme; questo significa che due semi uguali forniscono due sequenze uguali.\
+Inoltre, il numero di sequenze diverse che possono essere generate con un seme da $S$ bit sono $2^S$ (meno di tutte quelle che si potrebbero costruire:\ $2^n$), proprio perché questo è il numero di semi che si possono avere con $S$ bit:\ ecco perché si parla di generatore \textit{pseudocasuale}.\
+
+\subsubsection{Esempio di generatore}
+
+Generatore lineare:\ $x_i = (ax_{i-1} + b)\ \mathit{mod}\ m$, dove $a, b$ e $m$ sono interi positivi.\
+Il seme è un valore intero iniziale $x_0$ (che potremmo pensare di aver estratto casualmente).\
+Si osservi che, poiché lavora col modulo, questo generatore può generare i numeri da 0 a $m - 1$:
+\[x_0,\ x_1 = (ax_0 + b)\ \mathit{mod}\ m,\ x_2 = (ax_1 +b)\ \mathit{mod}\ m,\ \dots\]
+
+\noindent È chiaro che nel momento in cui $x_i = x_0$ la sequenza si ripeterà perché ricomincerà a generare gli stessi numeri.\
+Quindi il periodo massimo è proprio $m$, ma non è garantito che lo sia sempre; per far ciò bisogna imporre certe condizioni sui parametri:
+\begin{itemize}
+    \item $\mathrm{MCD}(b,m) = 1$;
+    \item ($a-1$) deve essere divisibile per ogni fattore primo di $m$;
+    \item ($a-1$) deve essere un multiplo di 4 se anche $m$ lo è.
+\end{itemize}
+
+\noindent Se si rispettano queste condizioni il periodo sarà $m$ e quindi verranno generate permutazioni degli interi da $0$ a $m-1$.\
+Esempio:
+\[a = 7,\ b = 7,\ m = 9,\ x_0 = 3\]
+\[x_i = (7x_{i-1} + 7)\ \mathit{mod}\ 9\]
+\[x_0 = 3,\ x_1 = 1,\ x_2 = 5,\ x_3 = 7,\ x_4 = 2,\ \dots,\ x_i=3 \]
+\textbf{Nota bene}:\ per trasformarlo in generatore binario si fa $\frac{x_i}{m}$, si guarda la prima cifra decimale e se è pari allora si ottiene uno 0, altrimenti si ottiene un 1.
+
+\subsubsection{Valutare un generatore}
+
+Le sequenze generate da un generatore si valutano tramite dei \textbf{test statistici}, in particolare valutano se la sequenze presenta proprietà tipiche di una sequenza casuale.\
+
+\begin{itemize}
+    \item \textbf{Test di frequenza}:\ controlla che i vari simboli diversi abbiano la stessa frequenza.
+    \item \textbf{Poker test}:\ controlla che le sottosequenze di lunghezza fissa occorrano lo stesso numero di volte nella sequenza totale.
+    \item \textbf{Test di autocorrelazione}:\ verifica che non ci siano irregolarità nella sequenza, per esempio, guardando quali sono gli elementi che si ripetono dopo una certa lunghezza (ad esempio:\ ogni cinque posti c'è uno 0).
+    \item \textbf{Run test}:\ verifica che le sottosequenze massimali di elementi tutti ripetuti abbiano una decrescenza esponenziale di apparizione nella sequenza in base a quanto sono lunghe (11 probabile, 111 poco probabile, 1111 quasi impossibile, 11111 impossibile, \dots).
+\end{itemize}
+
+\noindent Per le applicazioni crittografiche si richiede anche il \textbf{test di prossimo bit} (implica anche i test precedenti):\ controlla che sia impossibile fare previsioni in tempo polinomiale sugli elementi della sequenza prima che siano generati.\
+In particolare, un generatore binario supera il test di prossimo bit se non esiste un algoritmo polinomiale in grado di prevedere l'($i+1$)-esimo bit della sequenza a partire dalla conoscenza degli $i$-esimi bit precedenti con probabilità maggiore di $\frac{1}{2}$.\
+I generatori che superano il test di prossimo bit sono detti \textbf{crittograficamente sicuri}.\
+
+\subsubsection{Generatore polinomiale}
+
+Non è crittograficamente sicuro.\
+
+\[x_i = (a_1 x_{i-1}^t + a_2 x_{i-1}^{t-1} +\ \dots + a_t x_{i-1} + a_{t+1})\ \mathit{mod}\ m\]
+
+\subsection{Generatori crittograficamente sicuri}
+
+Si fa ricorso alle \textbf{funzioni one-way}
+
+\begin{itemize}
+    \item compututazionalmente facile da calcolare:\ $x\rightarrow y=f(x)$ richiede tempo polinomiale.
+    \item compututazionalmente difficile da invertire:\ $y\rightarrow x=f^{-1}(y)$ richiede tempo esponenziale.
+\end{itemize}
+
+\noindent Idea:\ si supponga di avere un seme $x_0$ dal quale si ottiene un valore $x$; si calcola $f(x)$ considerando $f$ come funzione one-way e si trova $x_1$.\
+In seguito si trova $x_2$ con $f(x_1)=f(f(x))=f^2(x)$.\
+In generale, $x_i = f^i(x) = f(x_{i-1})$:\ si itera l'applicazione della funzione one-way un numero arbitrario di volte.\
+
+Ogni elemento della sequenza $S$ si può calcolare facilmente dal precedente, ma non dai valori successivi perché $f$ è one-way; di conseguenza, si calcola la sequenza per un certo numero di passi, senza svelarne il risultato, e si comunicano/utilizzano gli elementi in ordine inverso:\ ogni elemento non è prevedibile in tempo polinomiale, pur conoscendo quelli comunicati in precedenza.\
+
+Per costruire generatori binari crittograficamente sicuri si usano i predicati ``\textit{hard core}'' delle funzioni one-way.\
+$b(x)$ è un predicato hard core di una funzione one-way $f(x)$ se:\
+\begin{itemize}
+    \item $b(x)$ è facile da calcolare conoscendo $x$;
+    \item $b(x)$ è difficile da prevedere con probabilità $> \frac{1}{2}$ conoscendo solo $f(x)$.
+\end{itemize}
+
+\subsubsection{Esempio di funzione one-way}
+
+Funzione one-way:\ $f(x) = x^2\ \mathit{mod}\ n$, $n$ non primo.\
+Supponiamo $n = 77$ e $x = 10$:
+\begin{itemize}
+    \item  $f(x) = 10^2\ \mathit{mod}\ 77 = 23 \rightarrow$ molto facile.
+    \item  $x =\ ? \rightarrow$ molto difficile:\ tipicamente si fa un forza bruta (costoso) dove si provano tutti i numeri da 0 a $n - 1$ e quando troviamo quello che corrisponde a $f(x)$ (23 in questo caso) ci fermiamo e guardiamo a quale $x$ corrisponde.
+\end{itemize}
+\textbf{Nota bene}:\ è importante ricordare che nell'algebra modulare, la funzione di elevamento a quadrato ($x^2$) è one-way.\
+In questo caso il predicato hard core $b(x)$ è ``$x$ è dispari''.\
+
+\subsubsection{Generatore BBS (1986)}
+
+Si prende un numero $n = p \cdot q$, con $p,q$ primi e molto grandi; inoltre
+\[p\ \mathit{mod}\ 4 = 3\ \mathrm{e}\ q\ \mathit{mod}\ 4 =3 \qquad 2 \left\lfloor\frac{p}{4}\right\rfloor + 1\ \mathrm{e}\ 2 \left\lfloor\frac{q}{4}\right\rfloor + 1\ \mathrm{primi\ tra\ loro} \]
+e $y$ coprimo con $n$.\
+
+Si calcola il seme come $x_0 = y^2\ \mathit{mod}\ n$ e una successione di $m \leq n$ interi
+\[x_i = (x_{i-1})^2\ \mathit{mod}\ n\]
+Successivamente si pone $b_i = 1 \Leftrightarrow x_{n-1}$ è dispari.\
+
+Il problema del generatore BBS è che per mantenersi sicuro deve usare numeri molto grandi ed effettuare potenze e moduli, perciò ha computazioni molto lente.\
+
+\subsubsection{Generatori basati su cifrari simmetrici}
+
+Si prende un cifrario simmetrico e la chiave e si sostituisce il messaggio con un valore iniziale legato al generatore.\
+\vspace{12pt}
+
+\noindent Esempio approvato dal FIPS:\ usa il DES.\
+
+\begin{itemize}
+    \item $r$ = numero di bit delle parole prodotte ($r=64$ in DES)
+    \item $s$ = seme casuale di $r$ bit
+    \item $m$ = numero di parole da produrre
+    \item $k$ = chiave segreta del cifrario
+\end{itemize}
+
+\begin{verbatim}
+Generatore(s, m){ //flusso di output di m*r bit
+    d = rappresentazione su r bit di data e ora
+    y = C(d, k);
+    z = s;
+    for(i = 1; i <= m; i++){
+        x_i = C(y XOR z, k);
+        z = C(y XOR x_i, k);
+        comunica x_i a chi di dovere;
+    }
+}
+\end{verbatim}

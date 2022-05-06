@@ -1,0 +1,252 @@
+\chapter{Teoria della Complessità}
+
+\subsubsection{Decidibilità e Trattabilità}
+
+Ci sono problemi (problema dell'arresto) che non possono essere risolti da nessun calcolatore, indipendentemente dal tempo a disposizione:\ problemi indecidibili.\
+Ci sono problemi decidibili che possono richiedere tempi di risoluzione esponenziali nella dimensione dell'istanza (torri di Hanoi, generazione delle sequenze binarie e delle permutazioni):\ \textbf{problemi intrattabili}.\
+Ci sono problemi che possono essere risolti con algoritmi di costo polinomiale (ordinamento; ricerca di chiavi in array, liste, alberi; problemi su grafi:\ OT di DAG, connettività, ricerca di cicli, ricerca di un ciclo euleriano):\ \textbf{problemi trattabili} (``facili'').\
+Ci sono infine problemi il cui stato non è noto (clique, cammino hamiltoniano); abbiamo a disposizione solo algoritmi di costo esponenziale, ma nessuno ha dimostrato che non possano esistere algoritmi di costo polinomiale:\ \textbf{problemi presumibilmente intrattabili}.\
+
+Studiamo la dimensione dei dati trattabili in funzione dell'incremento della velocità dei calcolatori.\
+
+\vspace{12pt}
+
+\noindent Calcolatori:\ $C_1$, $C_2$ ($k$ volte più veloce di $C_1$).\
+
+\noindent Tempo di calcolo a disposizione: $t$
+\begin{itemize}
+    \item $n_1$ = dati trattabili nel tempo $t$ su $C_1$
+    \item $n_2$ = dati trattabili nel tempo $t$ su $C_2$
+\end{itemize}
+\textbf{Osservazione}:\ usare $C_2$ per un tempo $t$, equivale a usare $C_1$ per un tempo $k \cdot t$.\
+
+Algoritmo \textbf{polinomiale} che risolve il problema in $c n^s$ secondi ($c,s$ costanti)
+\[C_1:\ cn_1^s = t \rightarrow n_1 = \left(\frac{t}{c}\right)^{\frac{1}{s}}\]
+\[C_2:\ cn_2^s = kt \rightarrow n_2 = \left(\frac{kt}{c}\right)^{\frac{1}{s}} = k^{\frac{1}{s}}\left(\frac{t}{c}\right)^\frac{1}{s}\]
+\[n_2 =k^{\frac{1}{s}}n_1\]
+Miglioramento di un fattore moltiplicativo $k^{\frac{1}{s}}$.\
+
+Algoritmo \textbf{esponenziale} che risolve il problema in $c 2^n$ secondi ($c$ costante)
+\[C_1:\ c2^{n_1} = t \rightarrow 2^{n_1} = \frac{t}{c}\]
+\[C_2:\ c2^{n_2} = kt \rightarrow 2^{n_2} = \frac{kt}{c} = k2^{n_1}\]
+\[n_2 = n_1 + \log_2k\]
+Miglioramento di un fattore moltiplicativo $\log_2k$.\
+
+\section{Problemi}
+
+Problema $\Pi$
+\begin{itemize}
+    \item $I$:\ insieme delle \textbf{istanze} in ingresso
+    \item $S$:\ insieme delle \textbf{soluzioni}
+\end{itemize}
+
+\noindent \textbf{Problemi decisionali}:\ richiedono una risposta binaria ($S = \{0,1\}$)
+\begin{table}[H]
+    \centering
+    \begin{tabular}{l l}
+        Istanze positive (accettabili): & $x \in I, \mathrm{t.c.}\ \Pi(x) = 1$ \\
+        Istanze negative:               & $x \in I, \mathrm{t.c.}\ \Pi(x) = 0$ \\
+    \end{tabular}
+\end{table}
+\noindent \textbf{Problemi di ricerca}:\ data un'istanza $x$, richiedono di restituire una soluzione $s$.\
+
+\noindent\textbf{Problemi di ottimizzazione}:\ data un'istanza $x$, si vuole trovare la migliore soluzione $s$ tra tutte le soluzioni possibili.\
+
+\subsubsection{Problemi decisionali}
+
+La teoria della complessità computazionale è definita principalmente in termini di \textit{problemi di decisione}:\ essendo la risposta binaria, non ci si deve preoccupare del tempo richiesto per restituire la soluzione e tutto il tempo è speso esclusivamente per il calcolo.\
+La difficoltà di un problema è già presente nella sua versione decisionale.\
+
+Molti problemi di interesse pratico sono però problemi di ottimizzazione:\ è possibile esprimere un problema di ottimizzazione in forma decisionale, chiedendo l'esistenza di una soluzione che soddisfi una certa proprietà.\
+Il problema di ottimizzazione è \textbf{almeno tanto difficile quanto} il corrispondente problema decisionale.\
+
+Caratterizzare la complessità del problema decisionale permette quindi di dare almeno una \textbf{limitazione inferiore} alla complessità del problema di ottimizzazione.\
+
+\subsection{Classi di complessità}
+
+Dato un problema decisionale $\Pi$ ed un algoritmo $A$, diciamo che $A$ risolve $\Pi$ se, data un'istanza di input $x$
+\[A(x) = 1 \Leftrightarrow \Pi(x) = 1\]
+$A$ risolve $\Pi$ in tempo $t(n)$ e spazio $s(n)$ se il tempo di esecuzione e l'occupazione di memoria di $A$ sono rispettivamente $t(n)$ e $s(n)$.\
+
+\subsubsection{Classi Time e Space}
+
+Data una qualunque funzione $f(n)$
+
+\begin{itemize}
+    \item \textbf{\textit{Time(f(n))}}:\ insiemi dei \textit{problemi decisionali} che possono essere risolti in tempo $O(f(n))$.\
+    \item \textbf{\textit{Space(f(n))}}:\ insiemi dei \textit{problemi decisionali} che possono essere risolti in spazio $O(f(n))$.\
+\end{itemize}
+
+\subsubsection{Classe P}
+
+Algoritmo polinomiale (tempo):\ esistono due costanti $c, n_0 >0$ t.c.\ il numero di passi elementari è al più $n^c$ per ogni input di dimensione $n$ e $\forall n>n_0$.\
+La classe P è la classe dei problemi \textbf{risolvibili in tempo polinomiale} nella dimensione $n$ dell'istanza di ingresso.\
+
+\subsubsection{Classe PSpace}
+
+Algoritmo polinomiale (spazio):\ esistono due costanti $c, n_0 >0$ t.c.\ il numero di celle di memoria utilizzate è al più $n^c$ per ogni input di dimensione $n$ e $\forall n>n_0$.\
+La classe PSpace è la classe dei problemi \textbf{risolvibili in tempo polinomiale} nella dimensione $n$ dell'istanza di ingresso.\
+
+\subsubsection{Classe Exp-Time}
+
+La classe Exp-Time è la classe dei problemi \textbf{risolvibili in tempo esponenziale} nella dimensione $n$ dell'istanza di ingresso.\
+
+\subsubsection{Relazioni tra classi}
+
+\[\mathrm{P} \subseteq \mathrm{PSpace}\]
+infatti un \textbf{algoritmo polinomiale} può avere accesso al più ad un numero polinomiale di locazioni di memoria diverse (in ordine di grandezza).\
+\[\mathrm{PSpace} \subseteq \mathrm{ExpTime}\]
+Non è noto (ad oggi) se le inclusioni siano proprie, l'unico risultato di separazione dimostrato finora riguarda P e ExpTime:\ esiste un problema che può essere risolto in tempo esponenziale, ma per cui tempo polinomiale non è sufficiente (per esempio le ``Torri di Hanoi'').\
+
+\subsubsection{Algoritmo per Clique}
+
+Si considerano tutti i sottoinsiemi di vertici, in ordine di cardinalità decrescente, e si verifica se formano una clique di dimensione almeno k.\
+Se $n$ è il numero di vertici, al caso peggiore l'algoritmo esamina $2^n$ sottoinsiemi diversi.\
+\[\mathrm{Clique} \in \mathrm{ExpTime}\]
+Algoritmo polinomiale non noto.
+
+\subsubsection{Algoritmo per Cammino Hamiltoniano}
+
+Si considerano tutte le permutazioni di vertici, e si verifica se i vertici in quell'ordine sono a due a due adiacenti.\
+Se $n$ è il numero di vertici, al caso peggiore l'algoritmo esamina $n!$ permutazioni diverse.\
+\[\mathrm{Cammino Hamiltoniano} \in \mathrm{ExpTime}\]
+Algoritmo polinomiale non noto.\
+
+\subsubsection{SAT}
+
+Insieme $V$ di variabili booleane
+\begin{itemize}
+    \item Letterale:\ variabile o sua negazione.
+    \item Clausola:\ disgiunzione (OR) di letterali.
+\end{itemize}
+Un'espressione booleana su $V$ si dice in forma normale congiuntiva (FNC) se è espressa come \textit{congiunzione di clausole} (AND di OR di letterali), per esempio:
+\[V = \{x,y,z,w\}\qquad \mathit{FNC}: (x \lor \neg y \lor z) \land (\neg x \lor w) \land y\]
+Data una espressione in forma normale congiuntiva verificare se esiste una assegnazione di valori di verità alle variabili che rende l'espressione vera.\
+L'algoritmo per SAT considera tutti i $2^n$ assegnamenti di valore alle $n$ variabili, e per ciascuno verifica se la formula è vera.\
+\[\mathrm{SAT} \in \mathrm{ExpTime}\]
+Algoritmo polinomiale non noto.\
+
+\vspace{12pt}
+\noindent La ricerca esaustiva è necessaria?\
+Non lo sappiamo.\
+
+\subsection{Problemi decisionali e certificati}
+In un \textit{problema decisionale} siamo interessati a verificare se una istanza del problema soddisfa una certa proprietà.
+\begin{itemize}
+    \item Esiste una clique di $k$ vertici?
+    \item Esiste un cammino hamiltoniano?
+    \item Esiste un assegnamento di valori che rende vera la formula?
+\end{itemize}
+Per alcuni problemi, per le \textbf{istanze accettabili} (positive) $x$ è possibile fornire un \textbf{certificato} $y$ che possa convincerci del fatto che l'istanza soddisfa la proprietà e dunque è un'istanza accettabile.\
+
+\subsubsection{Certificato}
+
+\begin{itemize}
+    \item Certificato per Clique:\ sottoinsieme di $k$ vertici, che forma la clique.\
+    \item Certificato per Cammino Hamiltoniano:\ permutazione degli $n$ vertici che definisce un cammino semplice.\
+    \item Certificato per SAT:\ un'assegnazione di verità alle variabili che renda vera l'espressione.\
+\end{itemize}
+
+\noindent Un certificato è un \textbf{attestato breve di esistenza} di una soluzione con determinate proprietà.\
+Si definisce solo per le istanza \textit{accettabili}, infatti, in generale non è facile costruire \textit{attestati di non esistenza}.\
+
+\subsubsection{Verifica}
+
+Idea:\ \textbf{utilizzare il costo della verifica} di un certificato (una soluzione) per un'istanza accettabile (positiva) per \textbf{caratterizzare la complessità} del problema stesso.\
+
+Un problema $\Pi$ è verificabile in tempo polinomiale se:\
+\begin{enumerate}
+    \item ogni {istanza accettabile} $x$ di $\Pi$ di lunghezza $n$ ammette un \textbf{certificato $y$ di lunghezza polinomiale} in $n$;
+    \item esiste un \textbf{algoritmo di verifica polinomiale} in $n$ e applicabile a ogni coppia $\langle x,y\rangle$ che permette di attestare che $x$ è accettabile.\
+\end{enumerate}
+
+\subsection{Classe NP}
+
+NP è la classe dei problemi decisionali \textbf{verificabili in tempo polinomiale}.\
+Cosa vuol dire NP? P sta per polinomiale, ma N non vuol dire NON...
+La classe NP è la classe dei problemi risolvibili in tempo \textbf{\textit{polinomiale non deterministico}}.\
+
+\textbf{Osservazione}:\ un certificato contiene un'informazione molto prossima alla soluzione, quindi qual è l'interesse di questa definizione?\
+Dubbio legittimo:
+\begin{itemize}
+    \item La teoria della verifica è utile per far luce sulle gerarchie di complessità dei problemi, non aggiunge nulla alla possibilità di risolverli efficientemente.
+    \item Chi ha una soluzione può verificare in tempo polinomiale che l'istanza è accettabile.
+    \item Chi non ha una soluzione (certificato), può individuarla in tempo esponenziale considerando tutti i casi possibili con una ricerca esaustiva.
+\end{itemize}
+
+\subsubsection{Le classi P e NP}
+
+\[P \subset NP\]
+Ogni problema in P ammette un certificato verificabile in tempo polinomiale:\ eseguo l'algoritmo che risolve il problema per costruire il certificato.\
+\[\mathit{P} = \mathit{NP}\ \mathrm{oppure}\ \mathit{P} \neq \mathit{NP}?\]
+Non sappiamo se per risolvere un problema della classe \textit{NP} dobbiamo per forza passare attraverso una ricerca esaustiva oppure no.\
+Si congettura che $\mathit{P} \neq \mathit{NP}$.\
+È possibile individuare i problemi più difficili all'interno della classe \textit{NP}, ovvero quelli candidati ad appartenere a \textit{NP} se $\mathit{P} \neq \mathit{NP}$.\
+
+\subsection{Problemi NP-Completi}
+Sono i problemi più difficili all'interno della classe NP:\ se esistesse un algoritmo polinomiale per risolvere uno solo di questi problemi, allora tutti i problemi in NP potrebbero essere risolti in tempo polinomiale e dunque $\mathit{P} = \mathit{NP}$.\
+Quindi tutti i problemi NP-Completi sono risolvibili in tempo polinomiale oppure nessuno lo è.\
+
+\subsubsection{Riduzioni polinomiali}
+
+$\Pi_1$ e $\Pi_2$ sono problemi decisionali, $I_1$ e $I_2$ insiemi delle istanze di input di $\Pi_1$ e $\Pi_2$.\
+$\Pi_1$ \textit{si riduce in tempo polinomiale} a $\Pi_2$
+\[\Pi_1 \leq_p \Pi_2\]
+se esiste una funzione $f: I_1 \rightarrow I_2$ calcolabile in tempo polinomiale t.c. $\forall x \in \Pi_1$, $x$ è un'istanza accettabile di $\Pi_1$ se e solo se $f(x)$ è un'istanza accettabile di $\Pi_2$.\
+
+Se esistesse un algoritmo per risolvere $\Pi_2$ potremmo utilizzarlo per risolvere $\Pi_1$
+\[\Pi_1 \leq_p \Pi_2\ \mathrm{e}\ \Pi_2 \in \mathit{P} \Rightarrow \Pi_1 \in \mathit{P}\]
+
+\noindent Un problema $\Pi$ si dice \textbf{NP-arduo} se
+\[\forall\ \Pi' \in \mathit{NP}, \Pi' \leq_p \Pi\]
+
+\noindent Un problema decisionale $\Pi$ si dice \textbf{NP-Completo} se
+\[\Pi \in \mathit{NP}\ \mathrm{e}\ \forall\ \Pi' \in \mathit{NP}, \Pi' \leq_p \Pi\]
+
+\noindent Dimostrare che un problema è in NP può essere facile, basta esibire un certificato polinomiale.\
+Non è altrettanto facile dimostrare che un problema $\Pi$ è NP-arduo o NP-completo:\ bisogna dimostrare che TUTTI i problemi in NP si riducono polinomialmente a $\Pi$.\
+In realtà la prima dimostrazione di NP-completezza aggira il problema.\
+
+\begin{theorem}[Cook, 1971]
+    SAT è NP completo.\
+\end{theorem}
+
+\noindent Cook ha mostrato che dati un qualunque problema $\Pi \in \mathit{NP}$ ed una qualunque istanza $x$ per $\Pi$ si può costruire una espressione booleana in forma normale congiuntiva che descrive il calcolo di un algoritmo per risolvere $\Pi$ su $x$:\ l'espressione è vera se e solo se l'algoritmo restituisce 1.\
+
+Un problema decisionale $\Pi$ è NP-completo se
+\[ \Pi \in \mathit{NP}\qquad \mathrm{SAT} \leq_p \Pi\]
+(o un qualsiasi altro problema NP-completo); infatti,
+\[\forall\ \Pi' \in \mathit{NP},\ \Pi' \leq_p \mathrm{SAT\ e\ SAT} \leq_p \Pi\]
+Quindi $\Pi' \leq_p \Pi$.\
+
+\[\mathrm{SAT} \leq_p \mathrm{Clique} \]
+data un'espressione booleana $F$ in forma normale congiuntiva con $k$ clausole è possibile costruire in \textit{tempo polinomiale} un grafo $G$ che contiene una \textbf{clique di $k$ vertici se esolo se $F$ è soddisfacibile}.\
+
+\[\mathrm{SAT} \leq_p \mathrm{Clique} \Rightarrow \mathrm{Clique\ \grave{e}\ NP\textrm{-}Completo}\]
+\[\mathrm{SAT\ \grave{e}\ NP\textrm{-}Completo} \Rightarrow \mathrm{Clique} \leq_p \mathrm{SAT}\]
+SAT e Clique sono \textbf{NP-equivalenti}.\
+Tutti i problemi NP completi sono tra loro NP-equivalenti; sono tutti facili, o tutti difficili.\
+
+\subsubsection{Problemi di ottimizzazione NP-arduo}
+
+Se la soluzione ottima è troppo difficile da ottenere, una soluzione quasi ottima ottenibile facilmente forse è buona abbastanza.\
+A volte, avere una so\-luzione \textbf{esatta} non è strettamente necessario:\ ci si accontenta di una soluzione che non si discosti troppo da quella ottima e che si possa calcolare in tempo polinomiale.\
+
+\subsection{Le classi Co-P e Co-NP}
+
+Profonda differenza tra certificare l'esistenza o la non-esistenza di una soluzione, per esempio nel problema del ciclo Hamiltoniano:
+\begin{itemize}
+    \item una permutazione di vertici (per certificare esistenza)
+    \item per la non-esistenza è difficile dare un certificato polinomiale che indichi direttamente questa proprietà
+\end{itemize}
+
+\begin{flushleft}
+    $\Pi$:\ problema decisionale.
+
+    $\mathrm{co}\Pi$:\ problema \textit{complementare} (accetta tutte e sole le istanze rifiutate da P.
+\end{flushleft}
+
+\noindent La classe co-P è la classe dei \textbf{problemi decisionali} $\Pi$ per cui \[\mathrm{co}\Pi \in \mathit{P}\]
+P = co-P (risolvo il problema, e complemento il risultato).\
+
+Si congettura che NP e co-NP siano diverse; se questa congettura è vera, allora $\mathit{P \neq NP}$.\

@@ -1,0 +1,86 @@
+\chapter{Microservizi}
+
+Due motivazioni principali per l'adozione di microservizi.\
+
+\begin{enumerate}
+	\item Cercare di abbreviare il cosiddetto \textbf{\textit{lead time}} (tempo che passa da quando si comincia a immaginare una funzionalità al momento in cui il primo utente ``fa il primo click'' su tale funzionalità) per nuove features o aggiornamenti a un'applicazione:
+	      \begin{itemize}
+		      \item accelerare \textit{rebuild} e \textit{redeployment};
+		      \item ridurre le cosiddette \textit{corde} tra silos funzionali.
+	      \end{itemize}
+	\item Riuscire a \textbf{scalare} efficacemente un'applicazione con un numero di utenti enorme, anche nell'ordine delle centinaia di milioni.\
+\end{enumerate}
+
+\begin{center}
+	\textit{Ma che cosa sono i microservizi?}
+\end{center}
+
+\noindent In passato una tipica applicazione enterprise consisteva in un'interfaccia utente (lato client), l'applicazione vera e propria (lato server) e il database.\
+L'applicazione lato server, tipicamente chiamata \textbf{\textit{monolite}}, si occupava di gestire le richieste HTTP, di implementare la logica di dominio, di interrogare e aggiornare il database (se necessario) e, infine, di mandare le risposte alle richieste del client.\
+
+Un'architettura monolitica comporta che anche un solo piccolo cambiamento di una parte richieda il \textbf{rebuild e il redeployment dell'intera applicazione}:\ tutto ciò potrebbe risultare costoso, non solo in termini di risorse, ma anche in termini di tempo necessario.\
+Inoltre, scalare un monolite richiede di \textbf{scalare l'intera applicazione} piuttosto che scalare quella singola parte che necessita di più risorse.\
+
+\subsubsection{Essenza dei microservizi}
+
+Le applicazioni sono sviluppate come insieme di servizi, si tratta di un'architettura modulare.\
+Ognuno di questi servizi viene eseguito in un ambiente (processo) separato, tipicamente in un container; la comunicazione fra tali processi avviene con meccanismi semplici e leggeri, solitamente si usano protocolli di tipo REST.\
+Un'altra delle caratteristiche distintive è il \textbf{\textit{poliglottismo}}:\ servizi diversi possono essere scritti in linguaggi diversi; così come tipi di dati diversi possono essere memorizzati con tecnologie diverse.\
+
+Si chiamano microservizi ma il termine ``\textit{micro}'' esiste per motivi storici:\ la dimensione non è veramente il punto più importante.\
+Se si vuole sapere davvero la dimensione di un microservizio si può misurare la dimensione del team che lo gestisce.\
+
+Uno degli aspetti più innovativi è l'idea di organizzare i servizi intorno alle \textbf{\textit{business capabilities}} e quindi avere dei \textbf{cross-functional teams}:\ team indipendenti (per quanto possibile) l'uno dall'altro e conseguentemente funzionalità di un'applicazione distribuite su questi microservizi.\
+
+\vspace{12pt}
+\noindent``\textit{Organizations which design systems [\dots] are constrained to produce designs which are copies of the communication structures of these organizations}''\qquad M.\ Conway, 1968
+\vspace{12pt}
+
+\noindent Un'ulteriore novità dei microservizi è la \textbf{decentralizzazione della gestione dei dati}:\
+\begin{itemize}
+	\item lasciare che ogni servizio gestisca il proprio database;
+	\item ``\textit{eventual consistency and compensations}'' invece di transazioni distribuite;
+\end{itemize}
+
+\noindent Inoltre, alla base dei microservizi, vi è la \textbf{\textit{deployability indipendente}}, ovvero possibilità di eseguire il deployment di una funzionalità mentre l'intero applicativo è in esecuzione, e la \textbf{\textit{scalabilità orizzontale}}, cioè la possibilità di scalare un singolo servizio.\
+
+Per concludere si può parlare di \textbf{\textit{fault resilient services}}:\ progettare le applicazioni in modo tale che riescano tollerare i fallimenti e quindi riuscire a garantire una \textit{resilienza} del sistema quanta più alta possibile di fronte a fault che certamente avverranno all'interno del sistema.\
+
+\paragraph{Test (bravely)}
+
+\textit{Chaos Monkey} è uno strumento che permette di testare in modo coraggioso il funzionamento di un'applicazione.\
+Perché in modo ``\textit{coraggioso}''?
+È possibile configurarlo in modo tale da uccidere istanze di macchine virtuali, o direttamente container, che vengono eseguiti nell'ambiente di \textbf{produzione}.\
+
+\subsubsection{Dev-Ops}
+
+Per anni lo sviluppo del software si è basato su un gruppo di \textit{developers} e un gruppo di \textit{operators}, le persone che gestiscono i rapporti con i clienti.\
+In \textbf{Dev-Ops} questa distinzione cessa di esistere.\
+
+\begin{center}
+	``\textit{You build it, you run it}''
+\end{center}
+
+\noindent Strumenti a disposizione:
+\begin{itemize}
+	\item Version Control System (VCS), e.g.\ Git \& Github;
+	\item Continuous Integration \& Continuos Development (CI{\&}CD), e.g.\ Jerkins;
+	\item Infrastructure as Code (IaC), e.g.\ Puppet, Chef;
+	\item Application Performance Monitoring (APM), e.g.\ NewRelic.
+\end{itemize}
+
+
+\subsubsection{Osservazioni conclusive}
+
+\textit{Don't even consider microservices unless you have a system that's too complex to manage as a monolith}.\qquad [M.\ Fowler]
+\vspace{12pt}
+
+\noindent Lo stile architetturale basato sui microservizi è un'idea molto importante da tenere in considerazione per le applicazioni enterprise.\
+Ci sono molti vantaggi, come abbreviare il \textbf{lead time} per aggiornare le applicazioni e riuscire a \textbf{scalare in maniera efficace} davanti a numeri drammatici di richieste.\
+
+Tra gli svantaggi principali vi sono l'\textbf{overhead} dovuto alla comunicazione e la \textbf{complessità} del sistema finale; è facile ``sbagliare i tagli'' nella progettazione dell'architettura, quando si eliminano le dipendenze durante il  partizionamento (se ce ne sono troppe si parla di \textit{wrong cuts}).\
+Inoltre la \textbf{decentralizzazione} dei dati comporta controlli per verificarne l'integrità e per ridurne al minimo la duplicazione.\
+
+\begin{center}
+	``\textit{A poor team will always create a poor system}.''
+\end{center}

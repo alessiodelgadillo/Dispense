@@ -1,0 +1,212 @@
+\chapter{Introduzione all'apprendimento degli alberi di decisione}
+
+Gli alberi decisionali rappresentano una disgiunzione di congiunzioni di vincoli sul valore degli attributi, o regole \textit{if-then-else}.\
+In particolare, lo spazio delle ipotesi di un albero di decisione è capace di esprimere qualsiasi funzione finita a valori discreti.\
+
+\section{Top-down induction of Decision Trees}
+
+\textbf{ID3} (Quinlan, 1986) è un algoritmo di base per l'apprendimento di DT.\
+Dato un insieme di esempi di training, l'algoritmo per la creazione di DT esegue la ricerca nello spazio degli alberi decisionali.\
+La costruzione dell'albero è \textit{dall'alto verso il basso}.\
+L'algoritmo esegue una ricerca \textit{greedy}.
+%La domanda fondamentale è ``Quale attributo dovrebbe essere verificato dopo?'',\
+%``Quale domanda ci dà più guadagno di informazioni?''.\
+Seleziona l'\textbf{\textit{attributo migliore}}, quindi crea un nodo discendente per ogni possibile valore di questo attributo e gli esempi sono partizionati in base a questo valore.\
+Il processo viene ripetuto per ogni nodo successore fino a quando tutti gli esempi non vengono classificati correttamente o non sono rimasti attributi.\
+
+\subsubsection{Scegliere l'attributo migliore}
+
+Usiamo la nozione di \textbf{\textit{entropia}}, comunemente usata nella teoria dell'informazione.\
+L'entropia misura l'\textit{impurità} di una raccolta di esempi; dipende dalla distribuzione della variabile casuale $p$.
+\begin{itemize}
+	\item $S$ è una raccolta di esempi di formazione.
+	\item $p_+$ la proporzione di esempi positivi in $S$.
+	\item $p_-$ la proporzione di esempi negativi in $S$.
+\end{itemize}
+\[\mathit{Entropy}(S) \equiv -p_+\log_2 p_+ - p_-\log_2 p_- \]
+con $0\leq p \leq 1\ \mathrm{e}\ 0\leq entropy \leq 1$ e si assume che $0 \log_2 0 =0$.\
+
+\begin{definition}
+	L'\textit{information gain} è la riduzione \textit{attesa} dell'entropia causata dalla partizione degli esempi su un attributo.\
+\end{definition}
+
+\noindent Riduzione attesa dell'entropia conoscendo A:
+\[\mathit{Gain}(S,A) = \mathit{Entropy}(S) - \sum_{v \in \mathit{Values}(A)} \frac{|Sv|}{|S|} \mathit{Entropy}(Sv)\]
+$\mathit{Values}(A)$ possibili valori per $A$.
+$Sv$ sottoinsieme di esempi $S$ per cui $A$ come valore $v$ (\textit{somma ponderata}).\
+
+\vspace{12pt}
+
+\noindent Maggiore è l'information gain, più efficace è l'attributo nella classificazione dei dati di addestramento (maggiore variazione nell'omogeneità della distribuzione delle classi sui sottoinsiemi, massima separazione delle classi).\
+L'\textbf{\textit{omogeneità}} ci consente una classificazione ``chiara''.\
+Poiché l'entropia misura l'omogeneità, l'impurità, della classe del sottoinsieme di esempi, si sceglie A in modo tale da massimizzare $\mathit{Gain}(S,A)$.\
+Lo scopo è separare gli esempi sulla base del target, trovando l'attributo che discrimina gli esempi che appartengono a classi target differenti.\
+
+Il problema dell'information gain è che si favoriscono gli attributi con più valori possibili.\
+Come evitare la generazione di tanti sottoinsiemi troppo piccoli?\
+
+\vspace{12pt}
+\noindent Viene introdotto un correttivo:
+\[\mathit{GainRatio}(S,A) \equiv \frac{\mathit{Gain}(S,A)}{\mathit{SplitInformation}(S,A)}\]
+dove
+\[\mathit{SplitInformation}(S,A) \equiv - \sum_{i=1}^c \frac{|S_i|}{|S|}\log_2\frac{|S_i|}{|S|}\]
+$S_i$ sono gli insiemi ottenuti partizionando sul valore $i$ di $A$, fino ai valori di una classe $c$.\
+
+\textit{SplitInformation} misura l'entropia di $S$ rispetto ai valori di $A$.\
+Più i dati sono dispersi in modo uniforme, più sono alti.\
+
+\textit{GainRatio} penalizza gli attributi che dividono gli esempi in molte piccole classi.\
+
+\begin{flushleft}
+	Problema:\ $\mathit{SplitInformation}(S, A)$ può essere zero o molto piccolo quando $|S_i| \approx |S|$ per qualche valore $i$ $[\log 1 = 0]$.\
+	Un caso estremo è $|S_1| = 0$ $|S_2| = n $.\
+\end{flushleft}
+
+\noindent Per mitigare questo effetto, è stata utilizzata la seguente euristica:
+\begin{enumerate}
+	\item calcolare il guadagno per ogni attributo,
+	\item applicare \textit{GainRatio} solo agli attributi con \textit{Gain} superiore alla media.
+\end{enumerate}
+
+\subsubsection{Ricerca nello spazio delle ipotesi - DT}
+
+ID3 esegue una ricerca (\textit{hill-climbing}) nello spazio del possibile DT dal più semplice al sempre più complesso.\
+\begin{itemize}
+	\item Lo spazio delle ipotesi è completo (rappresenta tutte le funzioni a valori discreti).
+	\item La ricerca mantiene un'unica ipotesi corrente.
+	\item Nessun backtracking, nessuna garanzia di ottimalità (optima locale).
+	\item Utilizza tutti gli esempi disponibili (non incrementali).
+	\item Può terminare prima, accettando classi rumorose.
+\end{itemize}
+
+\subsection{Bias induttivo - DT}
+
+Qual è il bias induttivo dell'apprendimento DT?\
+\textit{Gli alberi più corti sono preferiti a quelli più lunghi} a causa di una ricerca dal semplice al complesso.\
+Questo non basta:\ questo bias sarebbe esibito anche da un semplice algoritmo breadth first che genera tutti i DT e seleziona quello consistente più breve.\
+Si preferiscono alberi che posizionano vicino alla radice gli attributi con \textit{InformationGain} più alto.\
+
+\textbf{Nota}:\ i DT non si limitano a rappresentare tutte le funzioni possibili.\
+Le restrizioni non riguardano lo spazio delle ipotesi, ma la strategia di ricerca.
+
+\subsubsection{Due tipi di bias}
+
+\begin{flushleft}
+	Preferenze o \textbf{bias di ricerca} (dovuti alla strategia di ricerca):\ ID3 ricerca uno spazio \textit{completo} delle ipotesi, ma la strategia di ricerca è \textit{incompleta}.\
+
+	Restrizione o \textbf{bias linguistici} (dovuti all'insieme di ipotesi esprimibili o considerate):\ \textit{Candidate-Elimination} ricerca uno spazio di ipotesi \textit{incompleto}, ma la strategia di ricerca è \textit{completa} (tutte le ipotesi coerenti).\
+\end{flushleft}
+
+\noindent Nell'apprendimento di modelli lineari si usa una combinazione di bias.\
+
+Perché il bias di ricerca può essere preferito al bias linguistico?\
+In ML si utilizzano tipicamente \textit{approcci \textbf{flessibili}} (capacità universale dei modelli), senza escludere a priori la funzione target sconosciuta; naturalmente, flessibile $\rightarrow$ problema di overfitting!\
+
+\subsection{Overfittinng}
+
+La costruzione di alberi che ``si adattano troppo'' agli esempi di training può portare a un ``overfitting''.\
+Si consideri l'errore dell'ipotesi \textit{h} sui dati di training, $error_D(h)$ (errore empirico), e sull'intera distribuzione dei dati $X$, $error_X(h)$ (errore previsto o vero).\
+
+\begin{definition}
+	Un'ipotesi \textit{h} fa \textit{overfitting} sui dati di training se esiste un'ipotesi alternativa $h' \in H$ tale che
+	\[error_D (h) < error_D (h')\quad \mathrm{e}\quad error_X (h') < error_X(h)\]
+	cioè $h'$ si comporta peggio con i dati di training, ma meglio con i dati invisibili.\
+\end{definition}
+
+\noindent Approcci flessibili possono facilmente incontrare overfitting.\
+
+\subsubsection{Evitare l'overfitting nei DT}
+
+``Evitare'' non è corretto:\ non esiste un modo per evitarlo, ma esistono strategie per gestirlo in modo consapevole.\
+Due strategie:
+
+\begin{enumerate}
+	\item Fermare la crescita dell'albero prima di avere una classificazione perfetta.
+	\item Consentire all'albero di fare \textit{overfitting} di dati e quindi \textit{post-potare} l'albero.
+\end{enumerate}
+
+\noindent Come valutare l'effetto?\
+\textit{Training and validation set}:\ dividere il training set in due parti (training e validazione) e utilizzare il set di validazione per valutare l'utilità del post-potatura.\
+Altri approcci:
+\begin{itemize}
+	\item Utilizzare un test statistico per stimare l'effetto dell'espansione o della potatura.
+	\item \textit{Minimum description length principle}:\ utilizza una misura della complessità della codifica del DT e degli esempi e interrompe la crescita dell'albero quando questa dimensione di codifica è minima.
+\end{itemize}
+
+\subsubsection{Reduced-error pruning}
+
+Ogni nodo è un candidato per l'eliminazione.\
+La potatura consiste nel rimuovere un sottoalbero radicato in un nodo:\ il nodo diventa una foglia e viene assegnata la classificazione più comune.
+I nodi vengono rimossi solo se l'albero risultante non ha prestazioni peggiori sul \textbf{validation set}:\ ad ogni iterazione viene eliminato il nodo la cui rimozione aumenta maggiormente la precisione sul validation set.\
+La potatura si interrompe quando nessuna potatura aumenta la precisione.\
+
+\subsubsection{Regola post-pruning}
+
+\begin{enumerate}
+	\item Creare l'albero decisionale dal training set.
+	\item Convertire l'albero in un insieme equivalente di regole:
+	      \begin{itemize}
+		      \item ogni percorso corrisponde a una regola;
+		      \item ogni nodo lungo un percorso corrisponde a una pre-condizione;
+		      \item ogni classificazione foglia alla post-condizione.
+	      \end{itemize}
+	\item Potare (generalizzare) ogni regola rimuovendo quelle precondizioni la cui rimozione migliora la precisione sul \textit{validation set} e sul training con una misura pessimistica, statisticamente ispirata (euristica).
+	\item Ordinare le regole in base all'ordine di accuratezza stimato e considerarle in sequenza durante la classificazione di nuove istanze.
+\end{enumerate}
+
+\noindent Ogni percorso distinto produce una regola diversa:\ la rimozione di una condizione può essere basata su un criterio locale (contestuale).\
+L'eliminazione delle precondizioni è \textbf{specifica per le regole}, l'eliminazione dei nodi è globale e influisce su tutte le regole.\
+La conversione in regole migliora la leggibilità per gli esseri umani.
+
+\subsection{Gestire attributi a valore continuo}
+
+Finora sono stati considerati valori discreti sia per gli attributi che per il risultato.\
+
+\begin{flushleft}
+	Dato un attributo a valore continuo $A$, creare dinamicamente un nuovo attributo $A_c$
+	\[A_c = \mathit{True}\ \mathrm{se}\ A < c,\ \mathit{False}\ \mathrm{altrimenti}\]
+	Come determinare il valore di soglia $c$?
+\end{flushleft}
+
+\noindent Determinare le soglie dei candidati calcolando la media dei valori consecutivi in caso di modifica della classificazione.\
+Valutare le soglie dei candidati (attributi) in base al guadagno di informazioni.\
+Il nuovo attributo compete con gli altri.\
+
+\subsection{Gestione dei dati di training incompleti}
+
+Come affrontare la \textbf{mancanza} del valore di qualche attributo?\
+\textbf{\textit{Imputation}}:\ utilizzare altri esempi per indovinare l'attributo (all'interno dei dati di addestramento in un dato nodo).
+\begin{enumerate}
+	\item \textit{Più comune}:\ assegnare il valore più comune tra tutti gli esempi di addestramento al nodo/a quelli della stessa classe.
+	\item Assegnare una probabilità a ciascun valore, in base alle frequenze, e assegnare i valori all'attributo mancante secondo questa distribuzione di probabilità (aggiungendo più esempi ponderati per probabilità).
+\end{enumerate}
+
+\noindent I valori mancanti nelle nuove istanze da classificare vengono trattati di conseguenza (ponderazione) e viene scelta la classificazione più probabile.\
+
+\subsection{Gestione di attributi con costi differenti}
+
+Gli attributi dell'istanza possono avere un costo associato:\ si preferirebbero alberi decisionali che utilizzano attributi a basso costo.\
+ID3 può essere modificato per tenere conto dei costi:
+\begin{enumerate}
+	\item Tan e Schlimmer (1990)
+	      \[ \frac{\mathit{Gain}^2(S,A)}{\mathit{Cost}(S,A)}\]
+	\item Nunez (1988)
+	      \[\frac{2^{\mathit{Gain}(S,A)}-1}{\left(\mathit{Cost}(A) +1\right)^w}, \quad \mathrm{dove}\ w \in [0,1]\]
+\end{enumerate}
+
+\subsubsection{Una visione geometrica}
+
+Confini decisionali che possono essere prodotti da un DT:\ gli alberi decisionali dividono lo spazio di input in rettangoli paralleli all'asse e etichettano ogni rettangolo con una delle classi $K$ (foglia dell'albero).\
+
+\subsection{Conclusioni}
+
+DT è un approccio popolare per la \textbf{classificazione} in un numero discreto di classi.
+\begin{itemize}
+	\item Spazio delle ipotesi espressive nell'area degli approcci proposizionali basati su regole.
+	\item Dati da robusti a rumorosi.\ Gestisce i valori degli attributi mancanti.
+	\item Facile da capire (regole esplicite \textit{if-then-else}, a meno che non siano enormi).\
+	\item Molte estensioni allo schema di base\dots
+\end{itemize}
+
+\noindent \textit{Bias} linguistici e di ricerca:\ ID3 ricerca uno spazio di ipotesi completo, con una strategia \textit{greedy} e incompleta.\
+Approccio flessibile:\ l'\textit{overfitting} è una questione importante, affrontata dalla post-potatura e dalla generalizzazione delle regole indotte.\

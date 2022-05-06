@@ -1,0 +1,41 @@
+\chapter{Fondamenti di Strutturazione di Sistemi di Elaborazione}
+
+\section{Strutturazione a livelli di interpretazione}
+
+\subsection{Macchine virtuali e supporto a tempo di esecuzione}
+
+Le funzionalità di un sistema di elaborazione nel suo complesso possono essere viste come ripartite, secondo un certo numero di livelli, o \textbf{macchine virtuali} $\{\mathrm{MV}_0,\ \mathrm{MV}_1,\ \dots\ , \mathrm{MV}_n\}$.\
+I livelli $\{\mathrm{MV}_0,\ \mathrm{MV}_1,\ \dots\ , \mathrm{MV}_n\}$ sono caratterizzati da un proprio \textbf{linguaggio} e sono ordinati secondo una \textbf{relazione gerarchica}.\
+Ciò significa che ogni istruzione primitiva $\mathrm{I}_k^i$, o \textbf{\textit{meccanismo}} del linguaggio $\mathrm{L}_i$ ($i>0$) è implementata da un programma $\mathrm{P}_k$, o \textbf{\textit{politica}}, scritta nel linguaggio $\mathrm{L}_j$.
+
+Il concetto che sta alla base della strutturazione a livelli è il seguente:
+
+\begin{enumerate}
+    \item per ogni livello $\mathrm{MV}_i$ ($i>0$) l'insieme dei livelli $\{\mathrm{MV}_j\ mid  0 \leq j < i\}$ permette di implementare complessivamente il \textbf{supporto a tempo di esecuzione} di $\mathbf{L}_i$, $\mathbf{STE(L_i)}$, cioè una collezione di algoritmi e strutture dati che provvedono all'interpretazione dei meccanismi di $\mathrm{L}_i$;
+    \item \textit{tale supporto è a sua volta strutturato in modo gerarchico} riconoscendo un livello più alto $\mathrm{MV}_{i-1}$ (per $i>1$) il cui supporto a tempo di esecuzione è implementato dai livelli $\{\mathrm{MV}_h \mid 0 < h < i-1\}$ e così via.
+\end{enumerate}
+
+\noindent Questi principi sono alla base di una strutturazione dei sistemi con elevate potenzialità di \textit{modularità}, \textit{modificabilità}, \textit{portabilità}, \textit{manutenibilità} e \textit{testabilità}.
+
+Il livello $\mathrm{MV}_0$ è tipicamente quello dei componenti fisici (elettronici) a partire dai quali viene costruita un'astrazione, o virtualizzazione, sempre maggiore delle funzionalità di interesse per il sistema.\
+Il livello $\mathrm{MV}_n$ è quello che possiamo chiamare delle ``applicazioni''.
+
+Notiamo che per rendere possibile l'implementazione di un meccanismo $\mathrm{I}_k^i$, di $\mathrm{MV}_i$ occorre definire con chiarezza un'\textbf{interfaccia} nei confronti del livello $\mathrm{MV}_j$ che lo implementa.\
+La natura di questa interfaccia sarà di volta in volta dipendente dallo specifico livello considerato.
+
+\subsection{Compilazione e interpretazione}
+
+La traduzione del programma \textit{sorgente} scritto in linguaggio ad alto livello, nel programma oggetto o \textit{eseguibile}, può essere effettuata secondo una delle due ben note tecniche, la \textit{compilazione} e l'\textit{interpretazione}, o loro combinazioni.\
+In entrambi i casi, il punto di partenza è la sequenza di comandi, costituenti il programma scritto nel linguaggio ad alto livello, operanti su determinati insiemi di dati.\
+Un compilatore o un interprete sono essi stessi dei programmi, già disponibili in forma eseguibile, che accettano come dato d'ingresso il programma sorgente e producono come dato di uscita il programma eseguibile.
+
+In generale nella traduzione da parte di un interprete, poiché questa avviene passo per passo, non viene considerato il contesto in cui si trova il comando da interpretare a ogni passo, applicando sempre \textit{la stessa regola di traduzione} per uno stesso comando.\
+Invece, la traduzione da parte di un compilatore prende in considerazione una sequenza, più o meno ampia, in cui si trova inserito un comando e, per uno stesso comando, sceglie tra \textit{regole di traduzione diverse} allo scopo di ottimizzare le prestazioni.
+
+\section{Strutturazione a moduli}
+
+In un sistema a qualunque livello, \textit{una funzionalità complessa è ottenuta mediante composizione di funzionalità più semplici}: ognuna di queste, affidata a un modulo (autonomo e sequenziale), è specializzata verso determinati obiettivi, ma la cooperazione tra moduli rende possibile l'implementazione della funzionalità complessiva del sistema.
+
+\subsection{Modello di calcolatore general - purpose a programma memorizzato}
+
+\textbf{Modello Von Neumann}: il programma assembler da eseguire risiede in una memoria accessibile al Processore, detta \textit{Memoria Principale} del calcolatore. Questo comporta che le \textit{istruzioni del programma assembler}, rappresentate in binario, siano \textit{memorizzate in locazioni di memoria}, che possono essere lette dal Processore nel giusto ordine: \textit{è il Processore stesso (il suo microprogramma) che reperisce le istruzioni dalla memoria e provvede alla loro esecuzione (interpretazione)}.

@@ -1,0 +1,114 @@
+\chapter{Protocollo Diffie-Hellman e cifrario di El Gamal}
+
+\section{Protocollo Diffie-Hellman}
+
+In un contesto di comunicazione, i cifrari a chiave pubblica vengono sempre utilizzati per lo \textbf{scambio delle chiavi}:\ si parla di \textit{cifrari ibridi}.\
+Se Alice e Bob vogliono utilizzare l'AES per aprire una sessione di comunicazione sicura, devono concordare insieme una chiave simmetrica:\ useranno l'RSA per scambiarsi la chiave e l'AES per proteggere la loro comunicazione.\
+
+Alice:
+\begin{enumerate}
+    \item sceglie una chiave $k_s$ per AES
+    \item la cifra con la chiave pubblica RSA di Bob
+    \item cifra il messaggio con $k_s$
+    \item invia i due crittogrammi a Bob
+          \[\langle C_{\mathit{RSA}}\left(k_s, k_{\mathrm{Bob}}[\mathit{pub}]\right), C_{\mathit{AES}}(m, k_S)\rangle\]
+\end{enumerate}
+
+\noindent Bob, invece, decifra il primo crittogramma con $k_{\mathrm{Bob}}[\mathit{priv}]$, trova $k_s$ e decifra il secondo crittogramma.\
+
+Poiché la chiave pubblica viene usata per cifrare una sequenza imprevedibile (la chiave deve sempre essere generata casualmente) si è al riparo da attacchi di tipo \textit{choosen plain text}, al quale la crittografia a chiave pubblica è soggetta per sua natura.\
+
+Per usare in sicurezza l'RSA è necessario usare chiavi molto lunghe, ciò significa che devono essere eseguite operazioni aritmetiche, elevamenti a potenza, calcolo dell'inverso\dots di numeri molto grandi; di conseguenza si tratta di un cifrario molto ``costoso''.\
+Tuttavia, poiché la chiave dell'AES è una sequenza breve (128 o 256 bit) e deve essere cifrata una volta sola all'inizio della sessione, il costo si ammortizza un po' sulla comunicazione successiva.\
+
+Questo modo di usare la crittografia a chiave pubblica (e.g.\ RSA) per scambiarsi la chiave segreta da usare poi in una crittografia a chiave segreta (e.g.\ AES) ha una \textbf{distribuzione delle responsabilità per la generazione delle chiavi troppo eterogenea}:\ chi deve generare la chiave privata è sempre il mittente.
+
+In un ambiente distribuito come la rete, si preferisce una divisione più bilanciata delle responsabilità; perciò spesso, a questo approccio ibrido, si preferisce il \textbf{protocollo Diffie-Hellman}.\
+Si tratta di un algoritmo per generare e scambiare una chiave di sessione per un cifrario simmetrico.\
+A differenza dell'utilizzo di RSA per lo scambio delle chiavi, il protocollo DH distribuisce le responsabilità più omogeneamente mettendo mittente e destinatario sullo stesso piano per quanto riguarda la generazione della chiave privata.\
+
+\subsection{Funzionamento}
+
+L'idea è che Alice e Bob si scambino in chiaro pezzi di informazioni che verranno combinati insieme a informazioni segrete e private da mittente e destinatario per creare la chiave.\
+
+\begin{enumerate}
+    \item Alice e Bob si accordano pubblicamente su un numero $p$ molto grande e su un generatore $g$ di $\mathbb{Z}_p^*$ (insieme di tutti i numeri interi minori di $p$ e coprimi con $p$).\ Dato che $p$ è primo, esisterà sempre un generatore.\
+          \[\mathbb{Z}_p^* = \{1,2,\dots, p-1\} = \{ g^k\ \mathit{mod}\ p,\  1\leq k\leq p-1\}\]
+    \item Dopo aver scelto $g$ e $p$
+\end{enumerate}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{l|l}
+        \multicolumn{1}{c}{Alice}                             & \multicolumn{1}{c}{Bob}                               \\\hline
+        sceglie a caso $1< x < p-1$                           & sceglie a caso $1< y < p-1$                           \\
+        e calcola  $A = g^x\ \mathit{mod}\ p$                 & e calcola  $B = g^y\ \mathit{mod}\ p$                 \\
+                                                              &                                                       \\
+        manda A a Bob                                         & manda B a Alice                                       \\
+                                                              &                                                       \\
+        riceve B da Bob e calcola                             & riceve A da Alice e calcola                           \\
+        $k_s = B^x\ \mathit{mod} p = g^{yx}\ \mathit{mod}\ n$ & $k_s = A^y\ \mathit{mod} p = g^{yx}\ \mathit{mod}\ n$ \\
+    \end{tabular}
+\end{table}
+
+\subsection{Attacchi}
+
+\subsubsection{Attacchi passivi}
+
+Nell'attacco passivo, il crittoanalista spia la comunicazione senza intervenire nel processo.\
+
+Il crittoanalista conosce $p$, $g$, $A$ e $B$ e per calcolare $k_s$ deve trovare $x$ e $y$.\
+Tuttavia, $x$ e $y$ sono legate alle relazioni $A = g^x\ \mathit{mod}\ p$ e $B = g^y\ \mathit{mod}\ p$ e per trovarle bisognerebbe risolvere un logaritmo discreto, cioè un problema difficile quanto la fattorizzazione.\
+Gli attacchi passivi sono pressoché inutili.
+
+\subsubsection{Attacchi attivi}
+
+Il protocollo Diffie-Hellman è vulnerabile agli attacchi attivi ``\textit{man-in-the-middle}''.\
+Quando Alice e Bob si scambiano $A$ e $B$, Eve li sostituisce sul canale con
+\[E = g^z\ \mathit{mod}\ p\qquad z \in (1,p-1)\]
+A questo punto entrambi ricevono $E$ (pensando che sia $A/B$) e si costruiscono rispettivamente
+\[k_A = E^x\ \mathit{mod}\ p = g^{xz}\ \mathit{mod}\ p\quad \mathrm{e}\quad k_B = E^y\ \mathit{mod}\ p = g^{yz}\ \mathit{mod}\ p\]
+Chiaramente $k_A \neq k_B$ e Eve li conosce entrambi:
+\[k_A = A^z\ \mathit{mod}\ p = g^{xz}\ \mathit{mod}\ p \qquad k_B = B^z\ \mathit{mod}\ p = g^{yz}\ \mathit{mod}\ p\]
+Perché tutto funzioni correttamente Eve deve intercettare ogni crittogramma diretto in una delle due direzioni, decifrarlo con la chiave corrispondente a quella del mittente, leggerlo, cifrarlo con la chiave corrispondente a quella del destinatario e inviarglielo.\
+Se non facesse così, Alice e Bob non potrebbero decifrare i loro messaggi correttamente e si insospettirebbero.\
+
+L'unico modo per proteggersi da questo tipo di attacchi è ricorrere ai \textbf{certificati digitali} per autenticare le chiavi pubbliche.\
+
+\section{Cifrario di El Gamal}
+
+Si tratta di un cifrario a chiave pubblica alternativo all'RSA e che usa come funzione one-way trap-door il logaritmo discreto.\
+
+\vspace{12pt}
+\noindent Bob
+\begin{itemize}
+    \item Sceglie $p$, numero primo molto grande, e $g$, generatore per $\mathbb{Z}_p^*$
+    \item Sceglie $k_{\mathit{priv}} = \langle x \rangle,\ 2\leq x\leq p-2$
+    \item Calcola $y=g^x\ \mathit{mod}\ p$
+    \item Pubblica $k_{\mathit{pub}} = \langle p,g,y \rangle$
+\end{itemize}
+Alice
+\begin{itemize}
+    \item Sceglie un messaggio $m$ tale che $0\leq m <p$
+    \item Si procura $k_{\mathit{pub}} = \langle p,g,y \rangle$
+    \item Sceglie a caso $2\leq r \leq p-2$ segreto e calcola $c = g^r\ \mathit{mod}\ p$
+    \item Calcola $d=m \cdot y^r\ \mathit{mod}\ p$
+    \item Invia a Bob la coppia $\langle c,d \rangle$
+\end{itemize}
+
+\vspace{12pt}
+
+\noindent Bob riceve $\langle c,d \rangle$ e decifra:\
+\[m = d \cdot \left(c^x\right)^{-1}\ \mathit{mod}\ p\]
+
+\subsubsection{Correttezza}
+
+\[\frac{d}{c^x}\ \mathit{mod}\ p = \frac{y^r \cdot m}{c^x}\ \mathit{mod}\ p = \frac{g^{xr} \cdot m}{(g^r)^x}\ \mathit{mod}\ p = m\ \mathit{mod}\ p = m\]
+
+\subsubsection{Sicurezza}
+
+Il crittoanalista conosce $p, g, y, c$ e $d$ (tutto tranne $r$ e $x$).\
+Se conoscesse $x$, sarebbe in grado di calcolare \[m = \frac{d}{c^x}\ \mathit{mod}\ p\] mentre se conoscesse $r$ potrebbe calcolare
+\[m = \frac{d}{y^r}\ \mathit{mod}\ p = \frac{y^r \cdot m}{y^r}\ \mathit{mod}\ p = m \]
+Il protocollo è sicuro perché $r$ è protetto all'interno di $c = g^r\ \mathit{mod}\ p$ che, essendo una potenza in modulo, necessita del logaritmo discreto (problema non polinomiale) per essere invertito.\
+Stesso discorso vale per $x$ che è protetto dentro la formula $y = g^x\ \mathit{mod}\ p$.

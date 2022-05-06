@@ -1,0 +1,14 @@
+\section{Idea intuitiva di Algoritmo}
+
+Ci sono moltissimi formalismi che sono stati proposti per esprimere algoritmi, tra cui Macchine di Turing, funzioni ricorsive, $\lambda$-calcolo, Random Access Machine, algoritmi di Markov, grammatiche generali, sistemi di Post e linguaggi di programmazione.\
+In ciascuno di questi gli algoritmi devono soddisfare i seguenti requisiti:
+
+\begin{itemize}
+    \item[i)] un algoritmo è costituito da un insieme \textit{finito} di istruzioni;
+    \item[ii)] le istruzioni possibili sono in numero \textit{finito} e hanno un effetto \textit{limitato} su dati \textit{discreti}, esprimibili in maniera \textit{finita};
+    \item[iii)] una computazione è eseguita per \textit{passi discreti} (singoli), senza ricorrere a sistemi analogici o metodi continui, ciascuno dei quali impiega un tempo \textit{finito};
+    \item[iv)] ogni passo dipende solo dai precedenti e da una porzione finita dei dati, in modo deterministico (cioè senza essere soggetti ad alcuna distribuzione probabilistica non banale);
+    \item[v)] \textit{non c'è limite} al \textit{numero di passi} necessari all'esecuzione di un algoritmo, né alla \textit{memoria} richiesta per contenere i dati (finiti) iniziali, intermedi ed eventualmente finali (si noti che il numero dei passi di calcolo è finito solo quando non vi sia alcuna istruzione dell'algoritmo che si possa eseguire, sia perché abbiamo trovato il risultato e raggiunto uno stato finale, sia perché ci troviamo in uno stato di stallo).
+\end{itemize}
+
+\noindent Sotto queste ipotesi, tutte le formulazioni fin ad ora sviluppate sono equivalenti e si \textit{postula} che lo saranno anche tutte quelle future\footnote{Un'eccezione è costituita dalle macchine concorrenti/interattive in cui i dati di ingresso variano nel tempo; inoltre vi sono formalismi che tengono conto di quantità continue quali gli algoritmi probabilistici o stocastici, usati per esempio nella descrizione di sistemi biologici o di sistemi ibridi, anche se tali quantità sono poi approssimate a valori discreti, ricadendo così nel caso che consideriamo qui; altre eccezioni sono gli algoritmi non-deterministici, ma per ogni algoritmo di quest'ultimo tipo vi è un algoritmo deterministico del tutto equivalente (vedi teorema \ref{simulazione_non-deterministica}).}.

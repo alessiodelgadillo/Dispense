@@ -1,0 +1,80 @@
+\chapter{nDPI}
+
+\section{Introduzione}
+
+La nDPI è una liberia che permette di fare la \textbf{Deep Packet Inspection}:\ un'attività che analizza i pacchetti di rete oltre agli header di protocollo; con altri tool di analisi dei pacchetti di rete come Wireshark è possibile analizzare principalmente gli header dei pacchetti (dove ci sono IP e porte).\
+L'analisi di Wireshark è molto interessante però non è esaustiva (specialmente in questi ultimi anni):\ il traffico sta diventando sempre più complicato da gestire perché i protocolli esistenti sono continuamente in decrescita.\
+
+Un tempo veniva creato un protocollo per ogni cosa ma, con l'avvento del Web, HTTP è diventato uno dei protocolli predominanti; tuttavia, col tempo HTTP ha perso il senso per cui è stato inventato, ovvero per risolvere gli \textit{hypertext}, ed è diventato una sorta di protocollo di trasferimento.\
+Quindi, dato che i protocolli si stanno appiattendo, cioè vengono impiegati sempre gli stessi e talvolta vengono stravolti dal loro utilizzo originale, è necessario analizzare il traffico in maniera più profonda ovvero andare a guardare il payload.\
+Il tool nDPI permette questo tipo d'analisi.
+
+I motivi per cui si vuole monitorare il payload sono vari, ma il più importante è \textbf{\textit{classificare il traffico}} (per capire se ci sono contenuti malevoli o non consentiti sulla nostra rete).\
+Parlare di HTTP o UDP non ha più alcun senso poiché è troppo generico:\ è necessario capire cosa sia contenuto nei pacchetti per capire che tipo di traffico attraversi una rete e, di conseguenza, prendere delle decisioni.\
+Ad esempio, potremmo rallentare, bloccare o velocizzare un determinato traffico per proteggere la rete o aumentarne le prestazioni.\
+
+\section{Classificare il traffico di rete}
+
+Classificare il traffico non significa spiarlo, ma capirne la natura, sia per sicurezza che per migliorare l'esperienza dell'utente ottimizzando parametri di rete specifici.\
+I principali metodi di classificazione includono
+\begin{itemize}
+    \item \textbf{Classificazione della porta} TCP/UDP:\ agli albori di Internet, i protocolli di traffico di rete venivano identificati per protocollo e porta.\ Può classificare solo protocolli applicativi che operano su porte note (no rpcbind o portmap):\ facile da imbrogliare e quindi inaffidabile (TCP/80 $\neq$ HTTP).
+    \item \textbf{Classificazione basata su QoS} (DSCP):\ simile alla classificazione delle porte ma basata sui tag QoS.\ Di solito ignorato in quanto è facile da imbrogliare e falsificare.\
+    \item \textbf{Classificazione statistica}:\ classificazione dei pacchetti IP (dimensione, porta, flag, indirizzi IP) e dei flussi (durata, frequenza,\ \dots) basato su regole scritte manualmente, o automaticamente utilizzando algoritmi di \textit{machine learning} (ML).\ Il machine learning richiede un training set di ottima qualità e di solito è intensivo dal punto di vista computazionale.\
+          Il tasso di rilevamento può arrivare fino al 95\% per i casi che erano coperti dal training set e scarsa precisione per tutti gli altri casi.\
+    \item \textbf{Deep Packet Inspection}:\ tecnica che ispeziona il carico utile del pacchetto; computazionalmente intensivo rispetto alla semplice analisi dell'intestazione del pacchetto.\ Preoccupazioni per la privacy e la riservatezza dei dati ispezionati.\ La crittografia sta diventando pervasiva, sfidando così le tecniche DPI.
+          Nessun falso positivo a meno che gli strumenti DPI non utilizzino metodi statistici o analisi dell'intervallo/flusso IP.
+\end{itemize}
+
+\subsubsection{Usare DPI nel monitoraggio del traffico}
+
+L'analisi dell'intestazione del pacchetto non è più sufficiente in quanto è \textit{inaffidabile} e quindi \textit{inutile}.\
+Gli amministratori di sicurezza e di rete vogliono sapere quali sono i veri protocolli che scorrono su una rete, indipendentemente dalla porta utilizzata.\
+
+L'estrazione selettiva dei metadati (ad es.\ \texttt{URL HTTP} o User-Agent) è necessaria per eseguire un monitoraggio accurato e quindi questa attività dovrebbe essere eseguita dal toolkit DPI senza replicarlo sulle applicazioni di monitoraggio.\
+
+\subsection{Welcome to nDPI}
+
+Nel 2012 è stato deciso di sviluppare un toolkit GNU LGPL DPI (basato su un progetto non mantenuto chiamato OpenDPI) al fine di costruire un livello DPI \textit{aperto} per applicazioni \texttt{ntop} e di terze parti (Wireshark, netfilter, strumenti ML,\ \dots).\
+Ci sono più di 240 protocolli supportati divise in famiglie (è importante sapere la famiglia poiché il protocollo non è sempre conosciuto a livello globale):\ P2P (Skype, BitTorrent), messaging (Viber, Whatsapp, MSN, Facebook), multimedia (YouTube, Last.gm, iTunes), conferenza (Webex, CitrixOnLine), streaming (Zattoo, Icecast, Shoutcast, Netflix), business (VNC, RDP, Citrix, *SQL).
+
+\subsubsection{Cos'è un protocollo in nDPI?}
+
+Ogni protocollo è identificato come $\langle \mathtt{principale} \rangle . \langle \mathtt{minore} \rangle$, per esempio:\ \texttt{DNS.Facebook} o \texttt{QUIC.YouTube} e \texttt{QUIC.YouTubeUpload}.\
+\textbf{Nota}:\ Skype o Facebook sono protocolli nel mondo nDPI ma non per IETF.\
+
+La prima domanda che le persone chiedono quando devono valutare un toolkit DPI è:\ quanti protocolli sono supportati?\ Ma questa non è la domanda giusta.
+
+Oggi la maggior parte dei protocolli sono basati su HTTP/TLS.\
+nDPI include il supporto per il rilevamento di protocolli basati su stringhe:\ nome della query DNS, campi di intestazione host/server HTTP, TLS/QUIC SNI (indicazione del nome del server).
+
+\subsubsection{Categorie nDPI}
+
+I protocolli sono troppi e aumentano ogni giorno; molte persone non hanno familiarità con i nomi di protocollo.\
+Spesso le persone si fanno domande del tipo ``Come posso impedire ai miei figli di utilizzare i social network?''.\
+Soluzione:\
+nDPI consente di raggruppare i protocolli in categorie definite dall'utente come VoIP, P2P, Cloud,\ \dots le categorie possono includere migliaia di voci e possono essere (ri)caricate dinamicamente.\
+
+\subsubsection{nDPI Internals}
+
+Le applicazioni che utilizzano nDPI sono responsabili della ``cattura (inoltro in modalità inline) dei pacchetti'' e del mantenimento dello stato del flusso.\
+In base al protocollo/porta di flusso, tutti i dissettori che possono potenzialmente corrispondere al flusso vengono applicati in sequenza a partire da quello che più probabilmente corrisponde.\
+Ogni dissettore è codificato in un file ``\texttt{.c}'' diverso per motivi di modularità ed estensibilità.\
+C'è un file \texttt{.c} aggiuntivo per la corrispondenza IP (ad esempio, identificare il traffico Spotify basato su Spotify AS).
+
+\subsubsection{Ciclo di vita della classificazione}
+
+In base al tipo di traffico i dissettori vengono applicati in sequenza a partire da quello che ha più probabilità di corrispondere al flusso; ad esempio, per TCP/80 viene provato per primo il dissettore HTTP.\
+Ogni flusso mantiene lo stato per i dissettori non corrispondenti per saltarli nelle iterazioni future.\
+L'analisi dura fino a quando non viene trovata una corrispondenza o dopo troppi tentativi (8 pacchetti è il limite superiore nella nostra esperienza).\
+
+\subsubsection{Cattura del traffico di rete}
+
+Come detto in precedenza nDPI non cattura il traffico, ma ne esegue un'analisi:\ questo significa che il traffico gli deve essere passato in qualche modo.\
+La libreria ha anche la necessità di dividere il traffico in connessioni, quindi quando gli viene passato un pacchetto gli deve essere specificato anche il suo flusso di appartenenza.\
+
+La cattura del traffico di rete che non è locale può essere eseguita tramite un \textit{port mirror} (copia del traffico di rete) oppure si utilizza un \textit{network-tap}.\
+\begin{itemize}
+    \item\textbf{Port mirror}:\ su una determinata porta dove viene attaccato l'analizzatore di rete, si duplica il traffico (SPAN) della porta che si vuole analizzare (ad esempio tramite nDPI).\ Se la porta di destinazione non ha una capacità di destinazione superiore (quantomeno doppia) a quella sorgente, alcuni pacchetti possono essere persi; per nDPI questo è un problema visto che analizza solamente la parte iniziale di una comunicazione (se mi perdo dei pacchetti diventa quindi difficile ricostruire il traffico successivo).\
+    \item\textbf{Network Tap}:\ il traffico entra ed esce dal tap per poi essere indirizzato sulle porte collegate al dispositivo di cattura/analisi del traffico.\ Il vantaggio dell'utilizzo del tap è che non si ha la perdita di pacchetti, questo perché si cattura una direzione per volta; il vero problema è che si necessita di due porte per l'analisi (una per ogni direzione del traffico, quindi una per il traffico in entrata e una per il traffico in uscita).
+\end{itemize}

@@ -1,0 +1,254 @@
+\chapter{Concept Learning}
+
+\textbf{Concept Learning}:\ inferire una \textit{funzione booleana} da esempi di addestramento positivi e negativi $C: X \rightarrow \{t, f\}$ or $\{+, -\}$ or $\{0,1\}$, dove X è detto \textit{spazio d'istanza}.\
+
+\begin{definition}
+	$h: X \rightarrow \{0,1\}$ \textbf{soddisfa} \textit{x} se $h(x)=1$.
+\end{definition}
+
+\begin{definition}
+	Un ``esempio'' è una coppia $\langle \mathrm{x,c(x)} \rangle$ in D (o \textit{TR set}).
+\end{definition}
+
+\begin{definition}
+	Un'ipotesi \textit{h} è \textbf{consistente} con
+	\begin{itemize}
+		\item un esempio $\langle x,c(x) \rangle$, \textit{x} in X, se $h(x)=c(x)$;
+		\item D, se $h(x)=c(x)$ per ogni esempio di addestramento $\langle \mathrm{x,c(x)} \rangle$ in D.
+	\end{itemize}
+\end{definition}
+
+\subsubsection{Esempio}
+
+Abbiamo una funzione sconosciuta con quattro input, una funzione di uscita e una tabella di verità:\ conosciamo alcuni dei valori di uscita delle combinazioni degli input; l'obiettivo è trovare una funzione \textit{h} che approssimi la funzione sconosciuta.\
+Si tratta quindi di un \textbf{problema mal posto} (inverso):\ possiamo violare l'esistenza, l'unicità, la stabilità della soluzione (o delle soluzioni).\
+
+\noindent Ci sono $2^{16} = 2^{2^4} = 65536$ possibili funzioni booleane su quattro funzioni di input:\ non possiamo capire quale sia corretta finché non abbiamo visto ogni possibile coppia input-output; dopo 7 esempi abbiamo ancora $2^9$ possibilità.\
+Nel caso generale:\
+\[ |H| = 2^{\# \mathrm{istanze}} = 2^{2^n} \]
+per ingressi/uscite binari, $n =$ dimensione ingresso.
+
+\textbf{Lavoreremo con uno spazio di ipotesi ristretto}:\ iniziamo scegliendo uno spazio di ipotesi \textit{H} che è notevolmente più piccolo dello spazio di tutte le possibili funzioni (\textit{language bias}).\
+Vedremo:
+\begin{itemize}
+	\item \textbf{Regole congiuntive} (semplici) (in una H discreta e finita)
+	\item \textbf{Funzioni lineari} (in un H continuo e infinito)
+\end{itemize}
+
+\noindent Vedremo come organizzare efficientemente la ricerca in questo spazio discreto:\ alcuni algoritmi per un insieme molto ristretto di ipotesi; non solo regole congiuntive, ma assumeremo che non ci siano \textbf{rumori} nei dati.\
+
+\section{Regole congiuntive}
+
+Quante regole congiuntive ci sono?\
+Quante ipotesi \textit{h} è possibile fare?\
+È possibile avere una regola congiuntiva che è sempre vera, quattro singole, sei coppie, quattro triple o una quadrupla, per un totale di 16.\
+Nel caso generale:
+\begin{itemize}
+	\item Letterali positivi, per esempio:\ $h_1 = l_2$, $h_2 = (l_1\ and\ l_2)$, $h_3 = true$,\ \dots\
+	      \textbf{	Regole congiuntive semplici}:\ $|H| = 2^n$
+	\item Letterali (anche \textbf{\textit{not}}($l_i$):\ $|H| = 3^n+1$
+\end{itemize}
+
+\subsection{Rappresentazione delle ipotesi}
+
+Un'ipotesi \textit{h} è una congiunzione di vincoli sugli attributi.\
+Ogni vincolo può essere un valore specifico, un valore ``non importante'' oppure un valore non permesso (ipotesi nulla).\
+
+\subsection{Ipotesi di apprendimento induttivo}
+
+Assumiamo che:
+
+\vspace{12pt}
+\noindent``\textit{Qualsiasi ipotesi trovata per approssimare la funzione obiettivo ben oltre gli esempi di addestramento, approssimerà bene anche la funzione obiettivo rispetto agli esempi non osservati}''.
+
+\vspace{12pt}
+
+\noindent Si ricerca quindi una funzione $h(x)=c(x)\ \forall x \in D$, cioè \textit{consistente} con D, ma non è dato sapere se $h(x)=c(x)\ \forall x \in X$.\
+
+Tuttavia, le dimensioni da esplorare nello spazio delle ipotesi sono molto grandi, anche infinite:\ la strutturazione dello spazio di ricerca è un aspetto strategico per rendere efficiente tale ricerca.\
+
+\subsection{General to Specific Ordering}
+
+\begin{definition}
+
+	Siano $h_j$ e $h_k$ funzioni a valori booleani definite su $X$.\
+	Allora $h_j$ è \textbf{più generale o uguale} a $h_k$ (scritto $h_j \geq h_k$) \textit{sse}
+	\[
+		\forall x \in X:\ [\left(h_k(x)=1\right) \rightarrow \left(h_j(x)=1\right)]
+	\]
+\end{definition}
+
+\noindent Esempi su binario $l_i$:\ $l_1 \geq (l_1\ \land\ l_2),\ l_1\ versus\ l_2$ non confrontabile.
+
+La relazione $\geq$ impone un \textit{ordine parziale} (p.o.)\ sullo spazio delle ipotesi \textit{H} che viene utilizzato da molti metodi di apprendimento concettuale.\
+Possiamo trarre vantaggio da questo p.o.\ per organizzare efficacemente la ricerca in \textit{H}.\
+
+\subsection{Algoritmo Find-S}
+
+Sfrutta questo ordine parziale per cercare in \textit{h} efficientemente (\textit{senza enumerare esplicitamente} ogni $h \in H$).\
+
+\begin{enumerate}
+	\item Inizializza \textit{h} all'ipotesi più specifica in \textit{H}.
+	\item
+	      \begin{flushleft}
+		      For each \textbf{positive} training instance \textit{x}
+
+		      \quad For each attribute a\textsubscript{i} in \textit{h}
+
+		      \qquad If the a\textsubscript{i} in \textit{h} is satisfied by \textit{x} then do nothing
+
+		      \qquad else replace a\textsubscript{i} in \textit{h} by the next more general constraint that is
+
+		      \qquad\quad satisfied by \textit{x} (\textit{e.g.\ remove from h literals not satisfying x})
+	      \end{flushleft}
+
+	\item Output hypothesis \textit{h}.
+\end{enumerate}
+
+\subsubsection{Proprietà di Find-S}
+
+Spazio delle ipotesi descritto da congiunzioni di attributi:\ limite rigido!\
+
+L'algoritmo produrrà l'\textit{ipotesi più specifica} all'interno di \textit{H} che è coerente con gli esempi di allenamento \textbf{positivi}.\
+L'ipotesi di output \textit{h} sarà consistente anche con gli esempi negativi a condizione che il concetto di destinazione sia contenuto in \textit{H}, poiché $c \geq h$.\
+
+Non si sa se il learner è convergente al concept target, nel senso che non è in grado di determinare se ha trovato l'unica ipotesi coerente con gli esempi formativi.\
+Non è possibile stabilire se i dati di addestramento sono incoerenti, poiché ignora gli esempi di addestramento negativi:\ \textit{nessuna tolleranza al rumore}!\
+
+Perché preferire l'ipotesi più specifica?\
+E se ci sono più ipotesi massimamente specifiche?
+
+\subsection{Versions Spaces}
+
+Idea chiave:\ uscire una descrizione con tutto l'insieme delle ipotesi consistenti con D.\
+Possiamo farlo senza enumerarli tutti.\
+
+\[\mathrm{Consistente}(\textit{h}, \textit{D}):=\ \forall\ \langle x,c(x) \rangle \in D\ h (x) = c (x)\]
+
+\noindent Il \textbf{version space}, VS\textsubscript{\textit{H},\textit{D}}, rispetto allo spazio delle ipotesi \textit{H}, e l'insieme di addestramento \textit{D}, è il sottoinsieme di ipotesi da \textit{H} consistente con tutti gli esempi di addestramento:\
+\[
+	VS_{H,D} = \{h \in H\ |\ \mathrm{Consistente}(h, D)\}
+\]
+
+\subsubsection{Algoritmo List-Then Eliminate}
+Un'alternativa sarebbe il List-Then Eliminate
+\begin{enumerate}
+	\item \textit{Version Space} $\leftarrow$ una lista contenente ogni ipotesi in \textit{H}
+	\item Per ogni esempio di addestramento $\langle x,c(x) \rangle$ rimuovi da \textit{Version Space} qualsiasi ipotesi che non sia coerente con l'esempio di addestramento $h(x) \neq c(x)$
+	\item Visualizza l'elenco di ipotesi in \textit{Version Space}.
+\end{enumerate}
+
+\noindent \textit{Irrealistico:\ enumerazione esaustiva di tutte le h in H.}
+
+\subsubsection{Rappresentare i Version Spaces}
+
+Il \textbf{confine generale}, G, dello spazio delle versioni VS\textsubscript{H,D} è l'insieme dei membri massimamente generali (di H consistente con D).\
+
+\noindent Il \textbf{confine specifico}, S, dello spazio delle versioni VS\textsubscript{H,D} è l'insieme dei membri massimamente specifici (di H consistente con D).\
+
+\begin{theorem}
+	Ogni membro dello spazio delle versioni si trova tra questi confini
+	\[
+		\mathit{VS}_{H,D} = \{h \in H\ |\ (\exists s\in S)\ (\exists g \in G)\ (g \geq h \geq s)\}
+	\]
+	dove $x \geq y$ significa \textit{x} è più generale o uguale di \textit{y}.\
+\end{theorem}
+
+\noindent Possiamo fare una \textit{ricerca completa} di ipotesi coerenti usando i due confini S e G per VS, cioè non limitati a S come per Find-S.\
+
+\subsection{Algortimo Candidate Elimination}
+
+\begin{flushleft}
+	G $\leftarrow$ ipotesi massimamente generali in H.
+
+	S $\leftarrow$ ipotesi massimamente specifiche in H .
+\end{flushleft}
+
+\noindent Per ogni esempio di addestramento $ d = \langle x, c(x) \rangle $ se \textit{d} è un esempio \textbf{positivo} rimuove da G qualsiasi ipotesi che sia inconsistente con \textit{d} (definizione di VS) e per ogni ipotesi \textit{s} in S che non è consistente con \textit{d} (\textbf{generalize S}) rimuove s da S e aggiunge a S tutte le generalizzazioni minime \textit{h} di \textit{s} tali che
+\begin{itemize}
+	\item \textit{h} coerente con \textit{d},
+	\item alcuni membri di G sono più generali di \textit{h},
+\end{itemize}
+ed infine rimuove da S qualsiasi ipotesi più generale di un'altra ipotesi in S.\
+
+Se \textit{d} è un esempio \textbf{negativo} rimuove da S qualsiasi ipotesi che è incoerente con \textit{d} e per ogni ipotesi \textit{g} in G che non è coerente con \textit{d} (\textbf{specialize G}) rimuove \textit{g} da G e aggiunge a G tutte le specializzazioni minime \textit{h} di \textit{g} tali che
+\begin{itemize}
+	\item \textit{h} coerente con \textit{d},
+	\item alcuni membri di S sono più specifici di \textit{h},
+\end{itemize}
+ed infine rimuove da G qualsiasi ipotesi meno generale di un'altra ipotesi in G.\
+
+\section{Bias Induttivo}
+
+Lo spazio delle nostre ipotesi non è in grado di rappresentare un semplice concetto di obiettivo disgiuntivo.\
+\textbf{Bias}:\ supponiamo che l'ipotesi spazio H contenga il concept target $c$.\
+In altre parole, $c$ può essere descritto da una \textit{congiunzione} (dall'operatore AND) di letterali.
+
+\subsection{Unbiased Learner}
+
+Idea:\ scegliamo una H che esprime ogni concetto insegnabile, questo significa che H è l'insieme di tutti i possibili sottoinsiemi di X, il powerset $P(X)$.\
+
+\[ |X| = 96,\ |P(X)|=2^{96} \sim 10^{28}\ \mathrm{concetti\ distinti}  \]
+
+\noindent H = disgiunzioni, congiunzioni, negazioni.\
+H contiene sicuramente il concept target.
+
+Cosa sono S e G in questo caso?\
+Si assumino esempi positivi $(x_1, x_2, x_3)$ ed esempi negativi $(x_4, x_5)$
+
+\[
+	S: \{(x_1 \lor x_2 \lor x_3)\}\qquad G: \{\lnot(x_4 \lor x_5)\}
+\]
+
+\noindent Gli unici esempi classificati in modo univoco sono gli esempi di formazione stessi (H può rappresentarli).\
+In altre parole, per apprendere il target concept bisognerebbe presentare ogni singola istanza in X come esempio di formazione.\
+
+\begin{flushleft}
+	\textbf{Proprietà}:\ un unbiased learner \textit{non è in grado di generalizzare}.\
+
+	\textit{Prova}:\ ogni istanza non osservata sarà classificata come positiva esattamente per metà dell'ipotesi in VS e negativa per l'altra metà (\textit{rifiuto}).\
+	Infatti
+
+	\[
+		\forall h\ consistente\ con\ x_i,\ (\exists h'.\ h' \equiv h \land h'(x_i) \neq h(x_i))
+	\]
+	\[
+		h \in \mathit{VS} \rightarrow h' \in \mathit{VS}
+	\]
+	Sono identici su D.\
+\end{flushleft}
+
+\subsubsection{Futilità del Bias-Free Learning}
+
+Un learner che non fa ipotesi preliminari sull'identità del concept target non ha basi razionali per classificare istanze invisibili.\
+(Restrizione, preferenza) Bias non solo assunto per l'efficienza, ma \textit{necessario per la generalizzazione}.\
+Tuttavia, non ci dice (non quantifica) quale sia la migliore soluzione per la generalizzazione.\
+
+\subsection{Inductive Bias}
+
+Considera:
+\begin{itemize}
+	\item Algoritmo di apprendimento concettuale L.
+	\item Istanze X, target concept \textit{c}.
+	\item Esempi di addestramento $\mathrm{D_c} = \{\langle x, c(x) \rangle\}$.
+	\item Sia L(x\textsubscript{i}, D\textsubscript{c}) la classificazione assegnata all'istanza x\textsubscript{i} da L dopo l'addestramento su D\textsubscript{c}.
+
+\end{itemize}
+
+\begin{definition}
+	Il bias induttivo di L è un qualsiasi insieme minimo di asserzioni B tale che per ogni concetto di obiettivo \textit{c} e corrispondenti dati di addestramento D\textsubscript{c}
+	\[
+		(\forall x_i \in X) [B \land D_c \land x_i] \vdash L(x_i, D_c)
+	\]
+	dove A $\vdash$ B significa che A implica logicamente B (segue deduttivamente da).
+\end{definition}
+
+\subsubsection{Tre Learners con Bias differenti}
+
+Rote learner (\textit{lookup table}):\ memorizza esempi, classifica \textit{x} se e solo se corrisponde a un esempio osservato in precedenza.\
+Nessun bias induttivo $\rightarrow$ nessuna generalizzazione.\
+
+Version space e candidate elimination algorithm $\rightarrow$ Bias:\ lo spazio delle ipotesi contiene il concetto di destinazione (insieme agli attributi).\
+
+Find-S-Bias:\ lo spazio delle ipotesi contiene il concetto di destinazione e tutte le istanze sono negative a meno che l'opposto non sia implicato dalla sua altra conoscenza (visto come esempi positivi).\
+In altre parole abbiamo un \textit{bias linguistico} a causa dell'AND sui letterali più il \textit{bias di ricerca} a causa della preferenza dell'ipotesi più specifica.\

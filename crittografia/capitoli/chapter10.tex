@@ -1,0 +1,154 @@
+\chapter{AES}
+
+DES necessitava di un irrobustimento data la vulnerabilità alla crittoanalisi differenziale e lineare.\
+La prima proposta fu quella di scegliere in maniera indipendente le 16 sottochiavi di fase; questo ampliò il numero di bit delle chiavi da 56 a $16\cdot 48 = 768$ bit illudendo di avere uno spazio delle chiavi pari a $2^{768}$:\ con la crittoanalisi differenziale fu dimostrato che la cardinalità dello spazio delle chiavi era diventata $2^{61}$ contro i $2^{56}$ precedenti.\
+
+La seconda proposta fu quella della \textbf{cifratura multipla}:\ l'idea è di comporre il DES con se stesso.\
+Scegliendo due chiavi $k_1$ e $k_2$ è stato dimostrato che \[C(C(m, k_1), k_2) \neq C(m,k_3)\quad \forall\ m,k_3\]
+In pratica, applicare DES $n$ volte è diverso dall'applicarlo una volta sola, quindi c'è un aumento di sicurezza.\
+Si potrebbe pensare che usando due chiavi di lunghezza 56 bit, lo spazio delle chiavi sia di $2^{112}$, ma non è così:\ non sono tutti di sicurezza.\
+In realtà, l'attacco \textit{Meet in the Middle} dimostra che la sicurezza è pari a quella di una chiave lunga 57 bit.\
+
+\subsubsection{Meet in the Middle}
+
+Si prenda \[c = C(C(m,k_1), k_2)\] con $k_1, k_2$ chiavi di 56 bit e che \[D(c, k_2) = C (m, k_1)\]
+Il crittoanalista prende una coppia $\langle m,c \rangle$ e $\forall\ k_1$ calcola e salva $C(m,k_1)$ in una lista; mentre $\forall\ k_2$ si calcola $D(c, k_2)$ e lo cerca nella suddetta lista.\
+
+\vspace{12pt}
+\noindent\textbf{Osservazione}\quad Per costruzione dell'attacco, deve esistere certamente almeno una corrispondenza fra $D(c,k_2)$ e $C(m,k_1)$.\
+\vspace{12pt}
+
+\noindent Il costo dell'attacco è $O(2^{57})$:\ il crittoanalista deve aver calcolato e messo in una lista $C(m,k_1)$ per tutte le chiavi $k_1$, cioè $2^{56}$; successivamente deve calcolare al più $2^{56}$ volte $D(c,k_2)$.\
+Quindi:\
+\[2^{56} + O(2^{56}) = O(2\cdot 2^{56}) = O(2^{57})\]
+che è ben diverso da $2^{112}$.\
+
+\section{3DES}
+
+Alla fine è stato adottato il 3DES che viene indicato con
+\begin{itemize}
+    \item 2TDEA:\ Triple Data Encryption Algorithm con due chiavi;
+    \item 3TDEA:\ Triple Data Encryption Algorithm con tre chiavi;
+\end{itemize}
+
+\subsubsection{2TDEA}
+
+$c = C(D(C(m,k_1), k_2), k_1)$ dove $k_1$ e $k_2$ sono chiavi di 56 bit, tra loro indipendenti.\
+
+Si osservi che se $k_1=k_2$, allora 2TDEA equivale a DES con singola cifratura ed è stato fatto per mantenere la compatibilità con quei sistemi che erano abilitati a usare solo un singolo DES.\
+Non è più robusto di una tripla cifratura.\
+
+Il livello di sicurezza in bit è 112; ci vogliono $2^{112}$ operazioni di cifratura e decifrazione:\ ha un costo equivalente al forza bruta, quindi il triplo DES con due chiavi non è vulnerabile agli attacchi \textit{meet in the middle}.\
+
+\subsubsection{3TDEA}
+
+$c = C(D(C(m,k_1), k_2), k_3)$ dove $k_1$ e $k_2$ sono chiavi di 56 bit.\
+Ci si aspetterebbe che la sicurezza sia di $56\cdot3=168$ bit, ma in realtà è vulnerabile a \textit{meet in the middle} e la sicurezza risulta essere di $2^{112}$.\
+
+\begin{proof}
+    $m = D(C(D(c,k_3),k_2),k_1)$.\
+    Per costruzione si ricava che $C(m,k_1)=C(D(c,k_3),k_2)$ a questo punto è possibile:
+
+    \begin{itemize}
+        \item enumerare le chiavi $k_1$ di 56 bit e salvare $C(m,k_1)$ in una lista;
+        \item $\forall\ k_2,k_3$ calcolare $C(D(c,k_3),k_2)$ e cercarlo nella lista.\
+    \end{itemize}
+
+    \noindent Il costo complessivo totale è di $2^{56} + 2^{112}$, cioè il costo di enumerare tutte le chiavi $k_1$ sommato al costo di enumerare tutte le coppie $\langle k_2,k_3\rangle$.\
+\end{proof}
+
+\section{AES}
+
+Nel Giugno 1998 fu proposto dal NIST un bando per rimpiazzare il DES e furono presentate ventuno proposte.\
+I parametri di cui tener conto erano la sicurezza, il costo di realizzazione (doveva essere economico in hardware ed efficiente con le operazioni di cifratura e decifrazione, con meno spazio occupato possibile e licenza gratuita), la correttezza, la casualità e le caratteristiche algoritmiche (flessibile, portabile, chiavi con diversi numeri di bit [128-256]).\
+Nell'Agosto `98 rimasero quindici cifrari validi fino ad Aprile `99 quando diminuirono a cinque e nell'Ottobre 2000 fu scelto l'AES divenendo il nuovo standard nel 2001.
+
+È un cifrario molto efficiente, leggero, flessibile e permette di usare chiavi da 128, 192 o 256 bit e si lavora sempre a gruppi di 32 bit (estendibili).\
+Noi vedremo la variante con 128 bit di blocco e 128 bit di chiave.\
+Anche AES è un cifrario a fasi e il numero di esse dipende dal numero di bit di chiave:\ 128 bit sono 10 fasi, 192 bit sono 12 fasi e 256 bit sono 14 fasi.
+
+\subsubsection{Selezione delle sottochiavi di fase}
+
+Si parte da una chiave lunga 128 bit e a partire da questa si generano deterministicamente le sottochiavi di fase.\
+Per generare queste sottochiavi si inserisce la chiave della fase precedente in una matrice $k = 4 \times 4$ byte, caricandola per colonna.\
+Ogni sottofase riceve in input una nuova matrice $k$ calcolata a partire dalla matrice precedente.\
+L'innovazione è l'impiego della S-box, non solo durante il processo di cifratura, ma anche per generare le chiavi delle fasi.\
+
+Inizialmente abbiamo in input quattro parole di chiave:\ \[w(0), w(1), w(2), w(3)\]
+Poi $\forall\ t\geq 4$
+\[W(t) = \left\{\begin{array}{l l}
+        w(t-1) \oplus w(t-4)    & \mathrm{se}\ 4 \nmid t \\
+        T(w(t-1)) \oplus w(t-4) & \mathrm{se}\ 4 \mid t  \\
+    \end{array}\right.\]
+Quindi l'S-box interviene solo nel caso in cui $t$ sia multiplo di 4.\
+
+La chiave dell'$i$-esima fase, con $1 \leq i \leq 10$ è \[w(4i), w(4i+1), w(4i+2), w(4i+3)\]
+
+\subsubsection{Cifratura}
+
+Si hanno blocchi di 128 bit che vengono caricati (nuovamente) per colonna in una matrice $4 \times 4$ byte.\
+
+\[B = \left[\begin{array}{c c c c}
+            b_{00} & b_{01} & b_{02} & b_{03} \\
+            b_{10} & b_{11} & b_{12} & b_{13} \\
+            b_{20} & b_{21} & b_{22} & b_{23} \\
+            b_{30} & b_{31} & b_{32} & b_{33} \\
+        \end{array}\right] \qquad b_{ij} \in \{0,1\}^8\]
+Prima di procedere con la cifratura a 10 fasi, si esegue una \textbf{trasformazione iniziale}.\
+\[B \rightarrow B \oplus k\qquad k: \mathrm{matrice\ della\ chiave}\]
+Adesso possono iniziare le 10 fasi, le quali sono composte da quattro operazioni ciascuna:
+
+\begin{enumerate}
+    \item \textbf{Substitute bytes}:\ ogni byte di $B$ è trasformato usando una S-box, perciò $b_{ij} \rightarrow S\textrm{-}box(b_{ij})$.
+    \item \textbf{Shift rows}:\ shift ciclico sulle righe.
+    \item \textbf{Mix columns} (non si applica nella fase 10).
+    \item \textbf{Add round key}:\ aggiunta della chiave a $B$.
+\end{enumerate}
+
+\noindent Le prime tre operazioni servono per garantire i principi di Shannon, mentre l'ultima è semplicemente la cifratura con chiave.\
+Alla fine delle 10 fasi e dell'uso di queste operazioni in ognuna di esse, il blocco $B$ diventa il crittogramma.\
+
+\subsubsection{Decifrazione}
+
+Simile alla cifratura, ma avviene al contrario e ci sono alcune differenze nelle quattro operazioni.
+
+\subsection{S-box}
+
+\subsubsection{Substitute byte}
+
+È una matrice $16 \times 16$ di interi $\in [0, 255]$ e contiene una permutazione di essi (ogni intero compare al massimo una volta).\
+Gli interi sono rappresentabili su un byte ($2^8 = 256$).\
+\[b_{ij} \rightarrow S\textrm{-}box(b_{ij})\]
+La S-box prende in input un intero fra 0 e 255 e lo trasforma nel seguente modo:\ i primi 4 bit del numero da trasformare identificano la riga della matrice $16 \times 16$ mentre i secondi 4 bit rappresentano la colonna della medesima matrice.\
+Il numero di uscita della S-box è il numero che si trova nell'intersezione riga-colonna.\
+Ciò che si ottiene è l'inverso moltiplicativo del byte in input calcolato rispetto al campo di Galois di cardinalità $2^8$ ($\mathrm{GF}(2^8)$\footnote{La somma è \textit{mod} 2, mentre la moltiplicazione è $\mathit{mod}\ 2^8$}).\
+
+La composizione algebrica di questa S-box è la stessa usata per calcolare i byte delle sottochiavi di fase.\
+
+\subsubsection{Shift rows}
+
+\[\left[\begin{array}{c c c c}
+            b_{00} & b_{01} & b_{02} & b_{03} \\
+            b_{10} & b_{11} & b_{12} & b_{13} \\
+            b_{20} & b_{21} & b_{22} & b_{23} \\
+            b_{30} & b_{31} & b_{32} & b_{33} \\
+        \end{array}\right]
+    \rightarrow
+    \left[\begin{array}{c c c c}
+            b_{00} & b_{01} & b_{02} & b_{03} \\
+            b_{11} & b_{12} & b_{13} & b_{10} \\
+            b_{22} & b_{23} & b_{20} & b_{21} \\
+            b_{33} & b_{30} & b_{31} & b_{32} \\
+        \end{array}\right]\]
+Molto semplicemente, quest'operazione non fa altro che applicare \textit{diffusione} sul blocco.\
+
+\subsubsection{Mix columns}
+
+Viene fissata una matrice $M = 4 \times 4$ byte.\
+\[B_j \rightarrow M \times B_j\qquad 0\leq j\leq 3\]
+il nuovo $b_{ij}$ diventa un valore che dipende da tutti i byte della colonna.\
+
+\subsubsection{Add round key}
+
+Molto semplice:
+\[b_{ij} \rightarrow b_{ij} \oplus k_{ij}\]

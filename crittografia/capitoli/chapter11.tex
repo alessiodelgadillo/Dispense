@@ -1,0 +1,299 @@
+\chapter{Cifratura a blocchi e a chiave pubblica}
+
+\section{Cifratura a blocchi}
+
+Cifrari come l'AES e il DES lavorano a blocchi:\ se si ha un messaggio di $n$ bit, questo \textbf{viene diviso e cifrato in vari blocchi} sempre con la stessa chiave.\
+Si noti che un messaggio ha la seguente forma:\ \[m = m_1 m_2 m_3 \dots m_l\ \mathrm{t.c.}\ |m_i| = 128\ \mathrm{bit}\]
+Qualora non valga che $|m_l| < 128$ bit allora si aggiunge una concatenazione t.c.\ $|m_l 100\dots 0| = 128\ \mathrm{bit}$.\
+Se invece $|m_l| = 128$ bit allora si aggiunge un blocco terminatore $|10\dots 0| = 128$.\
+\textit{Per evitare che messaggi diversi diano crittogrammi uguali}, al messaggio viene concatenata una stringa iniziale $c_0$ che potrebbe rappresentare anche il timestamp in cui viene cifrato il messaggio.\
+
+La \textbf{cifratura} è semplice:\
+\[c_i = C(c_{i-1} \oplus m_i, k)\]
+si prende l'$i$-esimo blocco del messaggio da cifrare, si esegue lo $\oplus$ col crittogramma $c_{i-1}$ calcolato per il blocco precedente e infine si cifra il risultato ottenuto con la chiave $k$.\
+Sostanzialmente per cifrare il blocco di messaggio $(i + 1)$-esimo è necessario aver già cifrato il blocco di messaggio $i$-esimo.\
+
+La \textbf{decifrazione} è anch'essa semplice:\ dato che la doppia applicazione di una stringa con lo $\oplus$ ha l'effetto di annullare l'effetto stesso dello $\oplus$, allora per decifrare $c_i$ si esegue
+\[m_i = D(c_i, k) \oplus c_{i-1}\]
+
+\noindent Ci sono proprietà molto interessanti nella cifratura a blocchi:\
+\begin{itemize}
+    \item La decifrazione può essere fatta \textit{in parallelo} perché il blocco $c_{i-1}$ è già noto nel momento in cui bisogna decifrare il blocco $c_i$.
+    \item La cifratura a blocchi prevede che il crittogramma $c_i$ influenzi solo se stesso e $c_{i+1}$.\ Questo significa che se alcuni bit di $c_i$ sono trasmessi male, la decifratura stessa di $c_i$ non influenzerà tutto il messaggio $m$ ma solo i blocchi $m_i$ e $m_{i+1}$.\
+\end{itemize}
+
+\section{Crittografia a chiave pubblica}
+
+Per tanto tempo, il problema principale della crittografia è stato lo \textbf{scambio della chiave segreta}.\
+Questo problema è rimasto tale fino al 1976, quando Diffie e Hellman hanno proposto due metodi per generare e scambiare una chiave segreta su un canale insicuro senza che le due parti si debbano incontrare precedentemente.\
+Il primo metodo è un algoritmo chiamato \textbf{protocollo DH} ed è ancora usato nella crittografia su Internet; il secondo è la \textbf{crittografia a chiave pubblica} che non prevede affatto alcuno scambio di chiave.\
+In quest'ultimo metodo sostanzialmente le due parti cifrano il messaggio con una chiave pubblica e lo decifrano rispettivamente con una chiave privata.\
+
+\vspace{12pt}
+\noindent Nei cifrari a chiave privata (o simmetrici) si ha una chiave segreta per ogni coppia di utenti che vuole parlare, facendo crescere il numero di chiavi con un fattore esponenziale.
+\vspace{12pt}
+
+\noindent Nei cifrari a chiave pubblica o cifrari asimmetrici, invece, tutti possono inviare messaggi cifrati e solo il ricevente può decifrarli.\
+Le operazioni di cifratura e decifrazione sono pubbliche e utilizzano due chiavi diverse:
+\begin{itemize}
+    \item  $k_{\mathit{pub}}$ per cifrare:\ è pubblica, nota a tutti.
+    \item  $k_{\mathit{priv}}$ per decifrare:\ è privata, nota solo al destinatario.
+\end{itemize}
+
+\noindent In questo caso, ogni utente possiede una coppia $\langle k_{\mathit{pub}}, k_{\mathit{priv}}\rangle$:\ la chiave pubblica è nota a chiunque e qualsiasi persona interessata a inviare un messaggio all'utente che possiede $k_{\mathit{pub}}$ come chiave pubblica, può e deve cifrare il proprio messaggio esattamente con $k_{\mathit{pub}}$.\
+Il destinatario provvederà a decifrare con la sua chiave privata $k_{\mathit{priv}}$ nota solo a lui.\
+In questo modo il numero di chiavi è $2n$ se si hanno $n$ utenti.
+
+\subsubsection{Cifratura e decifrazione in un cifrario a chiave pubblica}
+
+\begin{flushleft}
+    Cifratura:\ $c = C(m, k_{\mathit{pub}})$.\
+
+    Decifrazione:\ $m = D(c, k_{\mathit{priv}})$.\
+\end{flushleft}
+
+\noindent I requisiti perché un cifrario a chiave pubblica funzioni sono:
+
+\begin{enumerate}
+    \item Correttezza:\ per ogni possibile messaggio $m = D(C(m, k_{\mathit{pub}}), k_{\mathit{priv}})$.\
+    \item Efficiente e sicuro:\ tutto ciò che è lecito, legale, deve richiedere tempo polinomiale, mentre tutto ciò che è ``illegale'' deve richiedere tempo esponenziale.\ Quindi:
+          \begin{itemize}
+              \item la \textbf{coppia di chiavi è facile da generare} e deve risultare pressoché impossibile che due utenti scelgano la stessa chiave (\textit{generazione casuale delle chiavi});
+              \item dati $m$ e $k_{\mathit{pub}}$, \textbf{è facile calcolare il crittogramma} $c = C(m, k_{\mathit{pub}})$ (\textit{adottabilità del sistema});
+              \item dati $c$ e $k_{\mathit{priv}}$, \textbf{è facile calcolare il messaggio in chiaro} $m = D(c, k_{\mathit{priv}})$ (\textit{adottabilità del sistema});
+              \item pur conoscendo il crittogramma $c,\ k_{\mathit{pub}},\ C\ \mathrm{e}\ D$ la \textbf{decifrazione} di $c$ deve essere \textbf{difficile per il crittoanalista} (\textit{sicurezza del cifrario}).
+          \end{itemize}
+\end{enumerate}
+
+\noindent Al fine di poter soddisfare questi requisiti, per la funzione di cifratura $C$ si deve ricorrere a una funzione \textbf{one-way trapdoor}, cioè calcolare $c = C(m, k_{\mathit{pub}})$ è \textit{computazionalmente facile}, ma calcolare $m = D(c, k_{\mathit{priv}})$ è \textit{computazionalmente difficile} se non si conosce la trapdoor ($k_{\mathit{priv}}$).\
+Tuttavia, Diffie e Hellman non riuscirono mai a trovare una funzione one-way trapdoor.\
+
+\subsection{RSA}
+
+Rivest, Adleman e Shamir proposero un sistema a chiave pubblica riuscendo a trovare una funzione one-way trapdoor.\
+RSA si basa sulla moltiplicazione di due numeri primi $p$ e $q$:
+
+\begin{itemize}
+    \item Calcolare $n = p\cdot q$ è facile.\ Una moltiplicazione richiede sempre tempo polinomiale.
+    \item Calcolare $p$ e $q$ conoscendo $n$ è difficile a meno che non si conosca uno dei due fattori.\ In pratica, fattorizzare $n$ senza conoscere $p$ o $q$ richiede tempo esponenziale.
+\end{itemize}
+
+\noindent RSA \textbf{utilizza algebra modulare} ($\mathit{mod}\ n$).
+
+\subsection{Algebra modulare}
+
+Usata in molti algoritmi crittografici per
+\begin{itemize}
+    \item ridurre lo spazio dei numeri su cui si opera e quindi aumentare la velocità di calcolo;
+    \item rendere difficili problemi computazionali che sono semplici (o anche banali) nell'algebra non modulare.
+\end{itemize}
+
+\noindent In algebra modulare le funzioni tendono a comportarsi in modo ``\textit{imprevedibile}''.\
+Si prenda, per esempio, la funzione $2^x$.\
+Il suo comportamento nell'algebra ordinaria è monotono crescente:
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+        \hline
+        x     & 1 & 2 & 3 & 4  & 5  & 6  & 7   & 8   & 9   & 10   & 11   & 12   \\\hline
+        $2^x$ & 2 & 4 & 8 & 16 & 32 & 64 & 128 & 256 & 512 & 1024 & 2048 & 4096 \\\hline
+    \end{tabular}
+\end{table}
+
+\noindent Se invece si prende $2^x\ \mathit{mod}\ 13$, il comportamento è:
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+        \hline
+        x     & 1 & 2 & 3 & 4 & 5 & 6  & 7  & 8 & 9 & 10 & 11 & 12 \\\hline
+        $2^x$ & 2 & 4 & 8 & 3 & 6 & 12 & 11 & 9 & 5 & 10 & 7  & 1  \\\hline
+    \end{tabular}
+\end{table}
+
+\noindent Sale, scende, sale\dots ha un andamento caotico:\ perde struttura rispetto alla precedente e non dà alcun suggerimento.\
+
+\subsubsection{Caratteristiche}
+
+Preso $n \in \mathbb{N}$, intero positivo
+\[\mathbb{Z}_n = \{0,1,2.\dots, n-1\}\qquad \mathbb{Z}_n^* \subseteq \mathbb{Z}_n\]
+è l'insieme degli elementi di $\mathbb{Z}_n$ co-primi con $n$.\
+Se $n$ è primo, $\mathbb{Z}_n^* = \mathbb{Z}_n$.\
+Se $n$ non è primo, calcolare $\mathbb{Z}_n^*$ è computazionalmente difficile:\ richiede tempo proporzionale al valore di $n$ (per confrontare $n$ con gli elementi di $\mathbb{Z}_n$) quindi esponenziale nella lunghezza della sua rappresentazione.\
+
+\vspace{12pt}
+\noindent Dati due interi $a,b \geq 0$ e $n\geq0$, $a$ è congruo a $b$ modulo $n$
+\[a \equiv b\ \mathit{mod}\ n\]
+se e solo se esiste $k$ intero per cui
+\[a = b + kn\]
+Nelle relazioni di congruenza la notazione $\mathit{mod}\ n$ si riferisce all'intera relazione, nelle relazioni di uguaglianza la stessa notazione si riferisce solo al membro dove appare:\ $5\equiv 8\ \mathit{mod}\ 3$, ma $5\neq 8\ \mathit{mod}\ 3$
+
+\subsubsection{Proprietà}
+
+\[(a+b)\ \mathit{mod}\ m = (a\ \mathit{mod}\ m + b\ \mathit{mod}\ m)\ \mathit{mod}\ m\]
+\[(a-b)\ \mathit{mod}\ m = (a\ \mathit{mod}\ m - b\ \mathit{mod}\ m)\ \mathit{mod}\ m\]
+\[(a\times b)\ \mathit{mod}\ m = (a\ \mathit{mod}\ m \times b\ \mathit{mod}\ m)\ \mathit{mod}\ m\]
+\[a^{r \times s}\ \mathit{mod}\ m = (a^r\ \mathit{mod}\ m)^s\ \mathit{mod}\ m\quad (r, s\ \mathrm{interi\ positivi})\]
+
+\subsubsection{Funzione di Eulero}
+
+Il numero di interi minori di $n$ e co-primi con esso
+\[\phi(n) = |\mathbb{Z}_n^*|\]
+Se $n$ è primo $\Rightarrow \phi (n) = n-1$.\
+
+\begin{theorem}
+
+    \[n\ \mathrm{composto} \Rightarrow \phi(n) = n\left(1-\frac{1}{p_1}\right)\dots \left(1-\frac{1}{p_k}\right)\]
+    $p_1, \dots, p_k$ fattori primi di $n$, presi senza molteplicità.\
+\end{theorem}
+
+\begin{theorem}
+    $n$ prodotto di due primi (semi-primo)
+    \[n = p\cdot q \Rightarrow \phi(n) = (p-1)(q-1)\]
+\end{theorem}
+
+\begin{theorem}[Eulero]
+    Per $n>1$ e per ogni $a$ primo con $n$
+    \[a^{\phi(n)} \equiv 1\ \mathit{mod}\ n\]
+\end{theorem}
+
+\begin{theorem}[Fermat]
+    Per $n$ primo e per ogni $a \in \mathbb{Z}_n^*$
+    \[a^{n-1} \equiv 1\ \mathit{mod}\ n\]
+\end{theorem}
+
+\subsubsection{Conseguenze}
+
+Per qualunque $a$ primo con $n$
+\[a \times a^{\phi(n)-1}\equiv 1\ \mathit{mod}\ n \quad (\mathrm{Teorema\ di\ Eulero})\]
+\[a \times a^{-1}\equiv 1\ \mathit{mod}\ n \quad (\mathrm{definizione\ di\ inverso})\]
+quindi,
+\[a^{-1} = a^{\phi(n)-1}\ \mathit{mod}\ n \]
+L'inverso $a^{-1}$ di $a$ modulo $n$ si può dunque calcolare per esponenziazione di $a$ se si conosce $\phi(n)$.\
+In generale, nell'algebra modulare l'esistenza dell'inverso non è garantita perché $a^{-1}$ deve essere intero.\
+
+\begin{theorem}
+    L'equazione $ax \equiv b\ \mathit{mod}\ n$ ammette soluzione se e solo se $\mathrm{MCD}(a,n)$ divide $b$.\
+    In questo caso si hanno esattamente $\mathrm{MCD}(a,n)$ soluzioni distinte.\
+\end{theorem}
+
+\begin{corollario}
+    L'equazione $ax \equiv b\ \mathit{mod}\ n$ ammette un'unica soluzione se e solo se $a$ e $n$ sono co-primi ($\mathrm{MCD}(a,n) = 1 $) $\Leftrightarrow$ esiste l'inverso $a^{-1}$ di $a$.\
+\end{corollario}
+
+\noindent Se nel corollario si sostituisce 1 con $b$, si ottiene $ax \equiv 1\ \mathit{mod}\ n$.\
+Ne consegue che ammette esattamente una soluzione (l'inverso di $a$) se e solo se $a$ e $n$ sono primi tra loro.\
+L'inverso si può calcolare come
+\[a^{-1} = a^{\phi(n)-1}\ \mathit{mod}\ n \]
+ma occorre conoscere $\phi(n)$, cioè fattorizzare $n$:\ è un problema ``difficile''.\
+
+\subsubsection{Algoritmo di Euclide Esteso}
+
+L'algoritmo di Euclide per il calcolo del MCD si può estendere per risolvere l'equazione in due incognite $ax+by=\mathrm{MCD}(a,b)$.\
+
+\begin{flushleft}
+    \ttfamily
+    Function Extended\_Euclid(a,b)
+
+    \quad if ($b=0$) then return $\langle a, 1, 0\rangle$
+
+    \quad else
+
+    \qquad $\langle d', x', y' \rangle = $ Extended\_Euclid($b, a\ \mathit{mod}\ b$);
+
+    \qquad $\langle d, x, y \rangle = \langle d', y', x' - \left\lfloor \frac{a}{b}\right\rfloor y' \rangle$
+
+    \qquad return $\langle d, x, y\rangle$
+\end{flushleft}
+
+\noindent \textbf{Osservazioni}:\
+
+\begin{itemize}
+    \item La funzione \texttt{Extended\_Euclid} restituisce una delle triple di valori \[\langle\mathrm{MCD} (a, b), x, y\rangle\] con $x,y$ tali che $ax + by = \mathrm{MCD}(a,b)$.\ Quindi $d = \mathrm{MCD}(a,b)$.\
+    \item complessità logaritmica nel valore di $a$ e $b$, quindi \textit{polinomiale} nella dimensione dell'input.\
+\end{itemize}
+
+\noindent L'algoritmo di Euclide esteso si può applicare al \textbf{calcolo dell'inverso}.\
+
+$ax \equiv 1\ \mathit{mod}\ b \Leftrightarrow ax = bz + 1$ per un opportuno valore di $z$ se e solo se $ax +by = \mathrm{MCD}(a,b)$, dove $y =-z$ e $\mathrm{MCD}(a,b) =1$.\
+
+\subsubsection{Generatori}
+
+$a \in \mathbb{Z}_n^*$ è un \textbf{generatore} di $\mathbb{Z}_n^*$ se la funzione
+\[a^k\ \mathit{mod}\ n\qquad 1 \leq k \leq \phi(n)\]
+\textbf{genera tutti e soli} gli elementi di $\mathbb{Z}_n^*$.\
+Produce come risultati tutti gli elementi di $\mathbb{Z}_n^*$, ma in un ordine difficile da prevedere.\
+
+\begin{theorem}[Eulero]
+    $a^{\phi(n)} \equiv 1\ \mathit{mod}\ n \Rightarrow 1 \in \mathbb{Z}_n^*$ è generato per $k = \phi(n)$.\
+    Per ogni generatore \[a^k \not\equiv 1\ \mathit{mod}\ n\qquad 1\leq k < \phi(n)\]
+\end{theorem}
+
+\begin{theorem}
+    Se $n$ è un numero primo, $\mathbb{Z}_n^*$ ha almeno un generatore.\
+\end{theorem}
+
+\begin{itemize}
+    \item Per $n$ primo, non tutti gli elementi di $\mathbb{Z}_n^*$ sono suoi generatori (1 non è mai generatore e altri elementi non possono esserlo).
+    \item Per $n$ primo, i generatori di $\mathbb{Z}_n^*$ sono in totale $\phi(n-1)$.
+\end{itemize}
+
+\subsubsection{Problemi sui generatori rilevanti in crittografia}
+
+Risolvere nell'incognita $x$ l'equazione $a^x = b\ \mathit{mod}\ n$, con $n$ primo.
+
+L'equazione ammette una soluzione per ogni valore di $b$ se e solo se $a$ è un generatore di $\mathbb{Z}_n^*$.\
+Tuttavia non è noto a priori in che ordine sono generati gli elementi di $\mathbb{Z}_n^*$, quindi non è noto per quale valore di $x$ si genera $b\ \mathit{mod}\ n$.\
+Un esame diretto della successione richiede tempo esponenziale nella dimensione di $n$:\ non è noto un algoritmo polinomiale di soluzione.\
+
+\subsection{Funzioni one-way trap-door}
+
+Esistono funzioni matematiche che sembrano possedere i requisiti richiesti:\ il loro calcolo risulta incondizionatamente semplice e la loro inversione semplice se si dispone di un'informazione aggiuntiva sui dati (cioè una chiave privata).\
+Senza questa informazione, l'inversione richiede la soluzione di un problema NP-hard, o comunque di un problema noto per cui non si conosce un algoritmo polinomiale.\
+
+\subsubsection{Fattorizzazione}
+
+Calcolare $n = p \times q$ è facile e richiede tempo quadratico nella lunghezza della loro rappresentazione.\
+Invertire la funzione per trovare $p$ e $q$ a partire da $n$ (univocamente possibile solo se $p$ e $q$ sono primi) richiede tempo (sub)esponenziale.\
+Per quanto noto fino a oggi, non è mai stato dimostrato che il problema è NP hard ma non è nemmeno mai stato dimostrato che il problema ammette un algoritmo risolutivo polinomiale (cosa da non escludere).\
+La trap door in questo caso è uno qualsiasi dei due fattori $p$ e $q$.\
+
+\subsubsection{Calcolo della radice in modulo}
+
+Calcolare $y = x^z\ \mathit{mod}\ s$ con $x, z, s$ interi, richiede tempo polinomiale e si può fare con l'algoritmo delle esponenziazioni successive eseguendo $\Theta(\log_2 z)$ moltiplicazioni.\
+Se $s$ non è primo, invertire la funzione e calcolare $x = y^{\frac{1}{z}}\ \mathit{mod}\ s$ richiede tempo esponenziale per quanto noto ad oggi.\
+La trap door la vedremo successivamente.\
+
+\subsubsection{Calcolo del logaritmo discreto}
+
+Calcolare la potenza $y = x^z\ \mathit{mod}\ s$ è facile.\
+Invertire rispetto a $z$, cioè trovare $z$ t.c.\ $y = x^z\ \mathit{mod}\ s$ dati $x$, $y$ e $s$ è computazionalmente difficile.\
+Tutti gli algoritmi noti hanno la stessa complessità della fattorizzazione.\
+
+\subsection{Vantaggi e svantaggi}
+
+Vantaggi
+\begin{itemize}
+    \item Se ho $n$ utenti, il numero di chiavi del sistema sono $2n$ anziché $\frac{n(n - 1)}{2}$.
+    \item Non è richiesto alcuno scambio di chiavi.
+\end{itemize}
+Svantaggi
+\begin{itemize}
+    \item Molto più lenti dei cifrari simmetrici.
+    \item Sono esposti per natura ad attacchi di tipo \textit{chosen plain-text}.\
+\end{itemize}
+
+\subsubsection{Attacchi chosen plain-text}
+
+Un crittoanalista può crearsi svariati crittogrammi $c = C(m, k_{\mathit{pub}})$ di un determinato destinatario e successivamente può mettersi in ascolto sul canale verso il quale sono diretti i crittogrammi per quel determinato destinatario.\
+A questo punto il crittoanalista può confrontare i crittogrammi che passano sul canale con quelli che si era preparato in precedenza e, conoscendone il testo in chiaro, se ne trova due uguali ne conosce automaticamente la decifrazione.\
+Qualora non trovasse alcuni dei suoi crittogrammi uguali a quelli passati sul canale, saprebbe comunque che il messaggio in chiaro è diverso da quelli da lui preparati.
+
+\section{Cifrari ibridi}
+
+Si usa un cifrario a chiave segreta (AES) per le comunicazioni di massa e un cifrario a chiave pubblica per scambiare le chiavi segrete relative al primo, senza incontri fisici tra gli utenti.\
+
+La trasmissione dei messaggi lunghi avviene ad alta velocità, mentre lo scambio delle chiavi segrete è lento (sono composte al massimo da qualche decina di byte).\
+L'attacco \textit{chosen plain-text} è risolto se l'informazione cifrata con la chiave pubblica (chiave segreta dell'AES) è scelta in modo da risultare imprevedibile al crittoanalista.\
+
+La chiave pubblica deve essere estratta da un certificato digitale valido, per evitare attacchi \textit{man-in-the-middle}.\

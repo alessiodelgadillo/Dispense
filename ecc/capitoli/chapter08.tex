@@ -1,0 +1,90 @@
+\section{Funzioni ricorsive generali}
+
+Arricchiamo di seguito gli schemi per la definizione delle funzioni ricorsive primitive con un nuovo schema, attraverso il quale è possibile esprimere anche funzioni parziali.\
+In esso, si fa uso dell'operatore $\mu$, detto di \textit{minimizzazione}, il quale applicato a un insieme di numeri naturali ne restituisce il minimo (se c'è!\ ovvero se l'insieme in questione non è vuoto).
+
+\begin{definition}[Funzioni $\mu$-ricorsive]
+
+    La classe delle \textit{funzioni $\mu$-ricorsive} (o \textit{ricorsive generali}) è la minima classe $\mathcal{R}$ tale che soddisfa le condizioni
+    \begin{itemize}
+        \item[I-V] per le ricorsive primitive e
+        \item[VI] (\textit{Minimizzazione}).\ Se $\varphi(x_1,...,x_n,y)\in \mathcal{R}$ in $n+1$ variabili, allora la funzione $\psi$ in $n$ variabili è in $\mathcal{R}$ se è definita da
+              \subitem $\psi(x_1,..,x_n)=\mu y[\varphi(x_1,\dots,x_n,y)=0$ e
+                              \subsubitem  $\forall z \leq y.\ \varphi(x_1,\dots,x_n,z)\downarrow]$ \hfill ($*$)
+    \end{itemize}
+
+    \noindent A volte le funzioni $\mu$-ricorsive \textit{totali} le chiameremo semplicemente \textit{ricorsive}, soprattutto per ragioni storiche.\
+    Nota bene:\ \textit{non} sono \textit{solo} le funzioni ricorsive primitive!\ (in cui, per esempio manca la funzione di Ackermann che è ricorsiva ma non ricorsiva primitiva.)
+\end{definition}
+
+\noindent Una funzione $\mu$-ricorsiva è intuitivamente calcolabile?\
+\textbf{Sì}:\ l'algoritmo ``intuitivo'' che la calcola è composto da un ciclo in cui si incrementa la variabile $y$ (inizialmente posta a 0), si calcola la $\varphi$ e si ripetono questi passi finché il risultato non è 0.\
+I primi passi dell'esecuzione di questo algoritmo potrebbero essere dunque:
+
+\begin{enumerate}
+    \item calcola $\phi(x_1, \dots, x_n, 0)$; se il risultato è 0 allora $\psi(x_1, \dots, x_n) = 0$;
+    \item altrimenti calcola $\varphi(x_1,\dots, x_n,1)$; se il risultato è 0 allora\\$\psi(x_1,\dots,x_n) = 1$;
+    \item \dots\\ \vdots
+\end{enumerate}
+
+\noindent Intuitivamente, potrei non finire mai o perché per ogni valore di $y$ esiste
+un $m_y$ tale che $\varphi(x_1,\dots, x_n, y) = m_y \neq 0$, o perché per i primi $k$ numeri naturali $\varphi(x_1,\dots, x_n, z) = n_z \neq 0$ e $\varphi(x_1, \dots, x_n, k) \uparrow$.\
+Infatti nel primo caso continuiamo a calcolare la $\varphi(x_1,\dots, x_n, y)$ per valori crescenti di $y$ senza terminare mai, e nel secondo caso non ci arrestiamo mai nel calcolo di $\varphi(x_1,\dots, x_n, k)$:\ da qui la parzialità di $\psi$.\
+Se dovessi scrivere un programma, userei un comando di tipo \texttt{while}.
+
+Vediamo adesso un semplicissima definizione $\mu$-ricorsiva, tramite la quale rappresentiamo l'archetipo delle funzioni parziali:\ la funzione ovunque indefinita, che è calcolabilissima!
+
+\begin{example}
+    La seguente è una delle possibili derivazioni per la funzione ovunque indefinita $\psi_{\uparrow}(x)$:
+    \begin{itemize}
+        \item[] $\varphi = \lambda x,y.\ 3$
+        \item[] $\psi_\uparrow = \lambda x.\ (\mu y.\ \varphi(x,y)= 0)$
+    \end{itemize}
+    Per verificare che quanto scritto sopra è davvero una derivazione basta controllare che la funzione (ricorsiva primitiva) $\varphi$ è definita per tutti i suoi argomenti, ovvero che il calcolo di $\varphi(x, y)$ termina per ogni $x$; il che è banale.\
+    In questo caso è altrettanto facile vedere che per nessun $x$ esiste un $y$ per cui $\varphi(x, y) = 0$ e che quindi la funzione $\psi(x)$ è indefinita per ogni valore di $x$; attenzione però:\ nella maggior parte dei casi questo controllo è molto molto difficile, in un senso che sarà precisato formalmente tra poco.
+\end{example}
+
+\noindent Ricapitolando:\ si comincia con le ricorsive primitive, si applica l'operatore di minimizzazione $\mu$ e si ottiene una funzione $\mu$-ricorsiva, che può essere ora usata nella prossima definizione.\
+Tutto ciò a patto che la condizione (*) valga, altrimenti si può uscire dalla classe, cioè, se $\varphi$ non termina per qualche valore $z$ minore del minimo $y$ su cui $\varphi$ vale 0, allora la funzione $\psi$ potrebbe non essere $\mu$-ricorsiva:\ terminazione e non terminazione sono \textit{importantissime}!
+
+Si noti anche che
+\[f(x) =\left\{\begin{array}{l l}
+        \mu y[y<g(x), h(x,y) = 0] & \mathrm{se\ esiste\ tale}\ y \\
+        0                         & \mathrm{altrimenti}          \\
+    \end{array}\right.\]
+è ricorsiva primitiva se $g$ e $h$ lo sono.\
+La ragione è che $g$ impone un limite ai tentativi di ricercare il minimo $y$, e quindi o lo troviamo in meno di $g(x)$ applicazioni di $h$ o diamo come risultato 0 dopo al più $g(x)$ applicazioni di $h$, che è un numero determinabile in tempo \textit{finito} perché sia $g$ che $h$ sono totali in quanto ricorsive primitive.\
+In altre parole anche la $f$ sarebbe totale, e quindi avremmo definito un formalismo che definisce solo funzioni totali e quindi inadatto a rappresentare \textit{tutte} le funzioni calcolabili.
+
+Diamo ora alcune definizioni ausiliarie che ci saranno utili in seguito.
+
+\begin{definition}
+    Una relazione $I \subseteq \mathbb{N}^n$, $n \geq 1$ è \textit{ricorsiva} (come sinonimo di totale) (o rispettivamente è \textit{ricorsiva primitiva}, ha la proprietà $P$) se la sua funzione caratteristica $\chi_I$ è ricorsiva totale (è ricorsiva primitiva, ha la proprietà $P$).\
+    Un caso particolare e interessante si ha con gli \textit{insiemi ricorsivi} $I \subseteq \mathbb{N}$, cioè quando $n = 1$.
+\end{definition}
+
+\noindent In analogia a quanto fatto con le funzioni T-calcolabili, diciamo che una funzione è $\mu$-\textit{calcolabile} se la sua definizione è $\mu$-ricorsiva.\
+
+Adesso abbiamo le funzioni T-calcolabili, quelle \textit{\footnotesize WHILE}-calcolabili e quelle $\mu$-calcolabili e il bello è che formano \textit{esattamente la stessa classe di funzioni calcolabili}, ciò che è stato accuratamente dimostrato.\
+Abbiamo già annunciato che molti altri formalismi sono stati proposti e che tutti questi (quando siano sufficientemente potenti in un senso che renderemo preciso tra poco) definiscono la \textit{stessa classe di funzioni}; in altre parole sono \textit{Turing equivalenti}.\
+Pertanto possiamo, o meglio vogliamo stipulare come vera la
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|}
+        \hline
+        \textbf{Tesi di Church-Turing}:\ Le funzioni (\textit{intuitivamente}) calcolabili sono \\
+        tutte e sole le funzioni (parziali) T-calcolabili.                                      \\\hline
+    \end{tabular}
+\end{table}
+
+\noindent In realtà questa è un'ipotesi, ma è talmente forte che la prendiamo come tesi.\
+In termini informatici, questo significa che non importa quale linguaggio di programmazione usiamo, né su quale macchina facciamo girare i nostri programmi, purché si abbia a disposizione memoria e tempo illimitati:\ ciò che possiamo calcolare \textit{non} cambia --- può forse cambiare \textit{come} lo si calcola.
+
+Chiaramente è dimostrabile solo l'equivalenza tra i formalismi esistenti, ed è certamente molto difficile immaginare una dimostrazione di equivalenza tra tutti i \textit{possibili} formalismi, inclusi quelli ancora da inventare.
+
+La tesi di Church-Turing postula che la nozione di calcolabilità ``intuitiva'' è \textit{robusta}.\
+Inoltre, la tesi cade se si rilascia anche una sola delle ipotesi fatte sulla natura degli algoritmi.
+
+Bene, di qui in avanti parleremo solo di \textit{funzioni calcolabili}, senza qualificare ulteriormente il formalismo usato per definirle.\
+Quante sono?\ E ce ne sono di non calcolabili?\ Se sì, ne vedremo una interessante?

@@ -1,0 +1,379 @@
+\chapter{Protocolli di identificazione, autenticazione e firma digitale}
+
+\textbf{Identificazione}\quad Un sistema di elaborazione, isolato o in rete, deve essere in grado di \textit{accertare l'identità di un utente} che richiede accesso ai suoi servizi.\
+
+\vspace{12pt}
+\noindent\textbf{Autenticazione}\quad Il destinatario di un messaggio deve essere in grado di accertare \textit{l'identità del mittente} e \textit{l'integrità del crittogramma ricevuto}.\
+
+\vspace{12pt}
+\noindent\textbf{Firma digitale}
+\begin{itemize}
+    \item Il mittente non deve poter negare di aver inviato un messaggio $m$.
+    \item Il destinatario deve essere in grado di autenticare il messaggio.
+    \item Il destinatario non deve poter sostenere che $m' \neq m$ è il messaggio inviato dal mittente.
+\end{itemize}
+Tutto ciò deve essere verificabile da terzi.
+
+\vspace{12pt}
+\noindent Nessuna delle tre funzionalità esclude l'altra, ciascuna estende le precedenti:\ l'autenticazione del messaggio garantisce l'identificazione del mittente e la firma digitale garantisce l'autenticazione del messaggio.\
+Sono usate per contrastare gli attacchi attivi ed esistono sia sui cifrari simmetrici che asimmetrici.
+
+\section{Funzioni Hash}
+
+Una \textbf{funzione hash} $f: X \rightarrow Y$ è una funzione tale che
+\[n = |X| >> m = |Y|\]
+$\exists\ X_1, X_2,\dots, X_m \subseteq X$ \textbf{disgiunti} tale che
+\[ X = X_1 \cup X_2 \cup \dots \cup X_m\]
+\[\forall\ i,\ \forall\ x \in X_i,\ f(x) = y\]
+
+\noindent Sostanzialmente, una funzione hash non è iniettiva, quindi più input corrispondono allo stesso output (più elementi del dominio hanno la stessa immagine).\
+
+Una buona funzione hash deve assicurare che \textbf{i sottoinsiemi $X_1, \dots, X_m$ abbiano circa la stessa cardinalità}:\ due elementi estratti a caso da $X$ hanno probabilità $\sim \frac{1}{m}$ di avere la stessa immagine in $Y$.\
+Un'altra proprietà che viene richiesta è che \textbf{elementi di $X$ molto simili tra loro appartengano a due sottoinsiemi diversi}:\ se $X$ è un insieme di interi, due elementi con valori prossimi devono avere immagini diverse.\
+Inoltre deve poter \textbf{gestire le collisioni}:\ l'algoritmo che impiega la funzione hash dovrà affrontare la situazione in cui più di un elemento di $X$ ha lo stesso valore hash $Y$.\
+
+\subsection{Funzioni hash one-way}
+
+Se la funzione è applicata in crittografia, deve soddisfare le seguenti proprietà:
+\begin{enumerate}
+    \item $\forall\ x \in X$ è \textbf{computazionalmente facile} calcolare
+          \[y = f(x)\]
+    \item Proprietà one-way:\ per la maggior parte degli $y \in Y$ è \textbf{computazionalmente difficile} determinare $x \in X$ tale che
+          \[f(x) = y,\ \mathrm{cio\grave{e}}\ x = f^{-1}(y)\]
+    \item Proprietà claw-free:\ è difficile trovare due elementi $x_1, x_2 \in X$ tali che
+          \[f(x_1) = f(x_2)\]
+\end{enumerate}
+
+\subsection{Funzioni hash usate in crittografia}
+
+\subsubsection{MD5 (Message Digest, versione 5)}
+
+È una famiglia di algoritmi di cui l'originale non venne mai pubblicato:\ furono pubblicati MD2 seguito da MD4.\
+Tuttavia, in MD2 e MD4 furono trovate debolezze e, nel 1992, Ron Rivest formulò MD5.\
+
+Riceve una sequenza $S$ di 512 bit e produce un'immagine di 128 bit:\ la sequenza è \textbf{digerita} riducendone la lunghezza ad un quarto.\
+In seguito è stato dimostrato che MD5 non resiste alle collisioni e nel 2004 sono state trovate debolezze severe:\ oggi la sua sicurezza si considera severamente compromessa.\
+Lo stesso Rivest ha affermato (2005) che era da considerarsi chiaramente forzata dal punto di vista della resistenza alle collisioni.\
+
+\subsubsection{RIPEMD-160}
+
+Versione ``matura'' delle funzioni MD.\
+Nasce nel 1995 nell'ambito di un progetto dell'Unione Europea.\
+Produce immagini da 160 bit ed è esente dai difetti di MD5.
+
+\subsubsection{SHA (Secure Hash Algorithm)}
+
+Progettata da NIST e NSA nel 1993, si adotta quando la proprietà di claw-free è cruciale per la sicurezza del sistema.\
+
+Opera su sequenze lunghe fino a $2^{64}$ bit e produce immagini di 160 bit.\
+È una funzione crittograficamente sicura:\ soddisfa i requisiti delle funzioni hash one-way e genera immagini molto diverse per sequenze molto simili.\
+La prima versione pubblicata (SHA-0) conteneva una debolezza, scoperta in seguito da NSA, che portò alla revisione dello standard.\
+
+\begin{itemize}
+    \item 1995:\ SHA-1, progettato da NSA e raccomandato da NIST.
+    \item 2001:\ SHA-2, produceva digest più lunghi.
+    \item 2007:\ a causa degli attacchi su MD5 e SHA-0 e di attacchi teorici su SHA-1, il NIST ha sollecitato proposte per un nuovo algoritmo hash.\
+    \item 2012:\ si è conclusa la valutazione ed è stato selezionata una funzione hash di progettazione non governativa (SHA-3, team di analisti italiani e belgi, rilasciata ufficialmente nel 2015).\
+\end{itemize}
+
+\subsubsection{SHA-1}
+
+Opera su sequenze lunghe fino a $2^{64} - 1$ bit e produce immagini di 160 bit.\
+È molto usata nei protocolli crittografici anche se non è più certificata come standard.\
+
+Opera su blocchi di 160 bit, contenuti in un buffer di 5 registri da 32 bit ciascuno, in cui sono caricati inizialmente dei valori pubblici.\
+Il messaggio $m$ viene concatenato con una sequenza di padding che ne rende la lunghezza un multiplo di 512 bit.\
+Il contenuto dei registri varia nel corso dei cicli successivi in cui questi valori si combinano tra loro e con blocchi da 32 bit provenienti da $m$.\
+Alla fine del procedimento, i registri contengono SHA-1($m$).\
+
+\section{Identificazione}
+
+\subsection{Identificazione su canali sicuri}
+
+\textbf{Esempio}:\ accesso di un utente alla propria casella di posta elettronica, o a file personali memorizzati su un calcolatore ad accesso riservato ai membri della sua organizzazione.\
+\begin{itemize}
+    \item L'utente inizia il collegamento inviando in chiaro login e password.\
+    \item Se il canale è protetto in lettura e scrittura, un attacco può essere sferrato solo da un utente locale al sistema (admin o hacker).\
+\end{itemize}
+
+\noindent Il meccanismo di identificazione prevede una cifratura delle password realizzata con funzioni hash one-way.\
+
+Ad esempio, in Unix, quando un utente $U$ fornisce per la prima volta la sua password $P$, il sistema associa a $U$ due sequenze binarie:\
+\begin{itemize}
+    \item $S$ (seme) prodotta da un generatore pseudocasuale.
+    \item $Q = h(PS)$ con $h$ funzione hash one-way.
+\end{itemize}
+
+\noindent Nel file delle password si memorizza $\langle S, Q\rangle$.\
+Quando l'utente si riconnetterà e fornirà nuovamente la password, verrà recuperata $S$ che viene concatenata con la password fornita e viene calcolata $h(PS)$; se risulterà uguale a $Q$ l'identificazione sarà corretta altrimenti no.\
+
+Un accesso illecito al file delle password non fornisce informazioni interessanti:\ è computazionalmente difficile ricavare la password originale dalla sua immagine one-way.\
+
+L'aggiunta del seme è molto utile perché, nel caso in cui due utenti usino la stessa password, $Q$ resta comunque diverso.\
+
+\subsection{Identificazione su canali non sicuri}
+
+Se il canale è insicuro, la password può essere intercettata durante la sua trasmissione in chiaro.\
+Il sistema non dovrebbe mai maneggiare direttamente la password, ma una sua immagine inattaccabile.\
+
+\begin{flushleft}
+    Si adottano strategie che si basano sulla cifratura a chiave pubblica.\
+\end{flushleft}
+
+\noindent Supponiamo che $\langle e, n \rangle$ e $\langle d \rangle$ siano rispettivamente la chiave pubblica e privata dell'utente $U$ che richiede l'accesso ai servizi offerti dal sistema $S$.\
+
+\begin{enumerate}
+    \item $S$ genera un numero casuale $r < n$ e lo invia in chiaro a $U$.
+    \item $U$ calcola
+          \[f = r^d\ \mathit{mod}\ n\quad (\mathrm{firma\ di}\ U\ \mathrm{su}\ r)\]
+          con la sua chiave privata e lo spedisce a $S$.\
+    \item $S$ verifica la correttezza del valore ricevuto calcolando e verificando se
+          \[f^e\ \mathit{mod}\ n = r \]
+          se cio avviene, l'identificazione ha successo.
+\end{enumerate}
+
+\noindent Le operazioni di cifratura e decifrazione sono invertite rispetto all'impiego standard nell'RSA:\ è possibile perché le due operazioni sono commutative
+\[(x^e\ \mathit{mod}\ n)^d\ \mathit{mod}\ n = (x^d\ \mathit{mod}\ n)^e\ \mathit{mod}\ n\]
+Inoltre, $f$ può essere generata solo da $U$ che possiede $\langle d \rangle$, quindi, se il passo 3 va a buon fine, il sistema ha la garanzia che l'utente che ha richiesto l'identificazione sia effettivamente $U$, anche se il canale è insicuro.\
+
+Fintanto che il sistema è ``onesto'' e $r$ è davvero un numero casuale non ci sono problemi; l'utente deve fidarsi del sistema:\ quest'ultimo potrebbe opportunamente scegliere $r$ in modo da carpire informazioni sulla chiave privata $\langle d \rangle$.\
+
+\section{Autenticazione}
+
+Tipicamente per garantire l'autenticazione si usa il MAC (Message Authentication Code):\ un breve codice associato al messaggio.\
+Per poter calcolare tale codice, il mittente e il destinatario devono concordare una chiave segreta simmetrica $k$.\
+
+Il mittente, quindi, allega al messaggio un MAC $A(m, k)$, allo scopo di garantire la provenienza e l'integrità del messaggio, e spedisce in chiaro la coppia $\langle m, A (m, k)\rangle$, oppure cifra $m$ e spedisce $\langle C(m, k'), A (m, k)\rangle$ ($C$ è una funzione di cifratura, mentre $k$ è la chiave pubblica o segreta del cifrario scelto).\
+
+Il destinatario entra in possesso di $m$ (dopo averlo eventualmente decifrato) e, essendo a conoscenza di $A$ e $k$, calcola $A(m,k)$ confrontando il valore ottenuto con quello inviato dal mittente (per verificare che il MAC ricevuto corrisponda al messaggio a cui risulta allegato).\
+Se la verifica ha successo il messaggio è autenticato, altrimenti scarta il messaggio.\
+
+\subsection{MAC}
+
+Il MAC è un'immagine breve del messaggio che può essere generata solo da un mittente conosciuto dal destinatario, previ opportuni accordi.\
+Ne sono state proposte varie realizzazioni, basate su cifrari asimmetrici, simmetrici e sulle funzioni hash one-way.\
+
+\subsubsection{MAC con funzioni hash one-way}
+
+$A(m,k) = h(mk)$, con $h$ funzione hash one-way.\
+Risulta computazionalmente difficile per un crittoanalista scoprire la chiave segreta $k$:\ $h$ è nota a tutti e $m$ può viaggiare in chiaro o essere scoperto per altra via, ma $k$ viaggia all'interno del MAC e quindi per poterlo recuperare si dovrebbe invertire $h$.\
+
+Il crittoanalista non può sostituire facilmente il messaggio $m$ con un altro messaggio $m'$ perché dovrebbe allegare alla comunicazione di $m'$ il MAC $A(m', k)$ che può essere prodotto solo conoscendo $k$.\
+
+\subsubsection{CBC e MAC}
+
+Usando un cifrario a blocchi in modalità CBC, si può usare il blocco finale del crittogramma come MAC:\ l'ultimo blocco è infatti una funzione dell'intero messaggio.\
+
+\section{Firma digitale}
+
+I requisiti fondamentali di una \textbf{firma manuale} sono
+
+\begin{enumerate}
+    \item è autentica e non falsificabile, prova che chi l'ha prodotta è chi ha sottoscritto il documento;
+    \item non è riutilizzabile, è legata strettamente al documento su cui è stata apposta;
+    \item il documento firmato non è alterabile, chi ha prodotto la firma è sicuro che questa si riferirà solo al documento sottoscritto nella sua forma originale;
+    \item non può essere ripudiata da chi l'ha apposta, costituisce prova legale di un accordo o dichiarazione.
+\end{enumerate}
+
+\noindent La \textbf{firma digitale} non può consistere semplicemente di una digitalizzazione del documento originale firmato manualmente:\ un crittoanalista potrebbe ``tagliare'' dal documento digitale la parte contenente la firma e ``copiarla'' su un altro documento.\
+Deve avere una forma che dipenda dal documento su cui viene apposta, per essere inscindibile da questo.\
+Per progettare firme digitali si possono usare cifrari sia i simmetrici che quelli asimmetrici.\
+
+\subsection{Protocollo:\ messaggio in chiaro e firmato}
+
+Si consideri un utente $U$ proprietario della coppia di chiavi $k_U[\mathit{priv}]$ e $k_U[\mathit{pub}]$.\
+$C$ e $D$ sono le funzioni di cifratura e decifrazione di un cifrario asimmetrico.\
+
+$U$ genera la firma $f = D(m, k_U[\mathit{priv}])$ per $m$ e spedisce all'utente $V$ la tripla $\langle U,m,f \rangle$.\
+$V$ riceve $\langle U,m,f \rangle$ e verifica l'autenticità della firma $f$ calcolando e controllando che
+\[C(f, k_U[\mathit{pub}]) = m\]
+L'indicazione del mittente $U$ consente a $V$ di selezionare la chiave pubblica $k_U[\mathit{pub}]$ da utilizzare nel calcolo.\
+
+I processi di firma e verifica impiegano le funzioni $C$ e $D$ in ordine inverso a quello standard, $C$ e $D$ devono essere commutative:
+\[C(D(m)) = D(C(m)) = m\]
+\textbf{Osservazione}:\ sostituire $m$ col suo crittogramma non serve a nulla perché il messaggio in chiaro può essere ottenuto conoscendo la chiave pubblica e la firma, che sono note a tutti.\
+\vspace{12pt}
+
+\noindent Il protocollo soddisfa i requisiti della firma manuale:
+
+\begin{itemize}
+    \item $f$ è autentica e non falsificabile:\ per falsificare la firma occorre conoscere $k_U[\mathit{priv}]$, che è nota solo a $U$, e inoltre $D$ è one-way.\
+    \item Il documento firmato $\langle U,m,f \rangle$ non può essere alterato se non da $U$, pena la non consistenza tra $m$ e $f$.
+    \item Poiché solo $U$ può aver prodotto $f$, $U$ non può ripudiare la firma.\
+    \item La firma $f$ non è riutilizzabile su un altro documento $m' \neq m$ poiché è immagine di $m$.
+\end{itemize}
+
+
+\subsubsection{Altre caratteristiche}
+
+\begin{itemize}
+    \item È definito per un particolare utente $U$, ma non per un particolare destinatario.\
+    \item Chiunque può convincersi dell'autenticità della firma facendo uso solo della chiave pubblica di $U$.\
+    \item È solo uno schema di principio:\ comporta lo scambio di un messaggio di lunghezza doppia dell'originale poiché la dimensione della firma è paragonabile alla dimensione del messaggio; il messaggio non può essere cifrato perché è ricavabile pubblicamente dalla firma attraverso la verifica di questo.\
+\end{itemize}
+
+
+\subsection{Protocollo:\ messaggio cifrato e firmato}
+
+Si consideri un utente $U$ proprietario della coppia di chiavi $k_U[\mathit{priv}]$ e $k_U[\mathit{pub}]$.\
+$C$ e $D$ sono le funzioni di cifratura e decifrazione di un cifrario asimmetrico.\
+
+$U$ genera la firma $f = D(m, k_U[\mathit{priv}])$ per $m$ e calcola il crittogramma firmato $c = C(f, k_V[\mathit{pub}])$ con la chiave pubblica del destinatario $V$ (si incapsula la firma nel documento cifrato).\
+A questo punto spedisce la coppia $\langle U,c \rangle$ all'utente $V$.\
+$V$ riceve $\langle U,c \rangle$, decifra il crittogramma $D(c, k_V[\mathit{priv}]) = f$ e cifra tale valore con la chiave pubblica di $U$ ottenendo
+\[C(f, k_U[\mathit{pub}]) = C (D(m, k_U[\mathit{priv}]), k_U[\mathit{pub}]) = m \]
+Se $m$ è significativo attesta l'identità di $U$:\ un utente diverso da $U$ ha probabilità praticamente nulla di generare un crittogramma di significato accettabile se ``cifrato'' con la chiave pubblica di $U$.\
+
+\subsubsection{Algoritmo}
+
+Immaginiamo che $U$ e $V$ utilizzino l'RSA sia per produrre la firma che per proteggere la loro comunicazione.\
+In questo caso si avranno due coppie di chiavi.
+
+\begin{itemize}
+    \item $\langle d_U \rangle, \langle e_U, n_U\rangle$ chiavi di $U$.
+    \item $\langle d_V \rangle, \langle e_V, n_V\rangle$ chiavi di $V$.
+\end{itemize}
+
+\noindent $U$ genera la firma del messaggio $m$
+\[f=m^{d_U}\ \mathit{mod}\ n_U\] e la cifra con la chiave pubblica di $V$
+\[c = f^{e_V}\ \mathit{mod}\ n_V\]
+e spedisce a $V$ la coppia $\langle U, c \rangle$.
+
+\vspace{12pt}
+\noindent L'utente $V$ riceve la coppia $\langle U, c \rangle$ e decifra $c$
+\[c^{d_v}\ \mathit{mod}\ n_V = f\]
+``decifra'' $f$ con la chiave pubblica di $U$
+\[f^{e_U}\ \mathit{mod}\ n_U = m\]
+Se $m$ è significativo, conclude che è autentico.\
+\vspace{12pt}
+
+\noindent Affinché il procedimento sia corretto è necessario che $n_U \leq n_V$ perché risulti $f < n_V$ e $f$ possa essere cifrata correttamente e spedita a $V$.\
+Questo impedirebbe a $V$ di inviare messaggi firmati e cifrati a $U$; per ovviare a questo tipo di problema, ogni utente stabilisce chiavi distinte per la firma e per la cifratura:\ si fissa pubblicamente $H$ molto grande, ad esempio $H = 2^{1024}$, e si prendono le chiavi di firma $< H$ e le chiavi di cifratura $> H$.\
+
+Il valore elevato di $H$ assicura che tutte le chiavi possano essere scelte sufficientemente grandi e, quindi inattaccabili con brute force.\
+Tuttavia, il meccanismo si presta ad altri tipi di attacchi basati sulla possibilità che il crittoanalista si procuri la firma di un utente su messaggi apparentemente privi di senso.\
+
+\subsubsection{Attacco}
+
+Supponiamo che un utente $U$ invii una risposta automatica (ack) al mittente ogni volta che riceve un messaggio $m$ e supponiamo che questo segnale di ack sia il crittogramma della firma di $U$ su $m$.\
+Un crittoanalista attivo $X$ può decifrare i messaggi inviati a $U$:\
+
+\begin{itemize}
+    \item intercetta il crittogramma $c$ firmato inviato da $V$ ad $U$, lo rimuove dal canale e lo rispedisce a $U$, facendogli credere che $c$ sia stato inviato da lui.
+    \item $U$ spedisce automaticamente a $X$ un ack.
+    \item $X$ usa l'ack per risalire al messaggio originale applicando le funzioni del cifrario con le chiavi pubbliche di $V$ e $U$.
+\end{itemize}
+
+\noindent Vediamo il procedimento:
+\begin{enumerate}
+    \item $V$ invia il crittogramma $c$ a $U$
+          \[c = C(f, k_U[\mathit{pub}])\]
+          \[f = D(m, k_V[\mathit{priv}])\]
+    \item Il crittoanalista $X$ intercetta $c$, lo rimuove dal canale e lo rispedisce a $U$ ($U$ crede che $c$ arrivi da $X$).
+    \item $U$ decifra $c$
+          \[f = D(c, k_U[\mathit{priv}])\]
+          e verifica la firma con la chiave pubblica di $X$ ottenendo un messaggio
+          \[m' = C(f, k_X[\mathit{pub}])\]
+    \item $m' \neq m$ è un messaggio privo di senso, ma il sistema manda l'ack $c'$ a $X$
+          \[f' = D(m', k_U[\mathit{priv}])\]
+          \[c' = C(f', k_X[\mathit{pub}])\]
+\end{enumerate}
+
+\noindent $X$ usa $c'$ per risalire al messaggio $m$
+\begin{enumerate}
+    \item decifra $c'$ e trova $f'$
+          \[D(c', k_X[\mathit{priv}]) = D(C(f', k_X[\mathit{pub}]), k_X[\mathit{priv}]) = f'\]
+    \item verifica $f'$ e trova $m'$
+          \[C(f', k_U[\mathit{pub}]) = C(D(m', k_U[\mathit{priv}]), k_U[\mathit{pub}]) = m'\]
+    \item da $m'$ ricava $f$
+          \[D(m', k_X[\mathit{priv}]) = D(C(f, k_X[\mathit{pub}]), k_X[\mathit{priv}]) = f\]
+    \item verifica $f$ con la chiave pubblica di $V$ e trova $m$
+          \[C(f, k_V[\mathit{pub}]) = C(D(m, k_V[\mathit{priv}]), k_V[\mathit{pub}]) = m\]
+\end{enumerate}
+
+\noindent Per evitare l'attacco occorre che $U$ blocchi l'ack automatico:\ l'ack deve essere inviato solo dopo un esame preventivo di $m$ e scartando tutti i messaggi che non si desidera firmare.\
+
+\subsection{Protocollo resistente agli attacchi}
+
+Si evita la firma del messaggio:\ la firma digitale si appone su un'immagine del messaggio ottenuta con una funzione hash one-way e pubblica.\
+La firma non è più soggetta a giochi algebrici.
+
+\vspace{12pt}
+
+\noindent Il mittente $U$ calcola $h(m)$ e genera la firma
+\[f = D(h(m), k_U[\mathit{priv}])\]
+Calcola il crittogramma $c = C(m, k_V[\mathit{pub}])$ e spedisce a $V$ la tripla $\langle U, c, f\rangle$.
+
+\vspace{12pt}
+
+\noindent Il destinatario $V$ attua la fase di decifrazione e verifica:
+$V$ riceve $\langle U, c, f\rangle$ e decifra $c$ \[m = D(c, k_V[\mathit{priv}])\]
+Calcola separatamente $h(m)$ e $C(f, k_U[\mathit{pub}])$ e se risultano uguali allora il messaggio è autentico.\
+
+\vspace{12pt}
+
+\noindent Il protocollo consente una firma più veloce e lo scambio di una maggiore, ma trascurabile, quantità di dati.
+
+\subsection{Attacchi man-in-the-middle}
+
+Poiché le chiavi di cifratura sono pubbliche e non richiedono un incontro diretto tra gli utenti per il loro scambio, un crittoanalista attivo può intromettersi proprio in questa fase iniziale del protocollo, pregiudicando il suo corretto svolgimento.\
+
+Attacco attivo chiamato \textbf{man-in-the-middle}:\ il crittoanalista si intromette nella comunicazione tra $U$ e $V$ e si comporta agli occhi di $U$ come se fosse $V$ (e viceversa), intercettando e bloccando le comunicazioni di $U$ e $V$.\
+
+Il crittoanalista $X$ devia le comunicazioni che provengono da $U$ e $V$ e le dirige verso se stesso:
+\begin{itemize}
+    \item $U$ richiede a $V$ la sua chiave pubblica.
+    \item $X$ intercetta la risposta contenente $k_V[\mathit{pub}]$ e la sostituisce con la sua $k_X[\mathit{pub}]$.
+    \item $X$ si pone in ascolto in attesa dei crittogrammi da $U$ a $V$ cifrati con la sua chiave pubblica $k_X[\mathit{pub}]$.
+    \item $X$ rimuove tutti questi crittogrammi, li decifra con $k_X[\mathit{priv}]$, se li legge per bene, li cifra con $k_V[\mathit{pub}]$ e li spedisce a $V$.
+    \item $U$ e $V$ non si accorgono della presenza di $X$ se egli è sufficientemente veloce nel rimuovere, decifrare e reinserire sul canale i crittogrammi.
+\end{itemize}
+
+\subsection{Certification Authority}
+
+Per evitare attacchi \textit{man-in-the-middle} si ricorre alle cosiddette \textbf{certification authority}:\ sono delle infrastrutture, degli enti che garantiscono la validità delle chiavi pubbliche e ne regolano l'uso, gestendo la distribuzione sicura delle chiavi alle due entità che vogliono comunicare.\
+
+La certification authority autentica l'associazione $\langle$\texttt{utente,chiave pub\-blica}$\rangle$ emettendo un certificato digitale.\
+Il certificato digitale consiste della chiave pubblica e di una lista di informazioni relative al suo proprietario, opportunamente firmate dalla CA.\
+Per svolgere correttamente il suo ruolo mantiene un archivio di chiavi pubbliche sicuro, accessibile a tutti e protetto da attacchi di scrittura non autorizzati.
+
+La chiave pubblica della CA è nota agli utenti che la mantengono protetta da attacchi esterni e la utilizzano per verificarne la firma sui certificati.\
+
+\subsubsection{Certificato digitale}
+
+Un certificato digitale contiene:
+
+\begin{itemize}
+    \item un'indicazione del suo formato (numero di versione);
+    \item il nome della CA che lo ha rilasciato;
+    \item un numero seriale che lo individua univocamente all'interno della CA;
+    \item la specifica dell'algoritmo usato dalla CA per creare la firma elettronica;
+    \item il periodo di validità del certificato (data di inizio e data di fine);
+    \item un'indicazione del protocollo a chiave pubblica adottato da questo utente per la cifratura e la firma:\ nome dell'algoritmo, suoi parametri e chiave pubblica dell'utente;
+    \item firma della CA eseguita su tutte le informazioni precedenti.
+\end{itemize}
+
+\noindent Se $U$ vuole comunicare con $V$ può richiedere $k_V[\mathit{pub}]$ alla CA che risponde inviando a $U$ il certificato digitale di $V$ e, poiché $U$ conosce $k_{CA}[\mathit{pub}]$, può controllare l'autenticità del certificato verificandone il periodo di validità e la firma prodotta dalla CA su di esso.\
+Se tutti i controlli vanno a buon fine, $k_V[\mathit{pub}]$ nel certificato è corretta e $U$ avvia la comunicazione con $V$.\
+Il crittoanalista potrebbe falsificare la certificazione ma si assume che la CA abbia un archivio di chiavi inattaccabile.
+
+\subsection{Protocollo:\ messaggio cifrato, firmato in hash e certificato}
+
+Il mittente $U$ si procura $\mathit{cert}_V$ di $V$, calcola $h(m)$ e genera la firma
+\[f = D(h(m), k_U[\mathit{priv}])\]
+Calcola il crittogramma $c = C(m, k_V[\mathit{pub}])$ e spedisce a $V$ la tripla
+\[\langle \mathit{cert}_U, c, f\rangle\]
+$\mathit{cert}_U$ contiene la chiave $k_U[\mathit{pub}]$ e la specificazione della funzione $h$ utilizzata.
+
+Il destinatario $V$ riceve $\langle \mathit{cert}_U, c, f\rangle$ e verifica l'autenticità di $\mathit{cert}_U$ (e dunque di $k_U[\mathit{pub}]$) utilizzando la propria copia di $k_{CA}[\mathit{pub}]$.\
+$V$ decifra il crittogramma $c$ mediante la sua chiave privata e ottiene
+\[m = D(c, k_V[\mathit{priv}])\]
+$V$ verifica l'autenticità della firma apposta da $U$ su $m$ controllando che risulti
+\[C(f, k_U[\mathit{pub}]) = h(m)\]
+
+\subsubsection{Conclusioni}
+
+Il punto debole di questo meccanismo è rappresentato dai certificati revocati, cioè non più validi:\ le CA mettono a disposizione degli utenti un archivio pubblico contenente i certificati non più validi.\
+La frequenza di controllo di questi certificati e le modalità della loro comunicazione agli utenti sono cruciali per la sicurezza.\
+
+Attacchi \textit{man-in-the-middle} possono essere evitati se si stabilisce un incontro diretto tra utente e CA nel momento in cui si istanza il sistema asimmetrico dell'utente.

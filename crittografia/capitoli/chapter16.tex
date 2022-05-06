@@ -1,0 +1,193 @@
+\chapter{Sistemi Zero-K e SSL}
+
+\section{Sistemi ``Zero-Knowledge''}
+
+L'obiettivo è permettere ad un determinato Prover di convincere un Verifier, tramite una serie di sfide, di possedere una caratteristica{\slash}conoscenza{\slash}capacità mostrando al Verifier la stessa e sola caratteristica in sé.\
+
+\subsubsection{Esempio}
+
+Supponiamo che Peggy sostenga di contare i granelli di sabbia di una qualunque spiaggia soltanto osservandoli e Victor vuole controllare se quanto sostiene è vero:\ vuole verificare l'affermazione di Peggy lasciandole una probabilità arbitrariamente piccola di convincerlo di qualcosa che non è vero.\
+
+Per semplicità si supponga che Victor si accontenti che Peggy dica solo se il numero di granelli nella spiaggia è pari o dispari.\
+
+\vspace{12pt}
+\noindent Nella fase di preparazione Peggy comunica $b_0$:\ parità dei granelli di sabbia a Victor.
+
+\begin{verbatim}
+Protocollo
+    for (i = 1 to k){ //k scelto da V
+        P si volta
+        V sceglie e in {0,1} a caso
+        if (e == 0) V toglie un granello di sabbia
+        V chiede a P il nuovo valore b[i]
+        if ((e == 0 && b[i] != b[i-1]) ||
+            (e == 1 && b[i] == b[i-1]))
+                continua alla prossima iterazione
+        else return "P è un impostore"
+    }
+\end{verbatim}
+
+\noindent Supponendo che il Prover sia un impostore, la probabilità di dare risposte giuste è equivalente a rispondere correttamente 0 o 1, quindi $\frac{1}{2}$, per tutte le $k$ volte.\
+Perciò, la probabilità che il Prover dia sempre risposte corrette e riesca ad ingannare il Verifier è $\left(\frac{1}{2}\right)^k$ e di conseguenza la probabilità che $P$ dica il vero è $1 -\left(\frac{1}{2}\right)^k$.\
+
+Si noti che $k$ viene scelto da Victor, è lui a decidere quante sfide deve superare Peggy per convincerlo.\
+Quindi, la probabilità di inganno è funzione di un parametro $k$ scelto dal Verifier.
+
+\subsubsection{Principi generali dei protocolli Zero-K}
+
+\begin{itemize}
+    \item \textbf{Completezza}:\ se $P$ è onesto e la sua affermazione è vera, $V$ deve accettare sempre la dimostrazione.
+    \item \textbf{Correttezza}:\ se $P$ è disonesto e la sua affermazione è falsa, $V$ può essere ingannato con probabilità $\leq \left(\frac{1}{2}\right)^k$ con $k$ scelto da $V$.
+    \item \textbf{Conoscenza zero}:\ se l'affermazione di $P$ è vera, $V$ (anche se disonesto) non può acquisire alcuna informazione se non la veridicità di quanto affermato da $P$.
+\end{itemize}
+
+\noindent La finalità di questi protocolli è far si che $P$ possa dimostrare a $V$ che è il proprietario di una certa chiave privata senza effettuare alcuna operazione su dati consegnati ad esso da parte di $V$.
+
+\subsection{Protocollo Fiat-Shamir}
+
+È un protocollo di identificazione Zero-K con l'obiettivo che $P$ dimostri a $V$ la sua identità senza svelare nessun'altra informazione.\
+Si basa sulla difficoltà di calcolo della $\sqrt[]{}$ in modulo $n$, con $n$ composto.\
+\[t \equiv s^2\ \mathit{mod}\ n\quad n\ \mathrm{composto}\]
+$V$ conosce $t$ e $n$, mentre $P$ convince $V$ di conoscere $\sqrt{t}$.\
+
+\subsubsection{Preparazione}
+
+$P$ sceglie $p$ e $q$ primi molto grandi, calcola $n = p\cdot q$, sceglie $s < n$ e calcola $t = s^2\ \mathit{mod}\ n$.\
+$P$ rende infine nota la coppia $\langle t, n\rangle$ (chiave pubblica) e mantiene segreto $\langle p, q, s\rangle$ (chiave privata).\
+
+Conoscendo solo $\langle t, n\rangle$ non è possibile calcolare in tempo polinomiale nessuno dei fattori contenuti in $\langle p, q, s\rangle$.\
+
+\subsubsection{Protocollo}
+
+Ripetizione per $k$ volte di
+
+\begin{enumerate}
+    \item $V$ chiede a $P$ di iniziare un'iterazione.
+    \item $P$ genera un intero $r < n$ casuale $u = r^2\ \mathit{mod}\ n$ e lo comunica a $V$.
+    \item $V$ genera un $e \in \{0, 1\}$ casuale e lo comunica a $P$ (è un passo cruciale perché se $P$ conosce come $V$ genera $e$, può sfruttarlo nelle sue risposte).
+    \item $P$ calcola $z = r\cdot s^e\ \mathit{mod}\ n$ e comunica $z$ a $V$.\ Si noti che
+          \[z = \left\{\begin{array}{l l}
+                  r\ \mathit{mod}\ n        & \mathrm{se}\ e = 0 \\
+                  r\cdot s\ \mathit{mod}\ n & \mathrm{se}\ e = 1 \\
+              \end{array}\right.\]
+          Si noti anche che in questo protocollo, $r$ è generato dallo stesso utente che vi applica la chiave segreta ($P$), perciò, $V$ non può ingannare $P$ mandandogli un $r$ studiato appositamente per ricavare la chiave dopo l'operazione $r\cdot s\ \mathit{mod}\ n$.\ Difatti, $r$ è totalmente casuale e applicargli $s$ significa applicare una maschera ad un numero casuale che nessuno è in grado di togliere se non conosce tale maschera.
+    \item $V$ calcola $x = z^2\ \mathit{mod}\ n$ e controlla se $x = ut^e\ \mathit{mod}\ n$ infatti
+          \[z^2\ \mathit{mod}\ n = (rs^e)^2\ \mathit{mod}\ n = r^2 (s^e)^2\ \mathit{mod}\ n  = u(s^2)^e\ \mathit{mod}\ n = ut^e\ \mathit{mod}\ n\]
+          Se la condizione è verificata riparti dal passo 1, altrimenti concludi con $P$ è un imbroglione.
+\end{enumerate}
+
+\subsubsection{Completezza}
+
+\[x = \left\{\begin{array}{l l}
+        ut^e\ \mathit{mod}\ n = u\ \mathit{mod}\ n        & \mathrm{se}\ e = 0 \\
+        ut^e\ \mathit{mod}\ n = (rs^e)^2\ \mathit{mod}\ n & \mathrm{se}\ e = 1 \\
+    \end{array}\right.\]
+Se $P$ conosce $r$ e $s$ passa tutte le sfide e $V$ accetta la dimostrazione.
+
+\subsubsection{Correttezza}
+
+Supponiamo che $V$ mandi sempre $e = 1$.\
+$P$ si aspetta di ricevere sempre $e =1$, al passo 2 sceglie $r$ a caso e invia a $V$
+\[u = \frac{r}{t}\ \mathit{mod}\ n = r^2 \cdot t^{-1}\ \mathit{mod}\ n\]
+Al passo 4, $P$ invia a $V$ $z = r\ \mathit{mod}\ n$.\
+
+A questo punto $V$ va a verificare se $ x = z^2\ \mathit{mod}\ n$, ovvero se $x = ut^e = ut$.\
+Sappiamo che $x = z^2\ \mathit{mod}\ n = r^2\ \mathit{mod}\ n$, quindi si ricava che
+\[ut = \left(\frac{r^2}{t}\right) \cdot t\ \mathit{mod}\ n = r^2\ \mathit{mod}\ n\]
+Di conseguenza si ottiene che $x = ut$.
+
+\noindent \textbf{Osservazioni}
+\begin{itemize}
+    \item $P$ disonesto riesce a ingannare $V$ se prevede correttamente il bit $e$ inviato da $V$ a ogni iterazione.\
+    \item Poiché $e$ è generato casualmente, le previsioni di $P$ sono corrette con probabilità $\frac{1}{2}$ ad ogni iterazione; quindi la probabilità di iganno è $\left(\frac{1}{2}\right)^k$.\
+\end{itemize}
+
+\subsubsection{Conoscenza-zero}
+
+Si tratta di una dimostrazione molto complessa che fa uso di un simulatore probabilistico (Macchina di Turing probabilistica).\
+
+\section{Protocollo SSL}
+
+Il protocollo SSL (\textbf{Secure Socket Layer}) è alla base dei protocolli più diffusi nelle comunicazioni sicure.\
+Garantisce \textbf{confidenzialità} e \textbf{affidabilità} alle comunicazioni su Internet, proteggendole da intrusioni, modifiche o falsificazioni.\
+È stato sviluppato da Netscape per effettuare comunicazioni sicure con il protocollo HTTP e la prima versione è stata rilasciata nel 1994:\ l'idea era di permettere la comunicazione tra computer che non conoscono le reciproche funzionalità.\
+Oggi è stato sostituito dal TLS (\textbf{Transport Layer Security}), una variante di SSL con piccole modifiche.\
+
+Supponiamo che un un'utente $U$ desideri accedere via Internet a un servizio offerto dal sistema $S$.\
+La \textbf{confidenzialità} è garantita dal fatto che la trasmissione è cifrata mediante un \textit{sistema ibrido}:\ cifrario asimmetrico per costruire e scambiare le chiavi segrete di sessione e cifrario simmetrico per criptare dati nelle comunicazioni successive.\
+L'\textbf{autenticazione} dei messaggi accerta l'identità dei due partner attraverso un cifrario asimmetrico o facendo uso di certificati digitali e inserendo nei messaggi stessi un apposito MAC (che usa una funzione hash one-way crittograficamente sicura).
+
+SSL si innesta tra un protocollo di trasporto e un protocollo di applicazione, ed è completamente indipendentemente da quest'ultimo.\
+L'HTTPS è la combinazione tra SSL e HTTP.\
+
+Si organizza su due livelli:\ \textbf{SSL record} e \textbf{SSL handshake}.\
+SSL record è al livello più basso, è connesso direttamente al protocollo di trasporto e ha l'obiettivo di incapsulare i dati spediti dai protocolli dei livelli superiori, assicurando confidenzialità e integrità della comunicazione.\
+SSL handshake è responsabile dell'instaurazione e del mantenimento dei parametri usati da SSL record.\
+Permette all'utente di autenticarsi, negoziare gli algoritmi di cifratura e firma e stabilire le chiavi per i singoli algoritmi crittografici e per il MAC.\
+
+Grazie all'SSL handshake (meccanismo crittografico) si crea un canale \textit{sicuro}, \textit{affidabile} e \textit{autenticato} tra utente e sistema, entro il quale SSL Record fa viaggiare i messaggi.\
+Tramite SSL Record si realizza \textit{fisicamente} un canale (meccanismo di rete):\ utilizza la cipher suite stabilita da SSL Handshake per cifrare e autenticare i blocchi di dati, prima di spedirli attraverso il protocollo di trasporto sottostante.\
+
+\subsection{SSL Handshake}
+
+Consiste in una serie di scambi di messaggi preliminari (\textit{handshake}), indispensabili per la creazione del canale sicuro, tramite i quali il sistema $S$ (\textit{server}) e l'utente $U$ (\textit{client}) si identificano a vicenda e cooperano alla costruzione delle chiavi segrete da impiegare nelle comunicazioni simmetriche successive.\
+
+\begin{enumerate}
+    \item $U$ manda a $S$ \texttt{client hello} con cui richiede la creazione di una connessione SSL, specificando le prestazioni di sicurezza che desidera siano usate durante la connessione (cifrari e meccanismi di autenticazione che $U$ può supportare) e invia una serie di byte casuali.\
+    \item Il sistema $S$ riceve il messaggio di \texttt{client hello} e risponde con un \texttt{server hello} che specifica una \textit{cypher suite} che anch'esso è in grado di supportare e che contiene una nuova sequenza di byte casuali.\ Se $U$ non riceve il messaggio di \texttt{server hello} interrompe la comunicazione.\
+    \item $S$ si autentica con $U$ inviandogli il proprio certificato digitale e gli eventuali altri certificati della catena di certificazione dalla sua CA fino alla CA radice.\ Se i servizi offerti da $S$ devono essere protetti negli accessi, $S$ può richiedere a $U$ di autenticarsi inviando il suo certificato digitale; avviene raramente:\ poiché la maggior parte degli utenti non ha un certificato personale, di solito il sistema si accerta dell'identità dell'utente in un secondo momento.\
+    \item $S$ invia il messaggio \texttt{hello done} con cui sancisce la fine degli accordi sulla \textit{cypher suite} e sui parametri crittografici a essa associati.\
+    \item Per accertare l'autenticità del certificato ricevuto da $S$, l'utente $U$ controlla che la data corrente sia inclusa nel periodo di validità del certificato, che la CA che ha firmato il certificato sia tra quelle ``fidate'' e che la firma apposta dalla CA sia autentica.\
+    \item L'utente $U$ costruisce un \textit{pre-master secret} costituito da una nuova sequenza di byte casuali (genera un numero segreto), lo cifra con il cifrario a chiave pubblica su cui si è accordato con $S$ e lo spedisce a $S$.\ Dopodiché combina il \textit{pre-master secret} con alcune stringhe note e con i byte casuali presenti sia nel \texttt{client hello} che in quello di \texttt{server hello}, vi applica delle funzioni hash one-way secondo una combinazione opportuna e ottiene il \textit{master secret}.\
+    \item $S$ decifra il crittogramma contenente il \textit{pre-master secret} ricevuto da $U$ e calcola il \textit{master secret} mediante le stesse operazioni eseguite da $U$ al passo 6 (dispone delle stesse informazioni).\
+    \item Se all'utente $U$ viene richiesto un certificato (passo 3) ed egli non lo possiede, il sistema interrompe l'esecuzione del protocollo; altrimenti $U$ invia il proprio certificato con allegate una serie di informazioni firmate con la sua chiave privata, tra cui il \textit{master secret} e tutti i messaggi scambiati fino a quel momento (SSL-\textit{history}).\ $S$ controlla il certificato di $U$ e verifica autenticità e correttezza della SSL-\textit{history}; in presenza di anomalie, la comunicazione viene interrotta.\
+    \item Le due parti si scambiano il primo messaggio protetto (\textit{finished}) tramite \textit{master secret} e la \textit{cipher suite} su cui si sono accordati su cui si sono accordati.\ Il messaggio viene prima costruito da $U$ e spedito a $S$ e poi viceversa:\ nei due invii la struttura del messaggio è la stessa, ma cambiano le informazioni in esso contenute.\ La costruzione del messaggio avviene in due passi
+          \begin{enumerate}
+              \item all'inizio si concatenano il \textit{master secret}, tutti i messaggi di \textit{handshake} scambiati fino a quel momento e l'identità del mittente ($U$ o $S$);
+              \item la stringa ottenuta viene trasformata applicando le funzioni SHA-1 e MD5: si ottiene una coppia di valori che costituisce il messaggio \textit{finished}.
+          \end{enumerate}
+          Il messaggio è diverso nelle due comunicazioni perché $S$ aggiunge ai messaggi di \textit{handshake} anche il messaggio \textit{finished} ricevuto da $U$.\ Il destinatario della coppia non può invertire la computazione precedente in quanto generata da funzioni one-way, perciò deve ricostruire l'ingresso delle due funzioni SHA-1 e MD5, le ricalcola e controlla che la coppia generata coincida con quella ricevuta.\
+\end{enumerate}
+
+\noindent A questo punto sia $C$ che $S$ usano il master secret per costruire una propria tripla contenente:\ la chiave segreta da adottare nel cifrario simmetrico, la chiave per l'autenticazione del messaggio (costruzione del MAC) e la sequenza di inizializzazione per cifrare in modo aperiodico messaggi molto lunghi.\
+
+Le triple di $U$ e $S$ sono diverse tra loro ma note a entrambi i partner:\ ciascuno usa la propria, il che aumenta la sicurezza delle comunicazioni.\
+
+Il canale sicuro approntato dal protocollo \textit{SSL handshake} viene realizzato da \textit{SSL record} tramite una \textbf{frammentazione}  in blocchi.\
+Ciascun blocco viene numerato, compresso e autenticato con l'aggiunta di un MAC, cifrato mediante il  cifrario simmetrico concordato nell'handshake e trasmesso utilizzando il protocollo di trasporto sottostante.
+Il destinatario decifra e verifica l'integrità dei messaggi attraverso il MAC, decomprime e riassembla i blocchi in chiaro e li consegna all'applicazione.
+
+\subsection{Sicurezza}
+
+Nei passi di \textit{hello} i due partner creano e si inviano due sequenze casuali per la costruzione del \textit{master secret}, che risulta così diverso in ogni sessione di SSL.\
+Un crittoanalista non può riutilizzare i messaggi di \textit{handshake} catturati sul canale per sostituirsi a $S$ in una successiva comunicazione con $U$.\
+
+\subsubsection{MAC dei blocchi di dati}
+
+SSL \textit{record} numera in modo incrementale ogni blocco di dati e autentica il blocco attraverso un MAC.\
+Per prevenire la modifica del blocco da parte di un crittoanalista attivo, il MAC viene calcolato come immagine hash one-way di una stringa concatenando il contenuto del blocco, il numero del blocco della sequenza, la chiave del MAC e alcune stringhe note e fissate a priori.\
+
+Dato che i MAC sono cifrati insieme al messaggio, un crittoanalista non può alterarli senza avere forzato prima la chiave simmetrica e di cifratura; un attacco volto a modificare la comunicazione tra i due partner è difficile almeno quanto quello volto alla sua decrittazione.\
+
+\subsubsection{Il sistema è autenticato}
+
+Il canale definito da SSL \textit{handshake} è immune da attacchi \textit{man-in-the-middle} poiché il sistema $S$ viene autenticato con un certificato digitale.\
+
+L'utente $U$ può comunicare il \textit{pre-master secret} al sistema $S$ in modo sicuro attraverso la chiave pubblica presente nel certificato di $S$.\
+Solo $S$ può decifrare quel crittogramma e costruire il \textit{master secret}, su cui si fonda la costruzione di tutte le chiavi segrete adottate nelle comunicazioni successive:\ quindi, solo il sistema $S$, quello cui si riferisce il certificato, potrà entrare nella comunicazione con l'utente $U$.\
+
+\subsubsection{L'utente può essere autenticato}
+
+Il certificato di $U$ (se richiesto) e la sua firma apposta sui messaggi scambiati nel protocollo (SSL-\textit{history}) consentono a $S$ di verificare che $U$ sia effettivamente quello che dichiara di essere e che i messaggi siano effettivamente spediti da esso.\
+Se ciò non si verifica, $S$ deduce che il protocollo è stato alterato (casualmente o maliziosamente con un attacco \textit{man-in-the-middle}) e interrompe la comunicazione.\
+
+L'opzionalità dell'autenticazione dell'utente ha reso l'SSL molto diffuso nelle transazioni commerciali via Internet:\ per gli utenti la necessità di certificazione può costituire un ostacolo pratico ed economico; l'utente può essere autenticato con altri metodi (\textit{login} e \textit{password}, \# carta di credito).\
+
+\subsubsection{Generazione delle sequenze casuali}
+
+Le tre sequenze generate da $U$ e $S$ e comunicate nei messaggi di \texttt{client hello}, \texttt{server hello}, \textit{pre-master secret} sono usate per creare il \textit{master secret}, quindi per generare le chiavi segrete di sessione.\
+La sequenza corrispondente al \textit{pre-master secret} viene generata da $U$ e comunicata per via cifrata a $S$; la non predicibilità di questa sequenza è cruciale per la sicurezza del canale SSL, una sua cattiva generazione renderebbe il protocollo molto debole.\
+
+\subsubsection{Messaggio \textit{finished}}
+
+Contiene tutte le informazioni scambiate nel corso dell'\textit{handshake} e ha lo scopo di consentire un ulteriore controllo sulle comunicazioni precedenti per garantire che queste siano avvenute correttamente, che $U$ e $S$ dispongano dello stesso \textit{master secret} e che la comunicazione non sia stata oggetto di un attacco attivo.\

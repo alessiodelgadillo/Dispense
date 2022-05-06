@@ -1,0 +1,188 @@
+\chapter{RSA}
+
+\subsubsection{Generazione della chiave}
+
+Il destinatario è colui che deve creare la chiave, quindi
+
+\begin{enumerate}
+    \item sceglie $p$ e $q$ numeri primi, molto grandi (migliaia di bit) tale che $n = p \times q$ abbia almeno 2048 cifre binarie (ad oggi si consigliano 3072 bit):\ si generano due sequenze casuali di mille bit e poi se ne testa la primalità con Miller-Rabin, questo garantisce una generazione polinomiale;
+    \item calcola $n = p \times q$ e la funzione di Eulero (che rappresenta il numero di interi minori di $n$ e coprimi con $n$) $\phi(n) = (p - 1) \times (q - 1)$:\ calcolare $p \times q$ e la funzione di Eulero risulta molto semplice (se si conosce la scomposizione in fattori di $n$), perciò, dato che per il destinatario ciò è valido, si ha un altro passo di tempo polinomiale;
+    \item sceglie $e < \phi(n)\ \mathrm{t.c.\ MCD}(e, \phi(n)) = 1$:\ nuovamente, si ha l'algoritmo di Euclide per il controllo del MCD che permette di avere tempo polinomiale;
+    \item calcola $d = e^{-1}\ \mathit{mod}\ \phi(n)$ (la condizione precedente garantisce che $d$ esista e sia unico):\ il calcolo dell'inverso in modulo si può fare con l'algoritmo di Euclide esteso che nuovamente consente di avere tempo polinomiale.
+\end{enumerate}
+
+\noindent Il destinatario ha terminato le operazioni da svolgere ed ha finalmente ottenuto le sue chiavi:\ $k_{\mathit{pub}} = \langle e, n\rangle$ e $k_{\mathit{priv}} = \langle d\rangle$.\
+
+\subsubsection{Messaggio}
+
+Si tratta di una sequenza binaria trattata come un intero.\
+Un qualsiasi messaggio $m$ deve rispettare la condizione che $|m| < n$, altrimenti $m$ e $m\ \mathit{mod}\ n$ finirebbero nello stesso crittogramma e ci sarebbe ambiguità durante la decifrazione:\ se $m \geq n$, si divide in blocchi di
+\[|b| = \lfloor(\log_2 n)\rfloor\ \mathrm{bit}\]
+cifrati indipendentemente.\
+
+Si noti che nella pratica si fissa un limite comune per la dimensione dei blocchi $b$:\ $m < 2^b < n$.\
+Questo garantisce anche una sorta di sicurezza poiché più $n$ è piccolo e più il cifrario è poco sicuro, quindi fissare un limite inferiore alla dimensione dei blocchi ($b$) ci permette di dire di conseguenza che $n$ avrà un valore alto.\
+
+\subsubsection{Cifratura}
+
+\[ c = C(m, k_{\mathit{pub}}) = m^e\ \mathit{mod}\ n \]
+Data la presenza del modulo, $c < n$.\
+Si noti inoltre che la presenza del modulo è cruciale:\ senza il modulo, $c$ sarebbe semplicemente $\sqrt[e] m$ ovvero un problema molto facile.\
+Col modulo diventa un problema del quale non è noto alcun algoritmo polinomiale!
+
+\subsubsection{Decifrazione}
+
+\[ m = D(c, k_{\mathit{priv}}) = c^d\ \mathit{mod}\ n \]
+Sia cifratura che decifrazione possono essere eseguite in tempo polinomiale grazie all'algoritmo delle quadrature successive.\
+
+\section{Correttezza}
+
+La correttezza prevede che
+\[D(C(m, k_{\mathit{pub}} ), k_{\mathit{priv}}) = m\]
+In questo caso è necessario dimostrare
+\[c^d\ \mathit{mod}\ n = (m^e\ \mathit{mod}\ n)^d \mathit{mod}\ n = m^{ed}\ \mathit{mod}\ n = m\]
+
+\begin{theorem}[Correttezza]
+    $\forall\ m<n,\ m^{ed}\ \mathit{mod}\ n = m$
+\end{theorem}
+
+\begin{proof}
+
+    Se $p$ e $q$ non dividono $m$ $\Rightarrow \mathrm{MCD}(m, n) = 1$ ($m$ e $n$ sono co-primi).\
+    Se ne ricava che
+    \begin{enumerate}
+        \item $m^{\phi(n)}\equiv 1\ \mathit{mod}\ n$ (Teorema di Eulero)
+        \item $e \cdot d  \equiv 1\ \mathit{mod}\  \phi(n) \Rightarrow e \cdot d = 1 + r\phi(n)\quad r \in \mathbb{N}$ (def.\ di inverso)
+    \end{enumerate}
+
+    \noindent Per quanto detto
+    \[m^{ed}\ \mathit{mod}\ n = m^{1+r \phi(n)}\ \mathit{mod}\ n = m \left(m^{\phi(n)}\right)^r\ \mathit{mod}\ n = m\cdot 1^r\ \mathit{mod}\ n = m \]
+
+    Se $m$ e $n$ non sono coprimi:\ supponiamo che $p \mid m$ e $q \nmid m$.\
+    Dato che $p \mid m$, allora  $m\equiv 0\ \mathit{mod}\ p$ e quindi $\forall\ r \in \mathbb{N},\ m^r \equiv 0\ \mathit{mod}\ p$ da cui $m^r - m\equiv 0\ \mathit{mod}\ p$.\
+    In particolare è possibile scegliere $r = e\cdot d$, quindi $m^{ed} - m \equiv 0\ \mathit{mod}\ p$.\
+    Dato che $q \nmid m$ allora $\mathrm{MCD}(q, m) = 1$ e quindi $m^{\phi(q)} \equiv 0\ \mathit{mod}\ q$.\
+    \[m^{ed}\ \mathit{mod}\ q = m^{1+r\phi(n)}\ \mathit{mod}\ q = m \cdot m^{r(p-1)(q-1)}\ \mathit{mod}\ q =\]
+    \[ = m \left( m^{(q-1)}\right)^{r(p-1)}\ \mathit{mod}\ q = m \left(m^{\phi(q)}\right)^{r(p-1)}\ \mathit{mod}\ q = \]
+    \[ = m (1)^{r(p-1)}\ \mathit{mod}\ q = m\ \mathit{mod}\ q\ \]
+    Perciò
+    \[m^{ed} \equiv m\ \mathit{mod}\ q \Rightarrow m^{ed} - m \equiv 0\ \mathit{mod}\ q\]
+    Siccome $m^{ed}-m$ è divisibile per $p$ e per $q$, allora è divisibile anche per $n = p \times q$.\
+    \[m^{ed} - m \equiv 0\ \mathit{mod}\ n \Rightarrow m^{ed} \equiv m\ \mathit{mod}\ n \Rightarrow m^{ed}\ \mathit{mod}\ n = m\ \mathit{mod}\ n = m\]
+
+    Si potrebbe considerare anche il caso in cui $p,q \mid m$, ma in realtà non si verifica perché $m<n$.\
+\end{proof}
+
+\section{Sicurezza}
+
+La sicurezza è basata sulla difficoltà di fattorizzare un numero arbitrario molto grande.\
+
+\begin{center}
+    Fattorizzare $\Rightarrow$ forzare RSA:\ è sicuramente valido.
+
+    Forzare RSA $\Leftarrow$ fattorizzare:\ è plausibile ma non certo.
+\end{center}
+
+\noindent Calcolare la radice in modulo per trovare $m = \sqrt[e] c\ \mathit{mod}\ n$ (che equivale a decifrare un crittogramma $c$) è difficile almeno quanto fattorizzare.\
+
+Calcolare $\phi(n)$ direttamente da $n$ (e ciò basterebbe per ricavare la chiave privata) è difficile almeno quanto fattorizzare.\
+
+È possibile dimostrare che fattorizzare $n$ e calcolare $\phi(n)$ sono computazionalmente equivalenti (uno si trasforma nell'altro in tempo polinomiale):\
+
+\vspace{12pt}
+
+\noindent Fattorizzazione di $n \Rightarrow$ calcolo di $\phi(n)$:\ \[n = p \times q \rightarrow \phi(n) = (p - 1)(q - 1)\] in tempo polinomiale.\
+
+\vspace{12pt}
+
+$n$ e $\phi(n)$ $\Rightarrow$ trovo $p$ e $q$ in tempo polinomiale.
+\[\phi(n) = (p-1)(q-1) = pq - (p+q) + 1 = n - (p+q) + 1\]
+\[\Rightarrow x_1 = p+q = n - \phi(n) +1\]
+\[(p-q)^2 = (p + q)^2 - 4n = x_1^2 - 4n\]
+\[\Rightarrow x_2 = p-q = \sqrt{x_1^2 - 4n}\]
+Conoscendo somma e differenza di $p$ e $q$ si ricava che
+\[p = \frac{x_1 + x_2}{2}\qquad q = \frac{x_1 - x_2}{2} \]
+Ma questo equivale a fattorizzare.\
+
+\vspace{12pt}
+\noindent Ricavare $d$ direttamente da $\langle n, e\rangle$ sembra costoso quanto fattorizzare $n$.\
+Sostanzialmente, tutta la sicurezza di RSA risiede nel non poter fattorizzare un numero $n$ in tempo polinomiale.\
+
+\subsection{Come fattorizzare un intero}
+
+La fattorizzazione è un \textbf{problema difficile}, ma \textbf{non più come un tempo}:\ da un lato la potenza di calcolo aumenta, dall'altro gli algoritmi di fattorizzazione vengono raffinati.\
+Esistono algoritmi relativamente veloci di complessità sub-esponenziale:
+
+\begin{itemize}
+    \item \textbf{General Number Field Sieve} (GNFS) richiede $O\left( 2^{\sqrt{b \log b}}\right)$ operazioni per fattorizzare un intero $n$, con $b = (\log_2 n)+1$ bit.\
+    \item Un attacco \textbf{brute force} ne richiede $O(n)$, cioè $O(2^b)$.
+\end{itemize}
+
+\noindent Con la potenza di calcolo attuale, usando l'algoritmo GNFS è possibile fattorizzare semiprimi fino a circa 768 bit.\
+
+Per interi con una struttura particolare, esistono algoritmi di fattorizzazione particolarmente efficienti.\
+
+La fattorizzazione e il logaritmo discreto non sono problemi NP-hard e si possono risolvere in tempo polinomiale su macchine quantistiche.\
+
+\subsection{Vincoli sui parametri}
+
+\begin{itemize}
+    \item Scegliere $p$ e $q$ molto grandi (almeno 1024 bit) per resistere agli attacchi brute force.
+    \item Sia $p - 1$ che $q - 1$ devono contenere un fattore primo grande (altrimenti $n$ si fattorizza velocemente).
+    \item $\mathrm{MCD}(p - 1, q - 1)$ deve essere piccolo:\ conviene scegliere $p$ e $q$ tale che $\frac{p - 1}{2}$ e $\frac{q - 1}{2}$ siano co-primi.
+    \item Non riusare uno dei primi per altri moduli.
+    \item $p$ e $q$ non devono essere troppo vicini fra loro perché se $n \sim p^2 \sim q^2$ allora $\sqrt n$ sarà vicino a $p$ e $q$:\ un attacco brute force potrebbe ricercare solo in un intorno di $\sqrt n$.\ Questa idea si può raffinare tenendo conto che
+          \[\left(\frac{p+q}{2}\right)^2 - n =\left(\frac{p-q}{2}\right)^2 \]
+          Quindi
+          \[\frac{p+q}{2} > \sqrt n\]
+          \[\frac{(p+q)^2}{4} - n\ \mathrm{\grave{e}\ un\ quadrato\ perfetto}\]
+          Si scandiscono gli interi maggiori di $\sqrt n$ fino a trovare $z$ t.c.\ $z^2 - n = w^2$ e si suppone
+          \[z = \frac{p+q}{2}\qquad w =\frac{p-q}{2}\]
+          da cui $p = z +w$ e $q = z-w$; la vicinanza tra $p$ e $q$ assicura che non dobbiamo allontanarci troppo da $\sqrt n$ per trovare $p$ e $q$.\
+          Per quantificare la distanza fra $p$ e $q$ si dice che è sufficiente che siano distanti più di un fattore logaritmico, cioè che $p - q$ deve crescere più di una funzione poli-logaritmica: $p - q = \Theta(n^\varepsilon)$ con $0 < \varepsilon < 1$.\
+\end{itemize}
+
+\subsection{Attacchi}
+
+\subsubsection{Attacchi con esponenti bassi}
+Esponenti $e$ e $d$ bassi sono attraenti perché accelerano cifratura e decifrazione.\
+Ovviamente, $d$ dovrebbe essere scelto sufficientemente grande per evitare attacchi brute force.\
+
+\textbf{Attenzione}:\ se $m$ ed $e$ sono così piccoli che $m^e < n$, allora risulta facile trovare la radice $e$-esima di $c$, poiché $c = m^e$ e non interviene la riduzione in modulo!
+
+\subsubsection{Attacchi a tempo (DH, RSA)}
+
+Si basano sul tempo di esecuzione dell'algoritmo di decifrazione.\
+
+L'idea è di determinare $d$ analizzando il tempo impiegato a decifrare:\ quando si esegue l'algoritmo delle quadrature successive, si esegue una moltiplicazione ad ogni iterazione, più un ulteriore moltiplicazione modulare per ciascun bit uguale a 1 in $d$.\
+Per rimediare si può aggiungere un ritardo casuale per confondere l'attaccante.
+
+\subsubsection{Attacchi legati alla scelta di \textit{e}}
+
+Ci sono alcuni valori di $e$ che vanno evitati durante la scelta, per esempio
+\[e \neq \frac{\phi(n) + k}{k}\quad\forall\ k\ \mathrm{t.c.}\ k \mid p - 1\ \mathrm{e}\ k \mid q - 1\ \mathrm{e\ t.c.}\ m\ \mathrm{e}\ n\ \mathrm{co\textrm{-}primi}\]
+e
+\[e \neq q,p\]
+Inoltre, $e$ non deve essere piccolo perché può essere usato in un attacco.\
+Supponiamo che ci siano $e$ utenti che hanno scelto lo stesso valore piccolo di $e$ (per esempio, $e= 3$) e anche che questi $e$ utenti ricevano lo stesso messaggio $m$.\
+\[c_1 = m^e\ \mathit{mod}\ n_1,\ c_2 = m^e\ \mathit{mod}\ n,\ \dots,\ c_e = m^e\ \mathit{mod}\ n_e\] \[\forall i\ 1\leq i \leq e,\ m < n_i\]
+Ipotizziamo che $n_1, n_2 , \dots, n_e$ siano co-primi fra loro.\
+Per il teorema cinese del resto, esiste e si può facilmente calcolare un unico $m'$ tale che \[m' < n = n_1 \times n_2 \times \dots \times n_e \qquad m' \equiv m^e \mathit{mod}\ n\]
+Inoltre, è noto che \[m_1 m_2 m_3 \dots m_e < n_1 n_2 n_3 \dots n_e = n \Rightarrow m^e < n\]
+Applicando la relazione di congruenza si ottiene che $m'\ \mathit{mod}\ n = m^e\ \mathit{mod}\ n$, ma $m' < n$ e $m^e < n$ e quindi la riduzione in modulo non interviene; da ciò si ricava che $m' = m^e$ questo permette di calcolare $m = \sqrt[e]{m'}$.\
+
+Usare $e$ piccolo ha comunque i suoi vantaggi, perciò per difendersi da questo attacco si concatena una sequenza di bit casuale (\textit{padding}).\
+
+\subsubsection{Attacchi con lo stesso valore di \textit{n}}
+
+Supponiamo due chiavi pubbliche $\langle e_1 , n\rangle$ e $\langle e_2 , n\rangle$ per cui $\mathrm{MCD}(e_1, e_2) = 1$.
+Esisteranno $r, s \in \mathbb{Z}\ \mathrm{t.c.}\ e_1 r + e_2 s = 1$ che si possono trovare con l'algoritmo di Euclide esteso.\
+
+Ipotizziamo che $r < 0$ e $s > 0$ e che il crittoanalista intercetti due crittogrammi $c_1 = m^{e_1}\ \mathit{mod}\ n$ e $c_2 = m^{e_2}\ \mathit{mod}\ n$.\
+A questo punto si imposta
+\[m = m^1 = m^{re_1+se_2} = (m^{e_1}\ \mathit{mod}\ n)^r \cdot (m^{e_2}\ \mathit{mod}\ n)^s =\]
+\[ = \left(c_1^r c_2^s\right)\ \mathit{mod}\ n  = \left(\left(c_1^{-1}\right)^{-r} c_2^s\right)\ \mathit{mod}\ n\]
+Adesso può ricavare $c_1$ con l'inverso $c_1^{-1}\ \mathit{mod}\ n$, ma ciò esiste solo se $c_1$ e $n$ sono co-primi.\
+Dopo si calcola $(c_1^{-1})^{-r}$ e $c_2^s$ con le quadrature successive e infine
+\[m=\left(\left(c_1^{-1}\right)^{-r} c_2^s\right)\ \mathit{mod}\ n\]
+Tutto ciò si può fare in tempo polinomiale.\

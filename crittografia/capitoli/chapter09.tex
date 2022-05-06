@@ -1,0 +1,103 @@
+\chapter{DES}
+
+DES (Data Encryption Standard) è un \textbf{cifrario simmetrico} che ha rappresentato lo standard per le comunicazione di massa (comunicazioni non classificate, ``quelle dei cittadini comuni'') per moltissimi anni.\
+Come tutti i cifrari progettati per la massa, DES cerca per costruzione di resistere alla crittoanalisi statistica applicando i \textit{principi di Shannon}.
+
+\begin{itemize}
+    \item \textbf{Diffusione}:\ tutti i caratteri del testo in chiaro si devono spargere sul crittogramma dopo la cifratura; in pratica, ogni carattere del crittogramma deve dipendere da tutti i caratteri del testo in chiaro (e anche della chiave).\
+    \item \textbf{Confusione}:\ combinare testo in chiaro e chiave in modo complesso così da non permettere al crittoanalista di separarli quando analizza il crittogramma.\
+\end{itemize}
+
+\noindent Nel 1973 il NBS (National Bureau of Standards)\footnote{Oggi si chiama NIST (National Institute of Standards and Technology)} avviò un programma pubblico per proteggere la comunicazione proponendo un bando alle varie accademie per trovare un sistema di cifratura innovativo:\ la sicurezza  doveva basarsi sulla segretezza della chiave, e non sul processo di cifratura e decifrazione (pubblici), e doveva essere certificata da enti di terzi parti; ovviamente l'algoritmo doveva essere efficiente sia in software che in hardware.\
+
+Nel 1977 IBM progettò \textbf{Lucifer} e NBS lo fece studiare dalla NSA che propose alcune variazioni:\ chiave da 128 a 56 bit e variazioni nella \textbf{S-box}.\
+Questo fece nascere nella IBM il sospetto che la NSA volesse quelle modifiche per poter eseguire brute force in momenti successivi; IBM analizzò comunque per bene le modifiche proposte da NSA e accettò.\
+Quindi nel 1977 DES viene reso pubblicamente disponibile con licenza d'uso gratuita.\
+La certificazione di sicurezza aveva un periodo di rinnovo di 5 anni (ogni 5 anni si controlla se è obsoleto) che si abbassava col passare del tempo:\ nel 1999 è stato sconsigliato se non per scopi limitati, al suo posto si è iniziato a usare 3DES.\
+3DES è durato fino al 2005 e dopodiché è stato sconsigliato, mentre dal 2001 entra nello standard l'AES (Advanced Encryption Standard) dopo un bando rimasto aperto dal 1993.
+
+\section{Funzionamento}
+
+La cifratura avviene \textbf{a blocchi} di 64 bit e anche la chiave segreta lo è:\ 56 sono casuali e 8 sono di parità.\
+I bit di parità sono in fondo ad ognuna delle 8 settuple e non sono altro che lo $\oplus$ dei sette bit precedenti.\
+
+Il DES consiste di $r=16$ fasi in cui si ripetono le stesse operazioni e in cui l'output di ogni fase è l'input per la fase successiva e la chiave di ogni fase è diversa:\ ogni chiave viene selezionata a partire da quella iniziale da 56 bit e la selezione di ogni bit della sottochiave è fatta in modo che ognuno di essi partecipi alla cifratura con pari responsabilità (rapporto di partecipazione:\ $\frac{14}{16}$).\
+
+\subsection{Struttura del DES}
+
+Inizialmente viene eseguita una permutazione del messaggio in chiaro e una trasposizione sulla chiave per scartare i bit di parità; dopodiché il messaggio viene diviso in due parti e insieme alla chiave costituisce l'input per la prima fase.\
+L'output di ogni fase è costituito dal nuovo messaggio elaborato composto nelle sue due metà e da una nuova sottochiave per la fase successiva.\
+Dalla sedicesima fase escono in output solo i due blocchi del crittogramma:\ questi vengono scambiati e nuovamente concatenati tra loro, successivamente viene eseguita un'altra permutazione.\
+
+Per la decifrazione si esegue un procedimento del tutto analogo con le sottochiavi di fase utilizzate nell'ordine inverso.\
+
+\subsubsection{Funzionamento di una fase}
+
+Supponendo di essere nella $(i-1)$-esima fase l'input è dato da \[\langle S[i-1], D[i-1], k[i-1] \rangle\]
+Per ogni $i=1,2,\dots,16$ si esegue:
+
+\begin{flushleft}
+    $S[i] = D[i-1]$
+
+    $D[i] = S[i-1] \oplus f(D[i-1], k[i-1])$
+\end{flushleft}
+
+\noindent $f$ è una funzione \textbf{non lineare}:\ si tratta della \textbf{S-box}.\
+
+Tramite lo scambio delle due metà e la combinazione con una funzione non lineare si cerca di realizzare la \textit{diffusione}, mentre con la S-box si cerca di realizzare la \textit{confusione}.\
+
+La sottochiave di fase da 56 bit viene divisa in due parti da 28 bit e su entrambe viene eseguito uno shift ciclico verso sinistra di un numero di posizioni che dipende dall'indice della fase:\ è di una posizione nella fasi 1, 2, 9 o 16 e di due posizioni in tutte le altre.\
+Dopo aver riconcatenato le due chiavi, viene eseguita una permutazione e vengono selezionati 48 bit per eseguire la cifratura di quella fase.\
+Il risultato della concatenazione diventa anche la chiave per la fase successiva.\
+
+I 64 bit del messaggio sono divisi in due parti da 32 bit.\
+La parte $D[i-1]$ diventa la parte di $S[i]$ che viene usata nella fase successiva, ma su di essa viene eseguita anche una permutazione e un'espansione tramite duplicazione di bit (crea \textit{diffusione}):\ i 32 bit iniziale diventano 48.\
+A questo punto, il risultato viene usato per fare lo \texttt{XOR} ($\oplus$) con i 48 bit della sottochiave e viene passato alla S-box che esegue un'operazione non lineare e trasforma i 48 bit di entrata in 32 bit che vengono permutati.\
+Infine, eseguo uno \texttt{XOR} bit a bit con la parte $S[i-1]$ e si ottiene $D[i]$.\
+
+La \textbf{S-box} è composta da otto funzioni booleane che prendono in input sei bit e ne restituiscono quattro (48 bit $\rightarrow$ 32 bit).\
+Si prendono i due bit estremi dei sei in input e si usano come \texttt{indice di riga}, i restanti quattro bit vengono usati come \textit{indice di colonna}; ogni riga di una S-box è una permutazione dei numeri da 0 a 15 che (non a caso) possono essere rappresentati su quattro bit.\
+A questo punto abbiamo evidenziato una riga e una colonna:\ l'output della S-box sarà esattamente l'incontro fra le due, ovvero un numero a quattro bit.\
+È molto importante notare che la S-box è una funzione non lineare ovvero una funzione per cui
+\[f(x \oplus y) \neq f(x) \oplus f(y)\]
+Se non fosse così, DES sarebbe più vulnerabile.
+
+\section{Attacchi a DES}
+
+\subsection{Attacchi storici}
+
+Sono tutti attacchi basati su brute force che si differenziano in due categorie:
+
+\begin{itemize}
+    \item architetture progettate appositamente per attaccare il DES (era abbastanza costoso, circa un milione di dollari per forzare una macchina che usa DES in 35 minuti);
+    \item calcolo distribuito su più macchine (si distribuisce il costo su più persone).
+\end{itemize}
+
+\subsection{Attacchi esaurienti}
+
+$2^{56} - 64$ chiavi deboli = chiavi totali \textbf{non deboli} nel DES, rimangono comunque pressoché $2^{56}$ chiavi; tuttavia esiste un metodo per cui le chiavi di DES non risultano più $2^{56}$ ma $2^{55}$, ovvero vengono dimezzate.\
+Il metodo di attacco si basa sul fatto che
+\[C(m, k) = c\ \mathrm{e}\ C(\bar{m}, \bar{k}) = \bar{c}.\]
+È un attacco di tipo \textit{chosen plain text}, nel quale il crittoanalista si procura coppie $\langle m, c_1 \rangle , \langle\bar{m}, c_2 \rangle$ e inizia a ispezionare lo spazio delle chiavi.\
+Per ogni chiave $k$ esegue $C(m, k)$:\
+\begin{itemize}
+    \item se risulta uguale a $c_1$, allora $k$ è probabilmente la chiave;
+    \item se risulta uguale a $\bar{c}_2$, allora $\bar{k}$ è probabilmente la chiave;
+    \item se nessuno dei precedenti casi, allora né $k$ né $\bar{k}$ sono chiave.\
+\end{itemize}
+Ma perché si può fare questa affermazione?\
+Eseguiamo $C(m, k)$ e otteniamo $\bar{c}_2$:\ per la proprietà di DES $C(\bar{m}, \bar{k}) = \bar{c}_2 = c_2$ e ricordiamo che il crittoanalista conosceva la coppia $\langle \bar{m}, c_2 \rangle$.\
+Provando una qualsiasi chiave $k$ e la sua verifica, è possibile scoprire immediatamente se $k$ o $\bar{k}$ sono chiave; di conseguenza, in un colpo solo \textit{si possono verificare due chiavi o se ne possono scartare due}:\ si \textbf{dimezza lo spazio delle chiavi}.\
+
+\subsection{Attacchi con crittoanalisi differenziale (Biham e Shamir, 1990)}
+
+Sono sempre attacchi \textit{chosen plain text} nei quali si prendono $2^{47}$ coppie $\langle m, c\rangle$ scelti dal crittoanalista.\
+L'idea molto semplificata è di scegliere meticolosamente le coppie $\langle m, c\rangle$ e vedere come le differenze fra i vari messaggi si ripercuotono sui crittogrammi al solo scopo di assegnare delle probabilità alle varie chiavi che potrebbero essere state usate per avere quelle determinate ripercussioni:\ alla fine si ottengono chiavi molto più probabili di altre.\
+Il costo di un attacco simile è di $2^{55.1}$ ed il motivo per cui è così alto è dovuto al numero di fasi del DES (16).\
+Gli sviluppatori erano già a conoscenza della crittoanalisi differenziale e si sono protetti proprio col numero di fasi.
+
+\subsection{Attacchi con crittoanalisi lineare (Matsui, 1993)}
+
+Sono attacchi che prendono la funzione di cifratura, la approssimano con una funzione lineare per stimare qualche bit della chiave e cercano di completare il resto della chiave con un attacco brute force.\
+Necessita di $2^{43}$ coppie $\langle m, c\rangle$ ed è un attacco \textit{known plain text}.\
+L'attacco è più efficiente di $2^{55}$ e quindi più efficiente di un brute force $\rightarrow$ DES è stato ufficialmente forzato.\

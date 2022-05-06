@@ -1,0 +1,359 @@
+\documentclass[12pt, a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[hidelinks]{hyperref}
+\usepackage[italian]{babel}
+\usepackage{array}
+\usepackage{caption}
+\usepackage{graphicx}
+\usepackage{float}
+
+\title {Domande\\Cloud and\\Green Computing}
+\date{Anno accademico 2020-2021}
+\author{Alessio Delgadillo}
+
+\begin{document}
+
+\section{Introduzione}
+
+\subsubsection*{Quali sono le principali differenze tra i modelli di servizio IaaS, PaaS e Saas?}
+
+\textbf{ToP} (Tradition on Premise):\ faccio tutto ``in casa'' e non prendo servizi esterni.\
+
+\noindent\textbf{SaaS} (Software as a Service) fornisce software on-demand accessibile mediante \textit{client thin}\footnote{In computer networking, a \textbf{thin client} is a simple (low-performance) computer that has been
+optimized for establishing a remote connection with a server based-computing environment.} o API.\
+Il fornitore SaaS gestisce infrastruttura, sistema operativo e applicazione, mentre il cliente non è responsabile di niente.
+
+\noindent\textbf{PaaS} (Platform as a Service) fornisce un'intera piattaforma come un servizio (machine virtuali, sistema operativo, servizi, ambiente di sviluppo).\
+Il fornitore PaaS gestisce infrastruttura, sistema operativo e enabling software, mentre il cliente è responsabile di installare e gestire l'applicazione.\
+
+\noindent\textbf{IaaS} (Internet as a Service) fornisce server, memoria, rete (virtualizzati).\
+Il fornitore di servizi IaaS gestisce tutta l'infrastruttura, mentre il cliente è responsabile di tutti gli altri aspetti del deployment (p.e.\ sistema operativo, applicazione).
+
+\section{Iaas}
+
+\subsubsection*{Cosa è una hypervisor?}
+Un \textbf{Hypervisor} crea il \textit{virtualization layer} e contiene il Virtual Machine Manager (VMM).\
+Si possono distinguere due tipi di Hypervisor, il \textbf{type 1} viene caricato direttamente sull'HW, \textbf{il type 2} viene caricato su un sistema operativo in esecuzione sull'HW.\
+Il type 2 ha un \textit{consolidation ratio}\footnote{Il \textbf{consolidation ratio} è il numero di server virtualizzati che possono essere in esecuzione su una
+macchina fisica.} minore rispetto al type 1.\
+Type 1 per data center, type 2 per desktop/laptop.
+
+\subsubsection*{Cosa è una macchina virtuale?}
+
+Una \textbf{macchina virtuale} è una risorsa di calcolo che utilizza il software invece di un computer fisico per eseguire programmi e distribuire applicazioni.\
+\\ \\
+O da \textit{Wikipedia}:\
+
+\noindent In informatica il termine macchina virtuale (VM) indica un software che, attraverso un processo di virtualizzazione, crea un ambiente virtuale che emula tipicamente il comportamento di una macchina fisica (PC, client o server) grazie all'assegnazione di risorse hardware (porzioni di disco rigido, RAM e risorse di processo) ed in cui alcune applicazioni possono essere eseguite come se interagissero con tale macchina; infatti se dovesse andare fuori uso il sistema operativo che gira sulla macchina virtuale, il sistema di base non ne risentirebbe affatto.
+
+\subsubsection*{Cosa è AWS IAM?}
+\textbf{AWS Identity and Access Management} (\textbf{IAM}) è un servizio web che consente di
+gestire in sicurezza l'accesso ai servizi e alle risorse AWS.\
+Grazie a IAM, è possibile creare e gestire utenti e gruppi AWS e utilizzare autorizzazioni per consentire o negare l'accesso alle risorse AWS.\
+IAM fornisce le seguenti features:\ \textit{shared access to your AWS account}, \textit{granular permissions}, \textit{secure access to AWS resources} for applications that run on Amazon EC2, \textit{multi factor authentication}\dots
+
+\section{BMs}
+
+\subsubsection*{Cosa è il business model canvas?}
+
+Un \textbf{business model canvas} è un linguaggio condiviso per descrivere, visualizzare, assegnare e cambiare \textit{business models}\footnote{Un \textbf{business model} descrive come un'azienda crea, consegna e cattura valore.}.\
+Il business model canvas contiene informazioni su:
+\begin{itemize}
+    \item \textit{Customer Segment}:\ il target di mercato, quali tipi di clienti vogliamo attirare.
+    \item \textit{Value Proposition}:\ Qual è il valore del nostro servizio?\ Cosa offriamo al cliente?\ Per cosa dovrebbero venire da noi?
+    \item \textit{Channels}:\ i canali con cui il servizio arriva ai clienti (shop online, negozio fisico\dots)
+    \item \textit{Customer Relationship}:\ sembra opzionale ma in realtà il rapporto col cliente è molto importante, ci sono aziende che si focalizzano molto su questo aspetto sfruttando la ``fidelizzazione'' attraverso dei punti per il cliente.
+    \item \textit{Revenue Streams}:\ I flussi da cui arrivano le entrate, ne descrive anche il tipo.
+    \item \textit{Key Resources}:\ risorse chiave, le risorse che eroghiamo e che sono fondamentali.
+    \item \textit{Key Activites}:\ l'attività principale della nostra azienda.
+    \item \textit{Key Partnership}:\ è bene cercare dei partner, come Dropbox aveva Amazon, però se il partner fallisce rischia di cadere tutto.
+    \item \textit{Cost structures}:\ indica quali sono le uscite.
+\end{itemize}
+
+\subsubsection*{Cosa è un freemium business model?}
+
+Consiste in una suddivisione dei servizi:\ una parte \textbf{Free} che comprende i cosiddetti servizi ``di base'' e una parte \textbf{Premium} a pagamento che invece offre servizi aggiuntivi e/o migliorati.\
+Chi adotta il modello Freemium deve porre molta attenzione al costo che comportano gli utenti ``free'' e alla percentuale di conversione degli utenti che decidono di passare a Premium.\
+
+\subsubsection*{Quale è un esempio di freemium business model?}
+
+
+\section{PaaS}
+
+\subsubsection*{Cosa è un PaaS?}
+
+PaaS (Platform as a Service) è un modello di servizio cloud dove un provider third-party mette a disposizione strumenti hardware e software agli utenti attraverso internet.\
+Di solito, questi strumenti sono necessari per lo sviluppo di una determinata applicazione.\
+Un provider PaaS ospita l'hardware e il software nella propria infrastruttura.\
+Come risultato, PaaS libera gli sviluppatori dal dover installare hardware in house per sviluppare o eseguire una nuova applicazione.
+
+I PaaS aumentano ancora di più i servizi offerti dallo IaaS offrendoci un intero ambiente di sviluppo e gestione dell'applicazione.\
+Vantaggi principali di PaaS per DevOps:\ non è necessario concentrarsi su provisioning, gestione o monitoraggio di elaborazione, archiviazione, rete e software.
+\begin{itemize}
+    \item Può creare prototipi in \textbf{pochi minuti}.
+    \item Può creare nuove versioni o deploy del codice più \textbf{rapidamente}.
+    \item \textbf{Self-assemble service}, quindi le varie parti dell'applicazione si assemblano da sole.
+    \item \textbf{Scala automaticamente}.
+    \item Non bisogna preoccuparci della sicurezza.
+    \item Il PaaS si occupa delle strategia di Backup e Recovery.
+\end{itemize}
+
+\noindent Il PaaS guadagna meno rispetto a IaaS, al secondo posto per guadagno, e SaaS, al primo posto, ma vale comunque molto:\ circa 19 miliardi di dollari.
+
+\subsubsection*{Quali sono le caratteristiche di Heroku?}
+È una piattaforma cloud che fornisce una serie di servizi integrati e un intero sistema che ci permette \textbf{non solo di fare il deployment delle applicazioni ma anche di completarle, mandarle in esecuzione e gestirle}.\
+Una delle caratteristiche di Heroku è di essere basata su un sistema di \textbf{Container}.\
+
+È nato nel 2007, poi nel 2010 è cresciuto ed è stato acquistato da Salesforce (che si occupa di Saas soprattutto).\
+Comprende diversi linguaggi per lo sviluppo del codice (Node, Java, Php, Python, Go, Scala).\
+
+I \textit{Container} di Heroku si chiamano \textbf{Heroku Dynos}.\
+Gli Heroku Dynos sono una virtualizzazione, ambienti Linux abbastanza leggeri, isolati che permettono di ``incapsulare'' un'applicazione e tutte le sue dipendenze, librerie\dots\ in un grande ``container''.\
+Questo ci permette di spostare la nostra applicazione senza dover dividere le varie parti:\ una volta giunto a destinazione viene prelevata l'immagine del container e ricostruita l'applicazione.\
+I Dynos sono utilizzati anche per lo scaling:\ potrebbe volerci un solo Dynos inizialmente, ma poi l'applicazione ingrandendosi avrà bisogno di più spazio e vengono semplicemente aggiunti più container la cui gestione è molto semplice; non dobbiamo più preoccuparci dell'aspetto scalabilità.\
+
+Heroku per funzionare correttamente richiede il codice sorgente dell'applicazione, una lista di dipendenze e un \texttt{procfile} il quale contiene il comando iniziale che Heroku eseguirà per avviare un'applicazione.\
+Una volta creato lo Slug dell'applicazione (l'alias di un'immagine Docker) quest'ultimo verrà iniettato nei Dynos.\
+È possibile gestire i Dynos attraverso l'uso del Dyno Manager che permette di fare tuning.
+
+\subsubsection*{Come si aggiunge un add-on a un'applicazione in Heroku?}
+
+Heroku ha più di \textbf{150 Add-ons} (servizi cloud di terze parti) da aggiungere alla propria applicazione per estenderne le funzionalità come servizio di autenticazione, log, monitorning, data stores\dots\
+Tutto questo attrae l'utente perché offre la possibilità di integrare nuove funzionalità in un tempo molto breve e ne facilita lo sviluppo non dovendo costruire da zero ciò che è richiesto.\
+Ogni Add-On ha una propria categoria di appartenenza.\
+È possibile aggiungere gli add-ons ad una nostra applicazione usando la Dashboard di Heroku o le loro CLI.
+
+L'aspetto negativo è che questo lega l'utente all'utilizzo della piattaforma e instaura una forma di \textbf{vendor lock-in} rendendo l'applicazione \textbf{difficilmente portabile}.\
+Infatti se volessimo spostare la nostra applicazione su un nuovo servizio cloud saremo costretti a rivedere tutto il codice perché gli Add-ons non funzionerebbero.
+
+\section{Container}
+\subsubsection*{Che cosa è un container?}
+
+Nelle macchine virtuali varie applicazioni possono essere eseguite sullo stesso server e ogni VM richiede l'allocazione di risorse (CPU, memoria e storage) e l'installazione del sistema operativo ospite.\
+I \textbf{containers} sfruttano la possibilità offerta dal kernel del sistema operativo di eseguire più istanze isolate.\ 
+Al posto dell'Hypervisor viene montato il Docker Engine.\
+In confronto alle VM, i containers sono più leggeri (richiedono meno risorse), più veloci ad avviarsi e più semplici da ``buildare''; tuttavia sono meno sicuri poiché meno isolati.
+
+\subsubsection*{Cosa è un \texttt{Dockerfile}/\texttt{docker-compose}?}
+
+Dalla documentazione di Docker:\ un \textbf{Dockerfile} è un documento di testo che
+contiene tutti i comandi che un utente potrebbe chiamare attraverso una CLI per creare un'immagine Docker.\
+Un dockerfile è composto da comandi, eseguiti in maniera sequenziale, che hanno la seguente sintassi:
+\begin{table}[H]
+	\centering
+	\begin{tabular}{l}
+	\# \textit{A single-line comment}\\
+	\texttt{INSTRUCTION arguments}\\
+		\end{tabular}
+\end{table}
+
+\noindent Un Dockerfile \textit{deve sempre iniziare con l'istruzione} \texttt{FROM}.\
+L'istruzione \texttt{FROM} specifica l'immagine di partenza dell'applicazione su cui si andrà a costruire.\
+
+\textbf{Docker Compose} è uno strumento offerto da Docker che permette di definire e
+eseguire applicazioni Docker multi-container.\
+Con Compose, si usa un file \texttt{YAML} per configurare i servizi dell'applicazione.\
+Poi eseguendo il comando `\texttt{docker-compose up}' si avviano i servizi descritti all'interno del file `\texttt{docker-compose.yaml}'.
+
+\subsubsection*{Quale è l'effetto del comando `\texttt{docker run}'?}
+Il comando `\texttt{docker run}' esegue un comando all'interno di un nuovo container.\
+Il comando crea prima un container layer in modalità scrittura su un'immagine esistente e poi manda in esecuzione il comando.\
+Ad esempio il comando `\texttt{docker run --name test -it debian}' crea un pseudo-terminale sopra un'immagine debian.\
+Se l'immagine non è presente all'interno del nostro sistema allora si farà
+una pull dell'immagine da Docker Hub.
+
+\subsubsection*{A cosa serve minikube?}
+
+\textbf{Minikube} è un tool di apprendimento creato dagli autori di Kubernetes.\
+Questo strumento permette di creare velocemente un cluster locale di Kubernetes sulla propria macchina di sviluppo.\
+Lo scopo di minikube è aiutare lo sviluppatore a imparare e sviluppare su Kubernetes.
+
+\section{Faas}
+\subsubsection*{Che cosa è AWS Lambda?}
+\textbf{AWS Lambda} è un servizio di cloud computing FaaS offerto da Amazon.\
+Permette di eseguire codice senza eseguire il provisioning o gestire i server, il tutto \textit{senza amministrazione}.\
+Una volta caricato il codice Lambda si occuperà di eseguirlo e scalarlo con disponibilità elevata.\
+È possibile configurare il codice in modo che \textit{si attivi automaticamente da altri servizi AWS} o chiamarlo direttamente da qualsiasi app Web o mobile.\
+
+\textbf{Si paga solo per il tempo di elaborazione} che si consuma.\
+
+\subsubsection*{Quali sono le caratteristiche da considerare nella scelta di una piattaforma FaaS?}
+Il meccanismo di ``\textit{Function as a Service}'', o \textbf{FaaS}, conosciuto anche come ``\textit{serverless}\footnote{\textbf{Serverless} indica il fatto che la gestione del server è trasparente a chi ne usufruisce.} computing'', ha avuto molto successo nel mondo dell'ICT e dello sviluppo del software e molte altre compagnie hanno iniziato a offrirlo come servizio.\
+Quando bisogna scegliere una piattaforma FaaS bisogna tenere conto di due viste:\ la Business View e la Technical View.\
+La \textbf{Business View} si occupa:
+\begin{enumerate}
+	\item \textit{Licensing}
+	\item \textit{Installation}
+	\item \textit{Source Code}:\ Azure è l'unica piattaforma commerciale che è parzialmente open source.\ Tutte le piattaforme open source sono ``hostate'' su GitHub e sono implementate in Go (la maggior parte).
+	\item \textit{Interface}
+	\item \textit{Community}
+	\item \textit{Documentation}
+\end{enumerate}
+
+\noindent Invece, la \textbf{Technical View} si occupa:
+\begin{enumerate}
+	\item \textit{Development}
+	\item \textit{Version Management}
+	\item \textit{Event Sources}:\ tutte le piattaforme supportano le chiamate sincrone, mentre quelle asincrone sono supportate da pochi.
+	\item \textit{Function Orchestration}
+	\item \textit{Testing and Debugging}
+	\item \textit{Observability}:\ monitoring and logging of a function.
+	\item \textit{Application Delivery}
+	\item \textit{Code reuse}:\ solo AWS Lambda e MS Azure Functions hanno un function marketplace.
+	\item \textit{Access Management}:\ autenticazione e resource access control.
+\end{enumerate}
+
+\subsubsection*{Cosa è un Lambda function handler?}
+
+Un Lambda Function Handler è un metodo che processa gli eventi nel nostro codice.\
+Quando la nostra funzione viene invocata, Lambda esegue l'handler method.\ 
+Quando l'handler termina o restituisce una risposta, allora torna disponibile per la gestione di un altro evento.\
+La funzione handler ha in ingresso due parametri event e context.\
+Il primo parametro è un oggetto evento.\
+Un evento è un documento JSON formattato che contiene i dati da processare per una Lambda function e inoltre contiene ulteriori metadati sull'invocazione della funzione.\
+Il secondo argomento è un context object e fornisce metodi e proprietà sull'invocazione della funzione e il runtime environment.
+
+\section{Microservizi}
+
+\subsubsection*{Quali sono le caratteristiche principali dei microservizi?}
+Le applicazioni sono sviluppate come insieme di servizi, si tratta di un'architettura modulare.\
+Ognuno di questi servizi viene eseguito in un ambiente (processo) separato, tipicamente in un container; la comunicazione fra tali processi avviene con meccanismi semplici e leggeri, solitamente si usano protocolli di tipo REST.\
+Un'altra delle caratteristiche distintive è il \textbf{\textit{poliglottismo}}:\ servizi diversi possono essere scritti in linguaggi diversi; così come tipi di dati diversi possono essere memorizzati con tecnologie diverse.\
+
+Si chiamano microservizi ma il termine ``\textit{micro}'' esiste per motivi storici:\ la dimensione non è veramente il punto più importante.\
+Se si vuole sapere davvero la dimensione di un microservizio si può misurare la dimensione del team che lo gestisce.\
+
+Uno degli aspetti più innovativi è l'idea di organizzare i servizi intorno alle \textbf{\textit{business capabilities}} e quindi avere dei \textbf{cross-functional teams}:\ team indipendenti (per quanto possibile) l'uno dall'altro e conseguentemente funzionalità di un'applicazione distribuite su questi microservizi.\
+
+\begin{flushleft}
+``\textit{Organizations which design systems [\dots] are constrained to produce designs which are copies of the communication structures of these organizations}''\qquad M.\ Conway, 1968
+\end{flushleft}
+
+\noindent Un'ulteriore novità dei microservizi è la \textbf{decentralizzazione della gestione dei dati}:\
+\begin{itemize}
+	\item lasciare che ogni servizio gestisca il proprio database;
+	\item ``\textit{eventual consistency and compensations}'' invece di transazioni distribuite.
+\end{itemize}
+
+\noindent Inoltre alla base dei microservizi vi è la \textbf{\textit{deployability indipendente}}, ovvero possibilità di eseguire il deployment di una funzionalità mentre l'intero applicativo è in esecuzione, e la \textbf{\textit{scalabilità orizzontale}}, cioè la possibilità di scalare un singolo servizio.\
+
+Per concludere si può parlare di \textbf{\textit{fault resilient services}}:\ progettare le applicazioni in modo tale che riescano tollerare i fallimenti e quindi riuscire a garantire una \textit{resilienza} del sistema quanta più alta possibile di fronte a fault che certamente avverranno all'interno del sistema.\
+
+\subsubsection*{Quali sono i principali pro e contro dei microservizi?}
+
+
+Due motivazioni principali per l'adozione di microservizi.\
+
+\begin{enumerate}
+	\item Cercare di abbreviare il cosiddetto \textbf{\textit{lead time}} (tempo che passa da quando si comincia a immaginare una funzionalità al momento in cui il primo utente ``fa il primo click'' su tale funzionalità) per nuove feature o aggiornamenti a un'applicazione:
+	\begin{itemize}
+		\item accelerare \textit{rebuild} e \textit{redeployment};
+		\item ridurre le cosiddette \textit{corde} tra silos funzionali.
+	\end{itemize}
+	\item Riuscire a \textbf{scalare} efficacemente un'applicazione con un numero di utenti enorme, anche nell'ordine delle centinaia di milioni.\
+\end{enumerate}
+
+\begin{flushleft}
+	\textit{Don't even consider microservices unless you have a system that's too complex to manage as a monolith}.\qquad [M.\ Fowler]
+\end{flushleft}
+
+\noindent Lo stile architetturale basato sui microservizi è un'idea molto importante da tenere in considerazione per le applicazioni enterprise.\
+Ci sono molti vantaggi, come abbreviare il \textbf{lead time} per aggiornare le applicazioni e riuscire a \textbf{scalare in maniera efficace} davanti a numeri drammatici di richieste.\
+
+Tra gli svantaggi principali vi sono l'\textbf{overhead} dovuto alla comunicazione e la \textbf{complessità} del sistema finale; è facile ``sbagliare i tagli'' nella progettazione dell'architettura, quando si eliminano le dipendenze durante il  partizionamento (se ce ne sono troppe si parla di \textit{wrong cuts}).\
+Inoltre la \textbf{decentralizzazione} dei dati comporta controlli per verificarne l'integrità e per ridurne al minimo la duplicazione.\ 
+
+\begin{center}
+ ``\textit{A poor team will always create a poor system}.''
+\end{center}
+
+
+\section{Datacenter}
+\subsubsection*{Quali sono le principali attività da svolgere nella gestione di un datacenter?}
+La gestione di un datacenter richiede diverse attività, quali:
+\begin{itemize}
+	\item fase di pianificazione (planning):\ fase in cui si pianifica la realizzazione del datacenter, la manutenzione e aggiornamento di hardware e software;
+	\item fase di installazione:\ fase in cui avviene l'installazione fisica dei rack e delle connessioni necessarie alla messa in funzione del datacenter;
+	\item fase di cabling: fase in cui si cerca di organizzare nel miglior modo possibile i tanti cavi presenti, evitando di creare gli ``spaghetti cabling'', cioè avere cavi disordinati che renderebbero complicate le operazioni di manutenzione;
+	\item fase di gestione della sicurezza: si occupa di garantire la sicurezza all'interno del data center, sia per quanto riguarda le apparecchiature hardware, sia per la sicurezza del personale all'interno.
+\end{itemize}
+
+\noindent Inoltre, esistono dei software utili per la gestione del datacenter detti DCIM.\
+Consentono di visualizzare dei parametri come la temperatura in modo tale da identificare rapidamente eventuali problemi.\
+Infine è molto importante mantenere una documentazione.
+
+\subsubsection*{Cosa è il PUE?}
+Il Power Usage Effectiveness (PUE) è l'efficacia nell'utilizzo dell'energia e si misura come:
+\[\mathrm{PUE = \frac{Total\ Facility\ Power}{IT\ Equipment\ Power}}\]
+\noindent dove Total Facility Power indica tutta l'energia utilizzata all'interno del datacenter e IT Equipment Power l'energia usata solo per le apparecchiature informatiche.
+
+\textbf{Nota bene}:\ PUE è un indicatore per l'energia utilizzata, ma non su quanto sia rinnovabile tale energia.
+
+\subsubsection*{Quali sono le caratteristiche principali della rete di datacenter di UNIPI?}
+
+La rete di data center di UNIPI è composta principalmente da 4 nodi DCI (Data Center Interconnect) che comunicano ad una velocità di 100 Gbit/sec.\ Il primo nodo, dove si trova l'IT center è quello che sta al polo Fibonacci (il dipartimento di informatica) ed è composto da 16 racks.\
+Il secondo si trova in Via Diotisalvi (nella zona del dipartimento di Ingegneria) con 12 racks.\
+Il terzo si trova in Piazza Dante dove vi è anche un Point of Presence (PoP) collegato alla rete GARR (la rete nazionale a banda ultralarga dedicata alla comunità dell'istruzione e della ricerca).\
+L'ultimo nodo, il più grande, si trova a San Piero a Grado ed è composta da 76 racks; questo nodo ha un $\mathrm{PUE}<1.3$ grazie all'implementazione del raffreddamento adiabatico e viene riconosciuto come green data center.\
+Per la comunicazione del traffico interno (east-west) viene utilizzata la tecnologia Spine-Leaf Topology (topologia a due livelli ridondante, per ridurre al minimo i punti di fallimento, replica i Layer 2 e 3 dello
+stack protocollare).\
+La persistenza e la sicurezza che nessun dato venga perso è garantita grazie al No Single Point of Failure, quindi vi è ridondanza dei dati.
+
+\section{Green Computing}
+\subsubsection*{Quali sono i problemi di sostenibilità ambientale causati da ICT?}
+La produzione di dispositivi ICT causa \textbf{inquinamento} e genera \textbf{gas serra} e \textbf{e-waste}.\
+
+\begin{flushleft}
+	\textit{Per produrre un singolo computer sono necessari 1800 Kg di materiale grezzo}.\quad [\texttt{news.un.org}]
+\end{flushleft}
+
+\begin{flushleft}
+	\textit{L'ICT rappresenta il 9\% del consumo europeo di elettricità e il 4\% delle emissioni europee di carbonio}.\quad [\texttt{ictfootprint.eu}]
+\end{flushleft}
+
+\noindent \textit{Nature} prevede che nel 2030 l'ICT rappresenterà il 20.9\% del consumo dell'elettricità mondiale.
+
+Il $\sim$40\% del consumo di energia di un datacenter è solo per il raffreddamento.\
+Si ricorda che il PUE non indica l'uso di energie rinnovabili.
+
+\subsubsection*{Che cosa è il green computing?}
+Il \textbf{green computing} è un \textit{insieme di pratiche per arrivare ad avere un ICT sostenibile a livello ambientale}, minimizzando il consumo elettrico, progettando dispositivi efficienti (a livello energetico) e riducendo l'e-waste.\
+
+\subsubsection*{Che cosa è l'obsolescenza programmata/percepita?}
+
+L'obsolescenza pianificata è quando un \textit{prodotto è deliberatamente progettato per avere una durata ridotta}:\ la durata della vita deve essere abbastanza lunga da sviluppare il bisogno duraturo di un cliente e il cliente deve considerare che il prodotto è un prodotto di qualità, anche se alla fine deve essere sostituito.
+
+L'obsolescenza percepita si verifica quando \textit{un cliente è convinto di aver bisogno di un prodotto aggiornato, anche se il suo prodotto esistente funziona bene}.
+
+
+%\subsubsection*{Quale è una soluzione innovativa che contribuisce agli obiettivi del green computing?}
+%
+\section{Fog}
+\subsubsection*{Cosa si intende con ``Fog computing''?}
+
+Il \textbf{Fog Computing} mira ad estendere il Cloud verso l'IoT per supportare meglio le applicazioni IoT \textit{latency-sensitive} e \textit{bandwith-hungry} introducendo infrastrutture di rete mirate a potenziare quelle comunicazioni fra device IoT e Cloud che alternativamente sarebbe troppo lente o inefficienti.\
+Questo aspetto è molto importante in quanto le device IoT spesso hanno bisogno di effettuare una computazione intensiva sui dati che raccolgono per ottenere dei risultati che gli permettono di capire come comportarsi.\
+Da sole non potrebbero fare questa cosa, perciò, si appoggiano ai datacenter in Cloud.\
+In tutto questo, però, non vogliamo che esse ci mettano troppo tempo a contattare il Cloud altrimenti anche le loro risposte saranno in ritardo.
+
+\subsubsection*{Principali difficoltà per effettuare deployment di applicazioni su infrastrutture Fog?}
+
+Le industrie e le accademie mostrano un enorme interesse per il Fog Computing.\
+Le principali sfide sono diverse:\ \textit{Adaptive Application Deployment}, \textit{Application Management}, \textit{Lightweight Monitoring}, \textit{Privacy}/\textit{Security}/\textit{Trust}, \textit{Fault Resistance} e \textit{Testbeds}.\
+Un'applicazione consiste in più pezzi diversi che devono essere distribuiti su più nodi diversi.\
+Ogni servizio ha sia dei requisiti hardware che software.\
+La Fog Infrastructure deve soddisfare tre requisiti:\ deve essere eterogenea, grande e dinamica.\
+Per la dislocazione dei servizi si usano diversi programmi, uno dei quali scritto in \texttt{PROLOG} a cui chiedere come posizionare i diversi servizi nei nodi della Fog Infrastructure.
+
+\section{Cloud in azienda}
+
+\subsubsection*{Cosa si intende con ``network slicing''?}
+Il \textbf{Network slicing} (or \textbf{End-to-End slice}, or \textbf{5G slice}) è un servizio abilitato dall'architettura del 5G che permette di creare una fetta di rete dedicata (virtuale); ad esempio per un cliente che richiede certi requisiti di connettività.\ - Tratto dal webinar di Riccardo Gasparetto Stori
+\subsubsection*{Quali sono i principali vantaggi offerti da OpenShift?}
+
+Mediante \textit{OpenShift}\footnote{\textbf{OpenShift} è una piattaforma DevOps di base che permette la costruzione e l’erogazione di servizi per la gestione del SDLC (\textit{Systems Development Life Cycle}) in modalità \textit{self service}.} un'organizzazione può costruire il proprio workflow DevOps, cioè un modo di lavorare che permette ai team di collaborare mantenendo \textbf{autonomia}.\
+La piattaforma è pensata per disaccoppiare i teams, riducendo il più possibile le dipendenze sincrone.\
+OpenShift permette di riavviare automaticamente i servizi quando quest'ultimi vanno offline seguendo delle politiche ben prestabilite.
+
+
+\end{document}

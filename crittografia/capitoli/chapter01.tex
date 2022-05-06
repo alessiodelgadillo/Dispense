@@ -1,0 +1,237 @@
+\chapter{Introduzione}
+
+Con il termine \textbf{crittografia}, ``\textit{scrittura nascosta}'', si intende lo studio di tecniche matematiche sofisticate per
+\begin{table}[H]
+    \centering
+    \begin{tabular}{l l}
+        mascherare i messaggi & crittografia  \\
+        tentare di svelarli   & crittoanalisi \\
+    \end{tabular}
+\end{table}
+
+\noindent La crittografia esiste perché esistono due mondi in contrapposizione:\ le persone che vogliono scambiarsi privatamente delle informazioni e gli ``impiccioni'' che desiderano ascoltare o intromettersi nelle conversazioni altrui per curiosità, investigazione, scopi malvagi\dots\
+Di conseguenza le persone che vogliono rendere incomprensibili le proprie conversazioni ai non autorizzati sviluppano metodi di cifratura, mentre chi vuole riportare alla luce le informazioni contenute in quelle conversazioni sviluppa metodi di crittoanalisi.\
+
+\subsubsection{Terminologia}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|}
+        \hline
+        \textit{crittografia}                   & metodi di cifratura                      \\
+        \textit{crittoanalisi}                  & metodi di interpretazione                \\
+        \multirow{2}{4em}{\textit{crittologia}} & studio della comunicazione               \\
+                                                & su canali non sicuri e relativi problemi \\\hline
+    \end{tabular}
+\end{table}
+
+\subsubsection{Lo scenario}
+
+Un agente Alice vuole comunicare con un agente Bob e deve utilizzare un canale di trasmissione \textbf{insicuro}, è possibile intercettare i messaggi che vi transitano.\
+Per proteggere la comunicazione, i due agenti devono adottare un \textbf{metodo di cifratura}:\ Alice spedisce un \textit{messaggio in chiaro} \texttt{m} sotto forma di \textit{testo cifrato} (\textit{crittogramma}) \texttt{c} che deve essere incomprensibile al crittoanalista Eve in ascolto sul canale, ma facilmente decifrabile da Bob.\
+
+\begin{flushleft}
+    \texttt{MSG}:\ insieme dei messaggi (testi in chiaro)
+
+    \texttt{CRITTO}:\ insieme dei crittogrammi (testi cifrati)
+\end{flushleft}
+
+\noindent \textbf{Cifratura del messaggio}:\ operazione con cui si trasforma un messaggio in un chiaro \texttt{m} in un crittogramma \texttt{c} applicando una funzione \[C: \mathtt{MSG}\rightarrow\mathtt{CRITTO}\]
+
+\noindent \textbf{Decifratura del crittogramma}:\ operazione che permette di ricavare il messaggio in chiaro \texttt{m} a partire dal crittogramma \texttt{c} applicando la funzione \[D:\mathtt{CRITTO}\rightarrow\mathtt{MSG}\]
+
+\noindent Le funzioni $C$ e $D$ sono una l'inversa dell'altra
+\[D(c) = D(C(m)) = m\]
+Inoltre, la funzione $C$ è iniettiva:\ \textit{a messaggi diversi devono corrispondere crittogrammi diversi}.\
+
+\section{Livello di segretezza}
+
+I metodi crittografici (cifrari) possono essere classificati in base al loro livello di segretezza:\ \textbf{cifrari per uso ristretto} e \textbf{cifrari per uso generale}.\
+
+\subsection{Cifrari per uso ristretto}
+
+Le funzioni di \textit{cifratura} $C$ e di \textit{decifrazione} $D$ sono tenute \textbf{segrete} in ogni loro aspetto.\
+Solitamente sono impiegati per comunicazione diplomatiche o militari e non sono adatti per una crittografia ``di massa''.\
+
+\subsection{Cifrari per uso generale}
+
+Ogni codice segreto non può essere mantenuto tale troppo a lungo.\
+
+In un cifrario utilizzato da molti utenti, la parte segreta del metodo deve essere limitata a un'informazione aggiuntiva, la \textbf{chiave}, nota solo alla coppia di utenti che stanno comunicando.\
+Le regole devono essere \textbf{pubbliche} e solo la chiave deve essere \textbf{segreta}:
+\begin{center}
+    \textit{il nemico conosce il sistema}.
+\end{center}
+
+\subsubsection{Chiave segreta}
+Una chiave segreta $k$ deve essere
+\begin{itemize}
+    \item diversa per ogni coppia di utenti,
+    \item inserita come parametro nelle funzioni di cifratura e decifrazione.
+          \[c = C(m,k)\quad m=D(c,k)\]
+\end{itemize}
+
+\noindent Se non si conosce $k$, la conoscenza di $C$ e $D$ e del crittogramma non deve permettere di estrarre informazioni sul messaggio in chiaro.\
+
+\begin{itemize}
+    \item Tenere segreta la chiave è più semplice che tenere segreto l'intero processo di cifratura e decifrazione.
+    \item Tutti possono impiegare le funzioni pubbliche $C$ e $D$ scegliendo chiavi diverse.
+    \item Se un crittoanalista entra in possesso di una chiave occorre solo generarne una nuova, le funzioni $C$ e $D$ rimangono inalterate.
+    \item Molti cifrari in uso (3DES, RC5, IDEA, AES) sono a chiave segreta.
+\end{itemize}
+
+\noindent Se la segretezza dipende unicamente dalla chiave, allora il numero delle chiavi deve essere praticamente immune ad ogni tentativo di provarle tutte e deve essere scelta in modo casuale.\
+
+\subsubsection{Attacco esauriente}
+
+Il crittoanalista potrebbe sferrare un \textbf{attacco esauriente} verificando la significatività delle sequenze $D(c,k),\ \forall\ \mathrm{chiave}\ k$.
+
+Se $|\mathrm{Key}| = 10^{20}$ e un calcolatore impiegasse $10^{-6}$ secondi per calcolare $D(c,k)$ e verificarne la significatività, occorrerebbe più di un miliore di anni per scoprire il messaggio provando tutte le chiavi possibili.\
+
+\subsubsection{Osservazioni}
+
+La segretezza può essere violata con altre tecniche di crittoanalisi.\
+
+Esistono cifrari più sicuri di altri, pur basandosi su uno spazio di chiavi molto più piccolo:
+\begin{enumerate}
+    \item un cifrario complicato non è necessariamente un cifrario sicuro;
+    \item mai sottovalutare la bravura del crittoanalista.
+\end{enumerate}
+
+\section{Crittoanalista}
+
+\begin{itemize}
+    \item Comportamento passivo:\ Eve si limita ad ascoltare la comunicazione.
+    \item Comportamento attivo:\ Eve agisce sul canale disturbando la comunicazione o modificando il contenuto del messaggio.
+\end{itemize}
+
+\noindent Gli attacchi ai sistemi crittografici hanno l'obiettivo generale di \textbf{forzare} il sistema.\
+Metodo e livello di pericolosità dipendono dalle informazioni in possesso del crittoanalista:
+\begin{itemize}
+    \item \textbf{Cipher Text Attack} (solo testo cifrato):\ il crittoanalista rileva sul canale una serie di crittogrammi $c_1,\dots, c_r$.
+    \item \textbf{Known Plain-Text Attack} (testo in chiaro noto):\ il crittoanalista conosce una serie di coppie $(m_1,c_1),\dots, (m_r,c_r)$.
+    \item \textbf{Choose Plain-Text Attack} (testo in chiaro scelto):\ il crittoanalista conosce una serie di coppie $(m_1,c_1),\dots, (m_r,c_r)$ relative a messaggi in chiaro da lui scelti.
+\end{itemize}
+
+\subsubsection{Attacchi ``Man in-the-middle''}
+
+Il crittoanalista si installa sul canale di comunicazione, interrompe le comunicazioni dirette tra Alice e Bob, le sostituisce con messaggi propri e convince ciascun utente che tali messaggi provengono legittimamente dall'altro.\
+\begin{center}
+    Eve si finge Alice agli occhi di Bob e Bob agli occhi di Alice.
+\end{center}
+
+\subsubsection{Attacchi}
+
+L'attacco al sistema può essere portato a termine con pieno successo, si scopre la funzione $D$, o con successo limitato, si scopre solo qualche informazione su un particolare messaggio:\ l'informazione parziale può essere sufficiente per comprendere il significato del messaggio.\
+
+\section{Situazione attuale}
+
+\textbf{Cifrari perfetti} (inattaccabili):\ esistono, ma richiedono operazioni estremamente complesse e sono utilizzati solo in condizioni estreme.\
+Messaggio in chiaro e crittogramma risultano del tutto scorrelati tra loro:\ nessuna informazione sul testo può filtrare dal crittogramma e la conoscenze di Eve non cambia dopo aver osservato un crittogramma sul canale.\
+
+\textbf{One-Time Pad}:\ assolutamente sicuro, ma richiede una nuova chiave segreta per ogni messaggio che deve essere lunga come il messaggio da scambiare e perfettamente casuale.\
+\begin{center}
+    \textit{Come si genera e come si scambia la chiave?}
+\end{center}
+Estremamente attraente per chi richiede una sicurezza assoluta ed è disposto a pagarne i costi.\
+
+I cifrari diffusi in pratica non sono perfetti, ma sono \textbf{dichiarati sicuri} perché sono rimasti inviolati dagli attacchi degli esperti e per violarli è necessario risolvere problemi matematici estremamente difficili.\
+Il prezzo da pagare per forzare il cifrario è troppo alto perché venga la pena di sostenerlo, l'operazione richiede di impiegare giganteschi calcolatori per tempi incredibilmente lunghi:\ impossibilità pratica di forzare il cifrario.\
+
+Non è noto se la risoluzione di questi problemi matematici richieda \textbf{necessariamente} tempi enormi, oppure se i tempi enormi di risoluzione siano dovuti alla nostra \textbf{incapacità di individuare metodi più efficienti di risoluzione}.\
+
+\subsection{Cifrari di oggi}
+
+\textbf{A}dvanced \textbf{E}ncryption \textbf{S}tandard (\textbf{AES}):
+
+\begin{itemize}
+    \item standard per le comunicazione riservate ma ``non classificate'';
+    \item pubblicamente noto e realizzabile in hardware su computer di ogni tipo;
+    \item chiavi brevi (qualche decina di caratteri, 128 o 256 bit).
+\end{itemize}
+
+\noindent Si tratta di un \textbf{cifrario simmetrico}, la stessa chiave è usata per cifrare e decifrare, e a blocchi, il messaggio è diviso in blocchi lunghi come la chiave:\ la chiave è utilizzata per trasformare un blocco del messaggio in un blocco del crittogramma.\
+
+Novità rispetto al passato:\ le chiavi segrete non sono stabilite direttamente dai partner (Alice e Bob), ma dai mezzi elettronici che utilizzano per comunicare; inoltre su Internet si costruisce una nuova chiave per ogni sessione.\
+
+\begin{flushleft}
+    Ma come si può scambiare una chiave segreta con facilità e sicurezza?
+\end{flushleft}
+
+\noindent La chiave serve per comunicare in sicurezza, ma Alice e Bob devono stabilirla comunicando in ``sicurezza'' senza poter ancora usare il cifrario; un'intercettazione nell'operazione di scambio della chiave pregiudica il sistema.\
+
+Nel 1976 viene proposto (da Merkle, Hellman e Diffie) alla comunità scientifica un algoritmo per generare e scambiare una chiave segreta su un canale insicuro senza la necessità che le due parti si siano scambiate informazioni o incontrate in precedenza; questo algoritmo, detto \textbf{protocollo DH}, è ancora largamente usato nei protocolli crittografici su Internet.\
+
+Nel 1976 D.\ e H.\ propongono alla comunità scientifica anche la definizione di \textbf{crittografia a chiave pubblica} (ma senza averne un'implementazione pratica):\ rivoluziona il modo di concepire le comunicazioni segrete; nata ufficialmente nel 1976 ma preceduta dal lavoro, coperto da segreto, degli agenti britannici (Ellis, Cock e Williamson).\
+
+\subsubsection{Cifrari simmetrici}
+
+Nei cifrari simmetrici, la \textit{chiave di decifratura è uguale a quella di decifrazione} (o l'una può essere facilmente calcolata dall'altra) ed è nota solo ai due partner che la scelgono di comune accordo e la mantengono segreta.\
+
+\subsubsection{Cifrari a chiave pubblica (asimmetrici)}
+
+\textbf{Obiettivo}:\ permettere a tutti di inviare messaggi cifrati, ma abilitare solo il ricevente (Bob) a decifrarli.\
+Le operazioni di cifratura e decifrazione sono pubbliche e utilizzano due chiavi \textbf{diverse}:
+
+\begin{itemize}
+    \item $\mathrm{k_{pub}}$ per \textbf{cifrare}:\ è pubblica, nota a tutti;
+    \item $\mathrm{k_{priv}}$ per \textbf{decifrare}:\ è privata, nota solo a Bob.\
+\end{itemize}
+
+\noindent La \textbf{cifratura} di un messaggio $m$ da inviare a Bob è eseguita da qualunque mittente come \[c = C(m,k_{pub})\] chiave $k_{pub}$ e funzione di cifratura sono note a tutti.\
+
+\vspace{12pt}
+
+\noindent La \textbf{decifrazione} è eseguita da Bob come \[m= D(c, k_{priv})\] la funzione di decifrazione è nota a tutti, ma $k_{priv}$ non è disponibile agli altri.\
+
+\vspace{12pt}
+
+\noindent La funzione di cifratura deve essere una funzione \textbf{one-way trap-door}:\ calcolare $c = C(m, k_{pub})$ è computazionalmente \textit{facile}, decifrare $c$ è computazionalmente \textit{difficile} a meno che non si conosca un meccanismo segreto, rappresentato da $k_{priv}$ (\textbf{trap-door}).\
+
+Nel 1977 Rivest, Shamir e Adleman propongono un sistema a chiave pubblica (RSA) basato su una funzione ``facile'' da calcolare e ``difficile'' da invertire.\
+
+Tutti gli utenti possono inviare in modo sicuro messaggi a uno stesso destinatario cifrandoli con la funzione $C$ e la chiave $k_{pub}$ che sono pubbliche; solo il destinatario può decifrare i messaggi.\
+Un crittoanalista non può ricavare informazioni sui messaggi pur conoscendo $C,\ D\ \mathrm{e}\ k_{pub}$.\
+
+\subsubsection{Vantaggi}
+
+\begin{itemize}
+    \item Se gli utenti di un sistema sono $n$, il numero complessivo di chiavi (pubbliche e private) è $2n$ anziché $\frac{n(n-1)}{2}$.\
+    \item Non è richiesto alcuno scambio segreto di chiavi.
+\end{itemize}
+
+\subsubsection{Svantaggi}
+
+\begin{itemize}
+    \item Questi sistemi sono \textbf{molto più lenti} di quelli basati sui cifrari simmetrici.\
+    \item Sono esposti ad attacchi di tipo \textbf{\textit{chosen plain-text}}; un crittoanalista può
+          \begin{itemize}
+              \item scegliere un numero qualsiasi di messaggi in chiaro $m_1,\dots, m_{h}$;
+              \item \textbf{cifrarli} con la funzione pubblica $C$ e la chiave pubblica $k_{pub}$ del destinatario, ottenendo i crittogrammi $c_1,\dots,c_h$;
+              \item quindi può confrontare qualsiasi messaggio cifrato $c'$ che viaggia verso il destinatario con i crittogrammi in suo possesso.\
+          \end{itemize}
+\end{itemize}
+
+\subsubsection{Cifrari ibridi}
+
+Si usa un cifrario a chiave segreta (AES) per le comunicazioni di massa e un cifrario a chiave pubblica per scambiare le chiavi segrete relative al primo, senza incontri fisici tra gli utenti.\
+
+La trasmissione dei messaggi lunghi avviene ad alta velocità, mentre è lento lo scambio delle chiavi segrete:\ le chiavi sono composte al massimo da qualche decina di byte e l'attacco chosen plain-text è risolto se l'informazione cifrata con la chiave pubblica (chiave segreta dell'AES) è scelta in modo da \textbf{risultare imprevedibile al crittoanalista}.\
+
+\subsection{Applicazioni su rete}
+
+Oltre alla segretezza delle comunicazioni, i sistemi crittografici attuali devono garantire:
+\begin{enumerate}
+    \item l'\textbf{identificazione} dell'utente:\ il sistema deve accertare l'identità di chi richiede di accedere ai suoi servizi.\
+    \item l'\textbf{autenticazione} di un messaggio:\ Bob deve accertare che il messaggio ricevuto sia stato effettivamente spedito da Alice e deve poter stabilire che il messaggio non è stato modificato o sostituito durante la trasmissione.\
+    \item la \textbf{firma digitale}:\ una volta apposta la ``firma'' Alice non può ricusare la paternità del messaggio spedito a Bob; Bob può dimostrare a terzi che il messaggio ricevuto è di Alice.\
+\end{enumerate}
+
+\subsubsection{Altre applicazioni}
+
+\begin{itemize}
+    \item Trasmissione protetta di dati sulla rete (protocollo SSL).
+    \item Moneta elettronica (BitCoin).
+    \item Dimostrazioni a conoscenza zero.
+    \item Applicazioni crittografiche dei fenomeni di meccanica quantistica.
+\end{itemize}

@@ -1,0 +1,182 @@
+\chapter{Metriche e rilevamento delle anomalie}
+
+\section{Metriche}
+
+Con sistemi come NetFlow è possibile andare a monitorare il traffico di rete, tuttavia è importante anche riuscire a capire che cosa monitorare, cioè quali sono le metriche importanti da monitorare.\
+Dal punto di vista di un ISP è importante andare a monitorare il Service Level Agreements:\ il provider deve capire se la rete sta fuzionando, se le linee internet a sua disposizione sono adeguate per il traffico che sta passando e deve fare delle previsioni per riuscire a capire se ha abbastanza banda per crescere nel futuro.\
+Dal punto di vista dell'utente non si parla di linea, di connettività, di Autonomous Systems\dots\ ma di servizi:\ riuscire a connettersi alla propria mailbox, connettersi a Google tramite il proprio browser,\ \dots
+
+Il traffico può essere monitorato:
+\begin{itemize}
+    \item sugli end-system (poiché richiede di installarvi una sonda di solito viene evitato);
+    \item sfruttando sistemi esistenti, per esempio usando NetFlow su un router;
+    \item usando delle macchine appositamente configurate per lo scopo.
+\end{itemize}
+
+\subsection{Benchmarking}
+
+Al contario delle metriche della vita quotidiana (kg, litri,\ \dots), le metriche usate per il traffico di rete spesso non sono standardizzate e le misure dei fornitori sono eseguite in modi leggermente diversi, rendendo i risultati difficili da confrontare.\
+Per questo gli operatori e il mondo delle reti hanno definito degli standard di \textit{benchmarking} che permettono di creare dei termini di paragone.\
+
+\begin{itemize}
+    \item \textbf{Disponibilità}:\ può essere espressa come la percentuale di tempo che un sistema, un componente o un'applicazione di rete è disponibile per l'utente.\ È basata sull'affidabilità dei singoli componenti di una rete.
+          \[\%\ \mathrm{Availability} = \frac{\mathrm{MTBF}}{\mathrm{MTBF + MTTR}}\]
+          MTBF è il tempo medio tra i fallimenti e MTTR è il tempo medio per riparare il fallimento.
+    \item \textbf{Tempo di risposta}:\ tempo che intercorre in un sistema tra un input e la sua reazione.\ È desiderabile che sia il più breve possibile.
+          \begin{itemize}
+              \item \textbf{Network delay}:\ quanto una rete ritarda l'esecuzione di un'azione.
+              \item \textbf{Application delay}:\ quanto un'applicazione ritarda l'esecuzione di un'azione.
+          \end{itemize}
+    \item \textbf{Throughput}:\ misura la quantità di dati che può essere inviata su un link in un certo momento.\ Spesso viene utilizzato per stimare la larghezza di banda disponibile sul link.\ Si noti che throughput e banda sono misure diverse:\ il primo è orientato all'applicazione.
+    \item \textbf{Goodput}:\ come il throughput, ma considera solo il payload del pacchetto, cioè i ``dati reali'' che sono trasportati dalla rete.\ È utile per identificare le cosiddette \textit{stealth connections}.
+    \item \textbf{Utilizzo}:\ è una misura più precisa rispetto al throughput, si riferisce alla determinazione della percentuale di tempo in cui una risorsa è in uso in un determinato periodo di tempo.\ Spesso un utilizzo molto scarso significa che qualcosa non funziona come previsto.
+\end{itemize}
+
+\noindent Per interpretare tali metriche sono vengono utilizzate la media, la varianza e la deviazione standard.\
+Viene anche definito un intervallo di confidenza ($\mathrm{media\ \pm\ margine\ di\ errore}$), i dati al di fuori di tale intervallo vengono scartati.
+
+\vspace{12pt}
+\noindent\textbf{Percentile}:\ il valore al di sotto del quale cade una determinata percentuale di osservazioni in un gruppo di osservazioni.
+
+\vspace{12pt}
+\noindent Nel networking un percentile popolare è il 95esimo.\
+
+\vspace{12pt}
+\noindent\textbf{Quartile}:\ è una divisione di serie in quarti.
+
+\begin{itemize}
+    \item $\mathrm{Q_1}$ è definito come il 25esimo percentile.
+    \item $\mathrm{Q_2}$ è definito come il 50esimo percentile.
+    \item $\mathrm{Q_3}$ è definito come il 75esimo percentile.
+\end{itemize}
+
+\subsubsection{Outlier}
+
+Gli outliers (valori anomali) sono i valori che ``si trovano al di fuori'' degli altri.\
+In statistica un valore è outlier quando cade al di fuori del
+
+\begin{itemize}
+    \item limite inferiore:\ $\mathrm{Q_1} - 1,5 \cdot \mathrm{IQR}$
+    \item limite superiore:\ $\mathrm{Q_3} + 1,5 \cdot \mathrm{IQR}$
+\end{itemize}
+dove IQR (interquartile range):\ $\mathrm{Q_3 - Q_1}$.\
+Gli outliers vengono utilizzati per individuare valori anomali, spesso denominati ``aberranti'', ovvero che si discostano da uno standard accettato, tra cui:
+\begin{itemize}
+    \item errori sperimentali/di misurazione;
+    \item distribuzioni a coda pesante (cioè che vanno a zero molto lentamente) in cui uno o più valori molto grandi influenzeranno le statistiche.
+\end{itemize}
+
+\subsubsection{Latenza e jitter}
+
+La \textbf{latenza} è la quantità di tempo che impiega un pacchetto per andare da sorgente a destinazione ed è molto importante per le applicazioni interattive.\
+$\frac{\mathrm{RTT}}{2}$ non è la latenza di una rete, ma la somma della latenza client-to-server e della latenza server-to-client è l'RTT.\
+
+Il \textbf{jitter} è la varianza dell'intra-packet delay su un link monodirezionale ed è molto importante per le applicazioni multimediali.\
+\[\mathrm{jitter} = \frac{\sum_i (|x_i - x_{i-1}|)}{n-1}\]
+È un modo per misurare quanto irregolare è un segnale.\
+\textbf{Nota}:\ il jitter tiene conto dell'ordine degli eventi mentre deviazione standard, media\dots\ non lo fanno.
+
+\subsubsection{Bandwidth}
+
+Per misurare la banda va definito inanzitutto l'intervallo di misura (TC), solitamente viene fissato a un secondo.\
+Si tratta dell'intervallo di tempo, o ``intervallo di larghezza di banda'', utilizzato per controllare i picchi di traffico.\
+Il Burst Committed (BC) è il numero massimo di bit che la rete accetta di trasferire durante qualsiasi TC, mentre il CIR (Committed Information Rate) è la velocità con cui una rete accetta di trasferire informazioni in condizioni normali, mediata su un incremento minimo di tempo:\ si tratta di una delle principali metriche tariffarie negoziate ed è misurato in bit al secondo.\
+\[\mathrm{CIR} = \frac{\mathrm{BC}}{\mathrm{TC}}\]
+Inoltre viene definito il Burst Excess (BE), ossia il numero di bit che si tenta di trasmettere dopo aver raggiunto il valore BC.\
+La velocità massima che può essere raggiunta (Maximum Data Rate) viene calcolata come
+\[\frac{\mathrm{BC + BE}}{\mathrm{BC}}\cdot\mathrm{CIR}=\frac{\mathrm{BC + BE}}{\mathrm{TC}}\]
+Si noti che la banda è una misura per link, mentre il throughput è una misura per comunicazione.\
+
+\subsubsection{Approcci di monitoraggio}
+
+\begin{itemize}
+    \item Misure attive:\ si inietta del traffico e si studia come la rete reagisce a tale traffico.
+    \item Misure passive:\ non si inietta nessun traffico, ma si osserva ciò che passa tramite la rete.
+\end{itemize}
+
+\noindent Le misure attive sono spesso end-to-end, mentre quelle passive sono limitate al link dove viene osservato il traffico.\
+
+\section{Rilevamento delle anomalie}
+
+Un'\textbf{anomalia} è un'osservazione che si discosta tanto dalle altre osservazioni da far sospettare che sia stata generata da un meccanismo diverso.\
+Data una misura e trovati gli outliers è necessario capire se quest'ultimi rappresentino un evento interessante o dei dati non voluti (sbagliati):\ nel primo caso l'obiettivo è quello di analizzare l'outlier, nel secondo è eseguire un \textit{data cleaning}.\
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|}
+        \hline
+        \multicolumn{2}{|c|}{\textit{\textbf{Definizioni}}}                             \\\hline
+        \textbf{Serie}          & sequenza ordinata di numeri                           \\
+        \textbf{Ordine}         & indice di un numero nella serie                       \\
+        \textbf{Timeseries}     & serie di punti ordinati nel tempo                     \\
+        \textbf{Osservazione}   & valore numerico osservato in un tempo specifico       \\
+        \textbf{Forecast}       & stima di un valore atteso in un momento specifico     \\
+        \textbf{Forecast Error} & differenza dell'osservazione rispetto alla previsione \\
+        \textbf{SSE}            & la somma degli errori di una serie al quadrato        \\\hline
+    \end{tabular}
+\end{table}
+
+\noindent Le serie temporali possono essere di due tipi, \textbf{univariate} e \textbf{multivariate}.\
+Una \textit{serie temporale univariata} è costituita da singole osservazioni (scalari) registrate in sequenza su incrementi di tempo uguali, per esempio la temperatura giornaliera, mentre una \textit{serie temporale multivariata} ha più di una variabile dipendente dal tempo:\ ogni variabile dipende non solo dai suoi valori passati, ma ha anche una certa dipendenza da altre variabili; questa dipendenza viene utilizzata per prevedere i valori futuri, ad esempio le previsioni del tempo che dipendono da temperatura, vento, umidità, copertura nuvolosa.
+
+Una serie temporale è \textit{stazionaria} quando le sue proprietà statistiche, media e varianza, non cambiano nel tempo, cioè non hanno stagionalità o trend.\
+Un contatore non è stazionario, ma può essere reso stazionario scrivendo la serie temporale come $\mathrm{osservazione}(t) - \mathrm{osservazione}(t-1)$ [gauge].\
+La stazionarietà è importante poiché per la previsione abbiamo bisogno di una sorta di invarianza:\ intuitivamente una variabile della serie temporale è stazionaria rispetto a un qualche percorso di equilibrio se dopo uno shock tende a ritornare su quel percorso, invece, una serie non è stazionaria se si sposta su un nuovo percorso dopo uno shock.\
+È molto difficile modellare il percorso di una variabile che cambia percorso se è soggetta a qualche shock.
+
+\subsection{Medie e previsioni}
+
+Data una serie ci sono diversi modi per prevedere il valore del punto $x+1$.\
+\begin{itemize}
+    \item Media semplice:\ il prossimo punto è la media dei punti della serie.
+    \item Media mobile:\ come la media semplice ma calcolata sugli ultimi $n$ punti più rilevanti di quelli precedenti.
+    \item Media mobile ponderata:\ uguale alla media mobile con un peso assegnato a ciascun punto in base alla loro età.
+\end{itemize}
+
+\subsubsection{Single Exponential Smoothing}
+
+La seguente formula (Poisson, Holt o Roberts) afferma che il valore atteso/livellato (smoothed) è la somma di due prodotti (formula ricorsiva):
+\[\hat{y}_x = \alpha\cdot y_x + (1-\alpha)\cdot \hat{y}_{x-1}\]
+$\alpha$ (\textit{smoothing factor}) è un ``decadimento della memoria'':\ indica l'influenza del passato.\
+Il processo per trovare il migliore valore di $\alpha$ si chiama \textit{fitting}.\
+
+\vspace{12pt}
+\noindent\textbf{Nota}:\ questa è essenzialmente una funzione di livellamento piuttosto che una previsione.\
+
+\vspace{12pt}
+\noindent In questo caso si fa una previsione sul futuro andando a considerare i valori passati:\ invece di dare un peso in base alla finestra temporale passata, si vuole dare un peso anche al trend (\textit{double exponential smoothing}).
+
+Chiamiamo $\hat{y}_x$ \textit{level} $\mathcal{L}_x$ e definiamo il trend (o slope) di due punti consecutivi come la differenza tra tali valori:\ $b = y_x - y_{x-1}$.\
+Otteniamo quindi
+\[\mathcal{L}_x = \alpha\cdot y_x + (1-\alpha)\cdot(\mathcal{L}_{x-1} + b_{x-1})\]
+\[b_x = \beta\cdot(\mathcal{L}_x - \mathcal{L}_{x-1}) + (1-\beta)\cdot b_{x-1}\]
+\[\hat{y}_{x+1} = \mathcal{L}_x + b_x\]
+dove $\beta$ è detto \textit{trend factor}.
+
+Nel caso in cui si voglia tenere in considerazione anche la stagionalità dei valori, è necessario introdurre il \textit{triple exponential smoothing} (o \textit{Holt-Winters method}).\
+
+\subsubsection{Triple Exponential Smoothing}
+
+Quando una serie si ripete a intervalli regolari è detta \textit{stagionale}.\
+La durata di una stagione è il numero di punti nella stagione.\
+La componente stagionale è una deviazione rispetto a $\hat{y}_{x+1}$ calcolato nel double exponential smoothing che si ripete per ogni stagione; quindi per ogni datapoint stagionale viene definita una componente stagionale $s$.
+\[s_x = \gamma\cdot(y_x - \mathcal{L}_x) + (1-\gamma)\cdot s_{x-L} \]
+\[\hat{y}_{x+m} = \mathcal{L}_x + m\cdot b_x + s_{x-L+1+(m-1)\%L}\]
+dove $\gamma$ è detto \textit{seasonal smoothing factor} e $S_{x-L+1+(m-1)\%L}$ indica che il seasonal factor deve essere ripetuto in loop per ogni durata della stagione.\
+Poiché la serie temporale ha una stagione, il numero di pronostici è arbitrario, consentendo di prevedere un numero arbitrario di punti (con errore crescente).\
+
+$\alpha$, $\beta$ e $\gamma$ sono i parametri di adattamento dell'algoritmo e $0 < \alpha$, $\beta, \gamma < 1$.\
+Valori maggiori indicano che l'algoritmo si adatta più velocemente e le previsioni riflettono osservazioni recenti nelle serie temporali; valori più piccoli significano che l'algoritmo si adatta più lentamente, dando più peso alla cronologia passata delle serie temporali.\
+I valori di $\alpha,\ \beta\ \mathrm{e}\ \gamma$ possono essere determinati cercando di determinare il più piccolo SSE (somma degli errori al quadrato) con un processo iterativo chiamato \textit{fitting}.\
+
+\subsection{Misurare una deviazione}
+
+Se Holt-Winters può prevedere un punto, possiamo rilevare anomalie quando l'osservazione si discosta troppo dalla previsione.\
+La deviazione può essere rilevata quando l'osservazione non rientra nelle bande di confidenza minima e massima per un dato punto:
+\[d_t= \gamma \cdot |(y_t-\hat{y}_t)| + (1-\gamma) \cdot d_{t-m}\]
+Bande di fiducia
+\begin{itemize}
+    \item Banda superiore:\ $\hat{y}_t+\delta \cdot d_{t-m}$
+    \item Banda inferiore:\  $\hat{y}_t - \delta \cdot d_{t-m}$
+\end{itemize}
+dove $\delta$ è detto \textit{confidence scaling factor} e tipicamente è compreso tra 2 e 3.\

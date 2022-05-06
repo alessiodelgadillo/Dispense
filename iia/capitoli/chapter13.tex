@@ -1,0 +1,102 @@
+\chapter{Introduzione alla convalidazione e questioni teoriche}
+
+La validazione ha due importanti scopi.\
+Il primo è il \textbf{\textit{model selection}}:\ stima le prestazioni (\textit{errore di generalizzazione}) di diversi modelli di apprendimento al fine di scegliere quello migliore (per generalizzare), questo include la ricerca dei migliori \textit{iper-parametri} del modello (cioè parametri che non vengono appresi direttamente, che non vengono modificati dalla formazione; ad es.\ l'ordine del polinomio, lambda di ridge regression,\ \dots), e restituisce un modello.\
+Il secondo è il \textbf{\textit{model assessment}}:\ sceglie un modello finale, stimando/valutando il suo errore/rischio di previsione (\textit{errore di generalizzazione}) sui nuovi dati di test (misura della qualità/prestazione del modello finale scelto), e restituisce una stima.\
+
+\subsubsection{Hold out}
+
+Se la dimensione del set di dati è sufficiente, ad esempio 50\% TR, 25\% VL, 25\% TS (\textbf{insiemi disgiunti}):
+
+\begin{itemize}
+	\item TR:\ il \textit{training set} viene utilizzato per adattarsi [\textbf{training}].
+	\item VL:\ il \textit{validation set} (o \textit{selection set}) può essere utilizzato per selezionare i modelli migliori (ad es.\ ottimizzazione degli iperparametri) [\textbf{model selection}].
+	\item TS:\ il \textit{test set} viene utilizzato per la stima dell'errore di generalizzazione (del modello finale) [\textbf{valutazione del modello}].
+\end{itemize}
+
+\noindent TR + VL a volte sono chiamati solo set di sviluppo/design, ovvero utilizzati per costruire il modello finale.\
+
+\textbf{Nota}:\ la stima effettuata per il model selection (sul validation set) [è a scopo di selezione del modello] non è una buona stima per la fase di valutazione{\slash}test di rischio e il test set non può essere utilizzato per il model selection (come validation set).
+
+\vspace{12pt}
+\noindent\textit{Cosa succede se il test set viene utilizzato in un ciclo di progettazione (ripetuto)?}
+
+\vspace{12pt}
+
+\noindent Si effettuerebbe un \textit{model selection} e una \textit{valutazione} non affidabile (stima dell'errore di generalizzazione previsto) e non si sarebbe in grado di farlo su esempi futuri:\ concetto di \textit{blind test}.\
+In tal caso, l'errore del test set utilizzato fornisce una valutazione eccessivamente ottimistica del vero errore di test.\
+
+\textbf{Regola d'oro}:\ mantenere la separazione tra gli obiettivi e utilizzare set separati (TR per il training, VL per il model selection, TS per la stima del rischio).\
+
+\subsubsection{Un meta-algoritmo semplice}
+
+Set separati TR (training), VL (convalida) e TS (test).\
+
+\noindent Si cerca la \textbf{migliore} $h_{w, \lambda}()$ cambiando gli iperparametri del modello $\lambda$ [es.\ l'ordine del polinomio, lambda per la ridge regression] e per ogni valore diverso di $\lambda$ (griglia di ricerca) si cercano i migliori $h_{w, \lambda}()$ che minimizzano l'errore{\slash}la perdita empirica (adattando l'insieme TR) trovando i \textbf{migliori} parametri $w$, dove migliore = errore minimo sull'insieme TR [$\mathit{argmin}_w\ Loss (w)\ in\ L_2$].\
+Si seleziona il migliore $h_{w, \lambda}()$, migliore = errore minimo sull'insieme VL.\
+
+\noindent (Opzionale:\ ora è anche possibile adattare $h_{w, \lambda} (x)$ su TR + VL con il miglior modello $\lambda$.)
+
+\noindent Infine si valuta $h_{w, \lambda} (x)$ finale su TS.
+
+\subsubsection{Hold out e K-fold cross validation}
+
+Si divide il data set $D$ in $k$ sottoinsiemi mutualmente esclusivi $D_1, D_2,\dots, D_k$,
+si addestra l'algoritmo di apprendimento su $D \backslash D_i$ e si testa su $D_i$.\
+Infine si riassume il tutto calcolando la media di tutti i risultati di $D_i$.\
+\begin{center}
+	\textit{Utilizza tutti i dati per l'addestramento, la convalida o il test}.
+\end{center}
+
+\noindent\textbf{Nota}:\ questa tecnica può essere utilizzata sia per il validation set che per il test set.\
+
+\section{Statistical Learning Theory (SLT)}
+
+Si vuole approssimare $f(x)$ con un certo valore desiderato $d$ che è il target ($d = \mathit{true}\ f+ \mathit{noise}$), riducendo al minimo la \textit{funzione di rischio}:
+\[R = \int L (d, h (x)) dP (x, d)\]
+\noindent Dato
+\begin{itemize}
+	\item un valore dall'insegnante ($d$) e una distribuzione di probabilità $P (x, d)$;
+	\item una funzione di loss (o costo), ad es.\ $L (h (x), d) = (d - h (x))^2$;
+\end{itemize}
+
+\noindent si cerca $h \in H$ che minimizzi R avendo solo l'insieme di dati finito $TR = (x_p, d_p),\ p = 1.. . l $.\
+
+\vspace{12pt}
+\noindent Quindi si cerca $h$ che minimizzi il rischio empirico (\textbf{errore di training \textit{E}}), trovando i valori migliori per i parametri liberi del modello
+\[R_{emp} = \frac{1}{l} \sum_{p=1}^l(d_p - h (x_p))^2\]
+Principio induttivo di minimizzazione del rischio emprico (ERM).\
+
+\begin{center}
+	\textit{Possiamo usare $R_{emp}$ per approssimare $R$?}
+\end{center}
+
+\noindent Dato \textit{VC-dim} ($VC$), una misura di \textit{complessità} di $H$ (\textit{flessibilità per adattare i dati}), ad esempio il numero di parametri per modelli lineari/polinomi.\
+
+\subsection{Vapnik-Chervonenkis-dim e SLT}
+
+\textit{VC-bounds nella forma}:\ con probabilità $1-\delta$ vale che
+\[R \leq R_{emp} + \varepsilon \left(\frac{1}{l}, \mathit{VC}, \frac{1}{\delta}\right)\]
+
+\noindent Prima spiegazione (di base):
+
+\begin{itemize}
+	\item $\varepsilon$ è una funzione direttamente proporzionale a $\mathit{VC}$ (\textit{VC-dim}), inversamente proporzionale a $l$ e $\delta$.
+	\item Sappiamo che $R_{emp}$ diminuisce utilizzando modelli complessi (con \textit{VC-dim} elevato).
+	\item $\delta$ è la confidenza, regola la probabilità che il limite sia valido (es.\ $\delta$ basso 0,01, vale con probabilità 0,99).
+\end{itemize}
+
+\noindent Ora possiamo vedere come si può ``spiegare'' l'\textit{underfitting} e l'\textit{overfitting} e gli aspetti che li controllano:
+
+\begin{itemize}
+	\item Maggiore $l$ (dati) $\rightarrow$ \textit{VC-confidence} ($\varepsilon$) diminuisce e il limite tende a $R$.
+	\item Un modello troppo semplice (VC-dim basso) può non essere sufficiente a causa dell'alto $R_{emp}$ (\textit{underfitting}).
+	\item VC-dim più alto (fix $l$) $\rightarrow$ $R_{emp}$ inferiore ma \textit{VC-confidence}, e quindi $R$, può aumentare (\textit{overfitting}).
+\end{itemize}
+
+\noindent Lo Statistical Learning Theory (SLT) permette l'inquadramento formale del problema della generalizzazione e dell'underfitting{\slash}overfitting, fornendo limitazioni superiori analitiche e quantitative al rischio $R$ di predizione su tutti i dati, indipendentemente dal tipo di learning algorithm o dai dettagli del modello.\
+
+Il ML è ben fondato:\ il rischio del learning (e l'errore di generalizzazione) può essere analiticamente limitato e solo pochi concetti sono fondamentali.\
+Si può trovare un buona approssimazione della $f$ target da esempi, pur di avere un buon numero di dati e un'adeguata complessità del modello (misurabile formalmente con la VC-dim).\
+
+L'SLT porta a nuovi modelli (SVM) (e altri metodi che direttamente considerino il controllo della complessità nella costruzione del modello) e fonda uno dei principi induttivi sul controllo della complessità.\

@@ -1,0 +1,201 @@
+\chapter{Il modello relazionale}
+
+Proposto da \textbf{E.\ F.\ Codd} nel \textbf{1970} per favorire l'indipendenza dei dati.\
+Disponibile in DBMS reali nel \textbf{1981} (non è facile implementare l'indipendenza con efficienza e affidabilità!).\
+Si basa sul concetto matematico di \textbf{relazione} (con una variante).\
+Le relazioni hanno naturale rappresentazione per mezzo di \textbf{tabelle}.
+
+\noindent \textbf{Relazione matematica}:\ come nella teoria degli insiemi.
+\begin{center}
+	$D_1, \dots, D_n$ (\textit{n} insiemi anche non distinti)
+\end{center}
+\textbf{Prodotto cartesiano} $D_1 \times \dots \times D_n$:
+\begin{center}
+	l'insieme di tutte le \textit{n-uple} \textit{(d\textsubscript{1} , \dots, d\textsubscript{n})} tali che $d_1 \in D_1 , \dots, d_n \in D_n$
+\end{center}
+\textbf{Relazione matematica} su $D_1, \dots, D_n$:
+\begin{center}
+	un sottoinsieme di $D_1 \times \dots \times D_n$
+\end{center}
+$D_1, \dots, D_n$ sono i \textbf{domini} della relazione.
+
+\textbf{Osservazione}:\ una relazione è un insieme quindi
+\begin{itemize}
+	\item non c'è ordinamento fra le \textit{n}-uple;
+	\item le \textit{n}-uple sono distinte;
+	\item ciascuna \textit{n}-upla è ordinata, l'\textit{i}-esimo valore proviene dall'\textit{i}-esimo dominio.
+\end{itemize}
+
+\subsubsection{Tabelle e relazioni}
+
+Una tabella rappresenta una \textbf{relazione} se i valori di ogni colonna sono fra loro omogenei e se le righe e le intestazioni delle colonne sono diverse fra loro.
+
+In una tabella che rappresenta una relazione l'ordinamento tra le righe e l'ordinamento tra le colonne sono irrilevanti.
+
+\subsubsection{Modello basato su valori}
+
+Il \textbf{modello relazionale è basato su valori}.\
+Ciò significa che i riferimenti fra dati in relazioni diverse sono rappresentati per mezzo di valori dei domini che compaiono nelle ennuple.
+
+\subsubsection{Vantaggi della struttura basata su valori}
+\begin{itemize}
+	\item \textbf{Indipendenza dalle strutture fisiche} (si potrebbe avere anche con puntatori di alto livello) che possono cambiare dinamicamente.\ La rappresentazione logica dei dati (costituita dai soli valori) non fa riferimento a quella fisica.
+	\item Si rappresenta solo ciò che è \textbf{rilevante} dal punto di vista dell'applicazione.
+	\item I dati sono \textbf{portabili} più facilmente da un sistema ad un altro.
+	\item I \textbf{puntatori sono direzionali}.
+\end{itemize}
+
+\section{Il modello relazionale}
+
+\begin{definition}
+	I meccanismi per definire una base di dati con il modello relazionale sono l'\textbf{ennupla} e la \textbf{relazione}.\
+\end{definition}
+
+\noindent Un \textbf{tipo ennupla} T è un insieme finito di coppie \[\langle\mathtt{Attributo, Tipo\ elementare}\rangle\]
+Se $T$ è un tipo ennupla, $R(T)$ è \textbf{lo schema della relazione \textit{R}}; lo schema di una base di dati è un insieme di schemi di relazione $R_i(T_i)$.\
+Un'\textbf{istanza} di uno schema $R(T)$ è un insieme finito di ennuple di tipo $T$.
+
+Uguaglianza di due tipi ennupla, due ennuple, due tipi relazione.
+
+\subsubsection{Informazione incompleta}
+
+Il modello relazionale impone ai dati una struttura rigida:\ le informazioni sono rappresentate per mezzo di ennuple, ma solo alcuni formati di ennuple sono ammessi, cioè quelli che corrispondono agli schemi di relazione.
+
+\textbf{Valore nullo}:\ denota l'assenza di un valore del dominio (e non è un valore del dominio).\
+\texttt{t[A]}, per ogni attributo $A$, è un valore del dominio $dom(A)$ oppure il valore nullo \texttt{NULL}.\
+Si possono (e devono) imporre restrizioni sulla presenza di valori nulli.
+
+\subsection{Vincoli di integrità}
+
+Esistono istanze di basi di dati che, pur sintatticamente corrette, non rappresentano informazioni possibili per l'applicazione di interesse e che quindi generano informazioni senza significato.
+
+Uno \textbf{schema relazionale} è costituito da un insieme di \textbf{schemi di relazione} e da un \textbf{insieme di vincoli} d'integrità sui possibili valori delle estensioni delle relazioni.\
+Un \textbf{vincolo d'integrità} è una proprietà che deve essere soddisfatta dalle istanze che rappresentano informazioni corrette per l'applicazione.\
+Un vincolo è espresso mediante una funzione booleana (un predicato):\ associa ad ogni istanza il valore vero o falso.
+
+\noindent Perché usare i vincoli di integrità?
+\begin{itemize}
+	\item Descrizione più accurata della realtà.
+	\item Contributo alla ``qualità dei dati''.
+	\item Utili nella progettazione.
+	\item Usati dai DBMS nella esecuzione delle interrogazioni.
+	\item Non tutte le proprietà di interesse sono rappresentabili per mezzo di vincoli formulabili in modo esplicito.
+\end{itemize}
+
+\subsubsection{Tipi di vincoli}
+
+Vincoli \textbf{intrarelazionali}:\ sono i vincoli che devono essere rispettati dai valori contenuti nella relazione considerata; vincoli su valori (o di dominio) e vincoli di ennupla.
+
+\noindent Vincoli \textbf{interrelazionali}:\
+sono i vincoli che devono essere rispettati da valori contenuti in relazioni diverse.
+
+\subsubsection{Vincoli di ennupla}
+
+I \textbf{Vincoli di ennupla} esprimono condizioni sui valori di ciascuna ennupla, indipendentemente dalle altre ennuple.\
+\textbf{Vincoli di dominio}:\ caso particolare, coinvolgono un solo attributo.
+
+\subsection{Chiave}
+
+\textbf{Informalmente}:\ una \textbf{chiave} è un insieme di attributi che identifica le ennuple di una relazione.\
+
+\noindent\textbf{Formalmente}:\ un insieme $K$ di attributi è \textbf{superchiave} per $r$ se $r$ non contiene due ennuple (distinte) $t_1\ \mathrm{e}\ t_2\ \mathrm{con}\ t_1[K] = t_2[K]$.\
+$K$ è \textbf{chiave} per $r$ se è una superchiave minimale per $r$ (cioè non contiene un'altra superchiave).
+
+\subsubsection{Esistenza delle chiavi}
+
+Una relazione non può contenere ennuple distinte ma con valori uguali (una relazione è un sottoinsieme del prodotto cartesiano).\
+Ogni relazione ha \textit{sicuramente} come \textbf{superchiave} l'insieme di tutti gli attributi su cui è definita e quindi ogni relazione \textit{ha (almeno) una chiave}.\
+L'esistenza delle chiavi garantisce l'accessibilità a ciascun dato della base di dati.\
+Le chiavi permettono di correlare i dati in relazioni diverse:
+\begin{center}
+	il modello relazionale è basato su valori
+\end{center}
+La presenza di valori nulli fra i valori di una chiave non permette di identificare le ennuple e di realizzare facilmente i riferimenti da altre relazioni.
+
+Una \textbf{chiave primaria} è una chiave su cui non sono ammessi valori nulli.
+
+\subsection{Integrità referenziale}
+
+Nel modello relazionale le informazioni in relazioni diverse sono correlate attraverso valori comuni, in particolare vengono spesso presi in considerazione i valori delle chiavi (primarie).\
+
+Le correlazioni debbono essere ``coerenti''.
+
+\subsubsection{Vincolo di integrità referenziale}
+
+Un vincolo di \textbf{integrità referenziale} (``\textbf{foreign key}'') fra gli attributi X di una relazione $R_1$ e un'altra relazione $R_2$ impone ai valori su $X$ in $R_1$ di comparire come valori della chiave primaria di $R_2$.
+
+\section{Trasformazione di schemi}
+
+\subsection{Progettazione logica relazionale}
+
+Si tratta di ``\textit{tradurre}'' lo schema concettuale in uno schema logico relazionale che rappresenti gli stessi dati in maniera \textbf{corretta} ed \textbf{efficiente}; questo richiede una ristrutturazione del modello concettuale.
+
+La trasformazione di uno schema ad oggetti in uno schema relazionale avviene eseguendo i seguenti passi:
+
+\begin{enumerate}
+	\item rappresentazione delle associazioni uno ad uno e uno a molti;
+	\item rappresentazione delle associazioni molti a molti o non binarie;
+	\item rappresentazione delle gerarchie di inclusione;
+	\item identificazione delle chiavi primarie;
+	\item rappresentazione degli attributi multivalore;
+	\item appiattimento degli attributi composti.
+\end{enumerate}
+Obiettivo:
+\begin{itemize}
+	\item rappresentare le stesse informazioni;
+	\item \textbf{minimizzare la ridondanza};
+	\item produrre uno schema comprensibile, per facilitare la scrittura e manutenzione delle applicazioni.
+\end{itemize}
+
+\subsection{Rappresentazione delle associazioni uno a molti}
+
+Le associazioni uno a molti si rappresentano aggiungendo agli attributi della relazione rispetto a cui l'associazione è univoca una chiave esterna che riferisce l'altra relazione.
+
+\subsection{Rappresentazione delle associazioni uno ad uno}
+
+Le associazioni uno a uno si rappresentano aggiungendo la chiave esterna ad una qualunque delle due relazioni che riferisce l'altra relazione, preferendo quella rispetto a cui l'associazione è \textbf{totale}, nel caso in cui esista un vincolo di totalità.\
+
+\subsection{Vincoli sulla cardinalità delle associazioni uno a molti e uno ad uno}
+
+La direzione dell'associazione rappresentata dalla chiave esterna è detta ``\textit{la diretta}'' dell'associazione.\
+Vincoli sulla cardinalità delle associazioni uno a molti ed uno ad uno:
+\begin{itemize}
+	\item \textbf{univocità della diretta};
+	\item \textbf{totalità della diretta}:\ si rappresenta imponendo un vincolo \texttt{not null} sulla chiave esterna;
+	\item \textbf{univocità dell'inversa} e \textbf{totalità della diretta}:\ si rappresenta imponendo un vincolo not null ed un vincolo di chiave sulla chiave esterna.
+\end{itemize}
+
+\subsection{Rappresentazione delle associazioni molti a molti}
+
+Un'associazione molti a molti tra due classi si rappresenta aggiungendo allo schema una nuova relazione che contiene due chiavi esterne che riferiscono le due relazioni coinvolte; la chiave primaria di questa relazione è costituita dall'insieme di tutti i suoi attributi.
+
+\subsection{Rappresentazione delle gerarchie fra classi}
+
+Il modello relazionale non può rappresentare direttamente le gerarchie, bisogna eliminarle, sostituirle con classi e
+relazioni:
+\begin{enumerate}
+	\item accorpamento delle figlie della gerarchia nel genitore (\textbf{relazione unica});
+	\item accorpamento del genitore della gerarchia nelle figlie (\textbf{partizionamen\-to orizzontale});
+	\item sostituzione della gerarchia con relazioni (\textbf{partizionamento verticale}).
+\end{enumerate}
+
+\subsubsection{Accorpamento delle figlie della gerarchia nel genitore}
+
+Se $A_{0}$ è la classe genitore di $A_{1}$ ed $A_{2}$, le classi $A_{1}$ ed $A_{2}$ vengono eliminate ed accorpate ad $A_{0}$.\
+Ad $A_{0}$ viene aggiunto un \textbf{attributo} (\textit{discriminatore}) che indica da quale delle classi figlie deriva una certa istanza, e gli \textbf{attributi di \textit{A\textsubscript{1}} ed \textit{A\textsubscript{2}}} vengono assorbiti dalla classe genitore, e assumono valore nullo sulle istanze provenienti dall'altra classe.
+
+Infine, una \textbf{relazione relativa a solo una delle classi figlie} viene acquisita dalla classe genitore e avrà comunque cardinalità minima uguale a 0, in quanto gli elementi dell'altra classe non contribuiscono alla relazione.
+
+\subsubsection{Accorpamento del genitore della gerarchia nelle figlie }
+
+La classe genitore $A_{0}$ viene eliminata e le classi figlie $A_{1}$ ed $A_{2}$ ereditano le proprietà (attributi, identificatore e relazioni) della classe genitore.\
+Le relazioni che coinvolgono la classe genitore vengono sdoppiate, coinvolgendo ciascuna delle classe figlie.\
+
+Il partizionamento orizzontale divide gli elementi della superclasse in più relazioni diverse, per cui \textit{non è possibile mantenere un vincolo referenziale verso la superclasse stessa}; in conclusione, questa tecnica non si usa se nello schema relazionale grafico c'è una freccia che entra nella superclasse;
+
+\subsubsection{Sostituzione della gerarchia con relazioni}
+La gerarchia si trasforma in due associazioni uno a uno che legano rispettivamente la classe genitore con le classi figlie.\
+In questo caso non c'è un trasferimento di attributi o di associazioni e le classi figlie $A_{1}$ ed $A_{2}$ sono identificate esternamente dalla classe genitore $A_{0}$.
+
+Nello schema ottenuto vanno aggiunti dei vincoli:\ ogni occorrenza di $A_{0}$ non può partecipare contemporaneamente alle due associazioni, e se la gerarchia è totale, deve partecipare ad almeno una delle due.\
+

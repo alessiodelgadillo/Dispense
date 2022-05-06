@@ -1,0 +1,219 @@
+\chapter{Monitoraggio del flusso}
+
+\section{Real-Time Flow Measurement (RTFM)}
+
+Misuratore molto flessibile e potente:\ contiene una serie di regole programmabili e può servire diversi lettori.\
+È possibile anche programmare un comportamento da seguire in caso di sovraccarico.\
+
+Il lettore interroga il contatore, il quale è implementato da SNMP Meter MIB.\
+Implementazione software gratuita NeTraMet, tuttavia non è stato accettato da parte dei produttori perché era complicato da usare (troppo potente).\
+Specificato da RFC 2720-2724.
+
+\subsubsection{SNMP vs.\ Network Flows}
+
+SNMP si basa sul paradigma manager-agent:\ l'agente monitora la rete e informa il gestore (tramite \texttt{trap}) quando è accaduto qualcosa di importante (ad esempio l'interfaccia ha cambiato stato), mentre il manager mantiene lo stato dell'intero sistema leggendo periodicamente (polling) variabili (ad es.\ tramite SNMP \texttt{get}) dall'agent.\
+Le variabili SNMP possono essere utilizzate sia per la gestione di elementi{\slash}dispositivi{\slash}sistema (ad es.\ informazioni su spazio su disco e partizioni) sia per il monitoraggio del traffico.
+
+I flussi di rete vengono emessi da una sonda verso uno o più collettori a seconda delle condizioni di traffico.\
+
+\begin{itemize}
+    \item I flussi contengono informazioni sul traffico analizzato (non contengono informazioni sul dispositivo/sonda come le variabili MIB II).\
+    \item I flussi immessi hanno un formato ben definito (ad esempio Cisco NetFlow v5) e spesso utilizzano UDP come trasporto (nessun protocollo specializzato come SNMP).
+    \item Nessun concetto di flussi di ``allarme'', né capacità della sonda di eseguire azioni basate sui flussi:\ tutta l'intelligenza è nel collettore.\
+    \item La strumentazione della sonda viene eseguita offline.\
+    \item Le sonde vengono attivate nel punto in cui scorre il traffico di rete (ad es.\ all'interno di router e switch).
+\end{itemize}
+
+\begin{center}
+    \textit{Cosa bisogna aspettarsi con la misurazione dei flussi}?
+\end{center}
+
+\noindent È possibile conoscere quali sono gli indirizzi IP/ASN più contattati, il tipo e la quantità del traffico (SMTP, Web, condivisione file, ecc.), i servizi che sono in esecuzione, riepiloghi sul traffico a livello di reparto, rintracciare i virus basati sulla rete sull'host, trovare (per esempio) i 100 server più contattati, trovare gli host più occupati,\ \dots
+
+\begin{center}
+    \textit{Cosa non è possibile misurare con i flussi}?
+\end{center}
+
+\noindent Traffico non IP (ad esempio NetBIOS, AppleTalk), informazioni di livello 2 (ad es.\ modifiche dello stato dell'interfaccia), traffico filtrato (ad es.\ contatori dei criteri del firewall), statistiche per collegamento (ad es.\ utilizzo del collegamento, congestione, ritardo, perdita di pacchetti), statistiche dell'applicazione (ad es.\ latenza delle transazioni, numero di risposte positive/negative, errori di protocollo),\ \dots
+
+\subsection{Cosa è un flusso di rete?}
+
+Un flusso è un insieme di pacchetti che hanno un insieme di proprietà comuni, ad esempio indirizzo IP/porta comune.\
+Un flusso viene (messo in coda per essere) emesso solo quando è scaduto.\
+
+\subsubsection{Contenuto dei flussi di rete}
+
+Un flusso contiene:
+\begin{itemize}
+    \item Peers:\ origine e destinazione del flusso.
+    \item Counters:\ pacchetti, byte, tempo.
+    \item Informazioni sul percorso:\ AS, maschera di rete, interfacce.
+\end{itemize}
+
+\noindent I flussi possono essere unidirezionali (impostazione predefinita) o bidirezionali (solo v9/IPFIX); due flussi unidirezionali opposti equivalgono a un flusso bidirezionale.\
+I flussi bidirezionali possono contenere altre informazioni come il tempo di andata e ritorno, il comportamento del TCP,\ \dots
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|}
+        \hline
+        \multicolumn{1}{|c|}{\textbf{Overhead} vs.\ \textbf{Accuracy}}               \\\hline\hline
+        Più risultati di misurazione in più dati raccolti.                           \\
+        Maggiore aggregazione del flusso, minore granularità.                        \\
+        Overhead (ad es.\ carico della CPU) su router, switch, host finali.          \\\hline
+        \multicolumn{1}{c}{}                                                         \\\hline
+        \multicolumn{1}{|c|}{\textbf{Sicurezza} vs.\ \textbf{Condivisione dei dati}} \\\hline\hline
+        I flussi emessi devono raggiungere i collettori su percorsi protetti         \\
+        \quad(ad esempio utilizzando una rete/VLAN diversa).                         \\
+        La privacy dell'utente deve essere rispettata.                               \\
+        Le misurazioni del traffico devono essere protette per non divulgare         \\
+        \quad importanti informazioni sulla rete a terzi.                            \\\hline
+    \end{tabular}
+\end{table}
+
+\subsection{NetFlow Architecture}
+
+I flussi vengono esportati (push) dalla sonda quando scaduti, contrariamente a SNMP in cui il manager interroga periodicamente l'agente.\
+Il protocollo di trasporto del flusso è NetFlow (no SNMP) e il protocollo di configurazione sonda/collector non è specificato dal protocollo NetFlow.\
+
+Il raccoglitore NetFlow ha il compito di assemblare e comprendere i flussi esportati e combinarli o aggregarli per produrre i preziosi report utilizzati per l'analisi del traffico e della sicurezza.\
+
+\subsubsection{Collection Architecture}
+
+È buona norma avere più router di frontiera (ad esempio per disaster recovery) e tipicamente i collettori vengono installati vicino a tali router.\
+Inoltre si cerca di collezionare i dati in modo tale da non influenzare la rete, per esempio sincronizzando i dati verso una struttura centrale di sera (quando c'è meno traffico), o da non essere influenzati:\ se si usa UDP per la sincronizzazione, in caso di congestione di rete, i pacchetti trasmessi vengono persi.
+
+In caso di reti complesse, è probabile che all'interno vi siano diversi router; per evitare di conteggiare più volte lo stesso traffico (\textit{deduplicazione}) nei router interni si conta il traffico solo in una direzione mentre in quelli di frontiera si conta in entrambe.
+
+Limiti dello spazio di raccolta:\ dipende dal traffico.
+
+\subsubsection{Using Flows}
+
+Nel flusso troviamo i contatori dei pacchetti e dei byte, fondamentali per calcolare l'uso di una rete.\
+Sono presenti l'ora di inizio e l'ora di fine; ci sono gli indici delle interfacce (informazione che si poteva ottenere anche tramite SNMP, ma che prima non poteva essere caratterizzata).\
+Inoltre sono presenti informazioni relative alla qualità del servizio (QoS), agli indirizzi IP (sorgente e destinazione), alle porte (sorgente/destinazione e TCP/UDP) e di routing (next hop, AS sorgente e destinazione,\ \dots).
+
+\subsection{Nozioni di base su Cisco NetFlow}
+
+Diverse versioni v 1,5,6,7,8,9.\
+La più comune è la v5, l'ultima è la v9.\
+Ogni versione ha il proprio formato di pacchetto:\ v1,5,6,7,8 hanno un formato fisso/chiuso, specificato, invece il formato della v9 è dinamico e aperto alle estensioni.\
+La v1 non ha numeri di sequenza (nessun modo per rilevare i flussi persi), v5,6,7,8 hanno numeri di sequenza di flusso (cioè tengono traccia del numero di flussi emessi), mentre v9 ha un numero di sequenza di pacchetti (non di flusso), quindi è facile conoscere il numero di pacchetti persi, ma non dei flussi persi.\
+La ``versione'' definisce il tipo di dati nel flusso.\
+
+Analisi del traffico solo sul traffico in entrata (ovvero il traffico che entra nel router) solo IP (non su tutte le piattaforme).\
+Flussi unidirezionali (fino a v8), bidirezionali su v9.\
+IPv4 unicast e multicast:\ tutte le versioni di NetFlow; IPv6 è supportato solo dalla v9.\
+
+Protocollo aperto definito da Cisco e supportato su piattaforme IOS e CatIOS (nessun supporto NetFlow sui firewall PIX) e su piattaforme Cisco (ad esempio Juniper, Extreme).
+
+\subsubsection{Nascita e morte di un flusso}
+
+Ogni pacchetto che viene \textit{inoltrato} all'interno di un router, o di uno switch di terzo livello, viene esaminato per un insieme di attributi del pacchetto IP.\
+Tutti i pacchetti con lo \textit{stesso} indirizzo IP di origine/destinazione, porte di origine/destinazione e interfaccia di protocollo vengono raggruppati in un flusso e quindi vengono conteggiati i pacchetti e i byte.\
+I flussi attivi vengono archiviati in memoria nella cosiddetta \textbf{cache NetFlow}.\
+
+I flussi vengono terminati quando viene soddisfatta una di queste condizioni:
+\begin{itemize}
+    \item La comunicazione di rete è terminata (ad es.\ un pacchetto contiene il flag TCP \texttt{FIN}).
+    \item Il flusso è durato troppo a lungo (impostazione predefinita 30 min).
+    \item Il flusso non è stato attivo (ovvero non sono stati ricevuti nuovi pacchetti) per troppo tempo (impostazione predefinita 15 sec).
+    \item La cache del flusso era piena e il gestore della cache ha dovuto eliminare i dati.
+\end{itemize}
+
+\noindent \textbf{Nota}:\ la cache dei flussi ha una dimensione limitata, quindi spesso non è possibile memorizzare tutti i flussi.\
+
+La cache di NetFlow si riempie costantemente di flussi e il software nel router, o nello switch, cerca nella cache i flussi che sono terminati o scaduti e questi flussi vengono esportati sul server di raccolta NetFlow; di conseguenza  i flussi di rete possono essere suddivisi in più flussi netflow che, se necessario, vengono riassemblati dal collettore di flusso.\
+
+\subsubsection{Formato dei pacchetti}
+
+Come detto in precedenza, esistono principalmente due versioni di NetFlow (le altre non sono molto diffuse); la v5 è quella che storicamente è stata la più diffusa, tuttavia oggi sta diventando più comune la versione 9 a causa del suo supporto a IPv6 (la v5 manca anche del supporto alle VLAN).\
+
+In un pacchetto NetFlow v5 è possibile inviare al massimo 30 flussi per mantenere la sua dimensione sotto $\sim 1480$ bytes e di conseguenza evitare la frammentazione.\
+Quando un flusso è terminato, la sonda lo tiene in memoria per un certo periodo di tempo per aspettare altri potenziali flussi; dopo tale lasso di tempo, il flusso viene mandato lo stesso.
+
+I formati fissi (v1-v8) per l'esportazione sono:
+\begin{itemize}
+    \item Facile da implementare.
+    \item Consuma poca larghezza di banda.
+    \item Facile da decifrare al collettore.
+    \item Non flessibile (mancano le informazioni sulle porte di TCP, UDP e ICMP).
+    \item Non estensibile (nessun modo per estendere il flusso a meno che non sia definita una nuova versione).
+    \item Mancano alcune funzionalità:\ L2, VLAN, IPv6, MPLS.
+\end{itemize}
+
+\subsection{Principi di NetFlow v9}
+
+Protocollo aperto (non proprietario) definito da Cisco nell'RFC 3954.\
+I dati sono stati suddivisi in template e record:\ un template è composto da tipo e lunghezza, mentre un record composto da ID modello e valore.\
+I template vengono inviati periodicamente e sono un prerequisito per la decodifica dei record di flusso; i record di flusso, invece, contengono il flusso vero e proprio.\
+
+Esistono anche gli option template e gli option record, i quali contengono la configurazione della sonda (ad es.\ velocità di campionamento del pacchetto/flusso, contatori di pacchetti dell'interfaccia).\
+
+Come nelle versioni precedenti il modello di esportazione è di tipo push:\ quando la sonda decide che ci sono dati da inviare, li invia.\
+Inoltre la sonda manda regolarmente template (per evitare i casi in cui il collezionatore sia stato avviato dopo la sonda).\
+
+La v9 è indipendente dal protocollo sottostante e quindi è pronta per qualsiasi protocollo affidabile; può inviare sia il modello che il record di flusso in un'unica esportazione e può intercalare diversi record di flusso in un pacchetto di esportazione.\
+
+Anche NetFlow v9 è unidirezionale, però tramite i template è possibile configurarlo in modo che sia bidirezionale.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|c|c|}
+
+        \multicolumn{3}{c}{\textbf{NetFlow v5 vs.\ 9}}                   \\\hline
+                   & v5               & v9                               \\\hline
+        Flow       & Format Fixed     & User Defined                     \\
+        Extensible & No               & Yes (Define new  FlowSet Fields) \\
+        Flow Type  & Unidirectional   & Bidirectional                    \\
+        Flow Size  & 48 Bytes (fixed) & It depends on the format         \\
+        IPv6 Aware & No               & IP v4/v6                         \\
+        MPLS/VLAN  & No               & Yes                              \\\hline
+    \end{tabular}
+\end{table}
+
+\subsection{IPFIX}
+
+Obiettivo:\ trovare o sviluppare una tecnologia di misurazione del flusso di traffico IP di base e comune da rendere disponibile su (quasi) tutti i router futuri.\
+
+IPFIX è fortemente basato su NetFlow v9, ma ha la capacità di definire nuovi campi di flusso utilizzando un formato standard (OID).\
+I messaggi sfruttano un trasporto basato su SCTP (Stream Control Transport Protocol), ma opzionalmente supportano anche UDP/TCP.\
+
+Attualmente è una bozza di specifica del protocollo e in conclusione non è altro che che NetFlow v9 su SCTP con qualche differenza.
+
+\subsection{Aggregazione e filtraggio}
+
+\subsubsection{Aggregazione dei flussi}
+
+NetFlow/IPFIX offre la possibilità di aggregare flussi:\ quando vengono esportati, possono essere inviati a quintupletta \[\langle \mathtt{srcIP}, \mathtt{dstIP}, \mathtt{Proto}, \mathtt{srcPort}, \mathtt{dstPort}\rangle\] oppure possono essere mandati aggregati.\
+Lo stesso flusso può essere aggregato più volte utilizzando criteri diversi, ad esempio da flussi grezzi è possibile generare:\ un elenco dei protocolli, una matrice di conversazione (chi sta parlando con chi) e le porte TCP/UDP più utilizzate.\
+Il flusso di aggregazione anticipato può far risparmiare tempo/memoria rispetto all'aggregazione tardiva, ad esempio, la matrice di conversazione (chi parla con chi) è molto più facile da implementare aggregando i dati sulla sonda invece di utilizzare flussi grezzi/non aggregati.\
+
+I flussi possono essere aggregati utilizzando criteri ``esterni'' e non solo in base a campi di flusso non elaborati.\
+Di solito questi criteri esterni vengono applicati ai campi ``chiave'' (non ``valore'') come porta, indirizzo IP, protocollo,\ \dots\ e sono utilizzati per raggruppare i valori.\
+I criteri vengono aggiunti (non sostituiti) ai campi esistenti.
+
+L'aggregazione può essere eseguita dalla sonda, dal collettore o da entrambi:\ l'aggregazione della sonda è molto efficace in termini di utilizzo delle risorse e traffico del flusso di rete, mentre l'aggregazione dei collettori è più potente (ad es.\ flussi aggregati prodotti da diverse sonde), ma piuttosto costosa (riceve tutto l'aggregato).
+
+\subsubsection{Filtraggio dei flussi}
+
+Filtrare i flussi significa scartare i flussi in base ad alcuni criteri come durata del flusso (si scartano i flussi che sono durati meno di $x$ secondi), sorgente e/o destinazione del flusso (ignora i flussi contenenti indirizzi di broadcast) o porte del flusso (ignora i flussi originati dalla porta $x$).\
+Si noti che:\
+\begin{itemize}
+    \item filtraggo $\neq$ aggregazione $\rightarrow$ fanno due lavori diversi;
+    \item il filtraggio e l'aggregazione possono coesistere;
+    \item il filtraggio viene solitamente applicato prima dell'aggregazione dei flussi e non dopo.
+\end{itemize}
+
+\subsection{Flussi e sicurezza}
+
+NetFlow/IPFIX può essere utilizzato per la sicurezza e non solo per la contabilità del traffico:\ rilevare portscan/portmap, rilevare attività su porte sospette o identificare le fonti di spam, come server non autorizzati.
+
+Semplice sistema per identificare intrusioni basato sul flusso:
+\begin{itemize}
+    \item flussi con un numero eccessivo di ottetti o pacchetti (inondazioni);
+    \item sorgenti IP che contattano più di $N$ destinazioni, scansione host;
+    \item sorgenti IP che contattano più di $M$ porte di destinazione su un singolo host (per porte 0-1023), scansione delle porte.
+\end{itemize}
+
+\noindent Si noti che nonostante IPFIX abbia il supporto ai MAC address, NetFlow resta un strumento di livello tre:\ non ha visibilità degli switch, per questo è possibile utilizzare sFlow.

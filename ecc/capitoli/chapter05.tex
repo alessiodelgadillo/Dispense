@@ -1,0 +1,57 @@
+\section{Due approcci alla calcolabilità}
+
+Abbiamo visto due modelli, i quali sottolineano due punti di vista leggermente diversi e complementari per descrivere algoritmi.\
+In entrambi gli approcci, una configurazione è la coppia
+
+\begin{center}
+    (istruzione corrente, stato della memoria)
+\end{center}
+
+\noindent mentre cambia il modo con cui si interpretano le istruzioni.
+
+Nel primo punto di vista, che per semplicità chiameremo approccio \textit{hardware}, un algoritmo è una macchina in cui \textit{l'insieme delle istruzioni rappresenta l'architettura}.\
+Il fatto che il programma stesso sia considerato come una macchina può sorprendere e richiede quindi una spiegazione ulteriore, prendendo in esame le macchine di Turing.\
+In effetti, la funzione di transizione rappresenta un programma e l'hardware pare essere composto solo dal nastro e dalla testina, dotata di un meccanismo di spostamento.\
+Tuttavia, in una macchina di Turing si cabla l'intero programma:\ ogni macchina ha un numero fissato di stati e di simboli ed è completamente definita dalla sua funzione di transizione.\
+Infatti non appena cambiamo quest'ultima, definiamo una nuova macchina.\
+In altre parole, una macchina di Turing è la realizzazione di un \textit{unico} algoritmo:\ l'unica cosa che varia è il dato di ingresso.
+
+Analogamente, ogni altro modello nell'approccio hardware ha una memoria che è infinita tout court o è indefinitamente espandibile, e ogni suo elemento realizza un singolo algoritmo.\
+Più in generale, può addirittura accadere che si usino macchine via via più grandi al crescere delle dimensioni del problema, che però sono tra loro simili o uniformi (si veda la cosiddetta ``circuit complexity''); vedremo un esempio di quanto detto subito prima della dimostrazione del teorema di Cook, in particolare quando useremo quella che viene detta tabella di computazione di una macchina di Turing (vedi pagina 107).\
+
+L'approccio software vede invece un algoritmo come un programma ``interpretato'' da un agente di calcolo, esso stesso una macchina (vedi il teorema di enumerazione \ref{teo-enumerazione}), che può essere realizzata in:
+
+\begin{itemize}
+    \item hardware (o firmware):\ la macchina fisica su cui ``gira'';
+    \item software, cioè un programma a più basso livello:\ la macchina astratta che lo ``esegue''.
+\end{itemize}
+
+\noindent Anche in questo caso, la configurazione della macchina è, come prima, formata dalla coppia costituita da un puntatore all'istruzione corrente e dallo stato della memoria.\
+A differenza dell'approccio hardware, qui i programmi \textit{non} sono parte integrante della macchina, ma sono contenuti nella memoria (cf.\ ancora il teorema \ref{teo-enumerazione}).\
+Di conseguenza, programmi più lunghi \textit{non} richiedono agenti di calcolo di dimensioni maggiori:\ l'agente di calcolo o l'interprete è fisso e non cambiano solo i dati di ingresso, ma anche i programmi.\
+
+Tra i formalismi visti, i programmi \textit{\footnotesize WHILE} hanno proprio quest'ultima
+caratteristica:\ l'interprete è (una qualunque realizzazione del)la semantica del linguaggio, la memoria è infinita, modellata attraverso la funzione $\sigma$, il contatore istruzioni è rappresentato dal programma che dobbiamo ancora eseguire (quest'ultimo punto è particolarmente evidente nell'approccio SOS alla semantica operazionale).\
+
+Introdurremo tra poco un terzo formalismo, da ascrivere tra quelli software:\ quello delle funzioni ricorsive, il quale è molto rilevante sia in informatica che nella teoria della calcolabilità classica, tanto che a volte questa è chiamata teoria delle \textit{funzioni ricorsive}.\
+Uso e ragione per l'introduzione dei tre principali formalismi che vedremo sono elencati qui sotto.
+
+\begin{itemize}
+    \item Funzioni Ricorsive \hfill \textit{\footnotesize CHIAREZZA}
+
+          Sono la base per:\ Programmazione Funzionale; Semantica Denotazionale.
+
+    \item Programmi \textit{\footnotesize WHILE/FOR} \hfill \textit{\footnotesize FAMILIARITÀ}
+
+          Sono la base per:\ Programmazione Imperativa; Semantica Operazionale; Complessità (Loop Programs).
+
+    \item  Macchine di Turing \hfill \textit{\footnotesize SEMPLICITÀ}
+
+          Sono la base per:\ Descrizione Macchine; Algoritmi; Complessità.
+\end{itemize}
+
+\noindent Come già detto, i primi due paradigmi si possono classificare nell'approccio software, mentre il terzo è un paradigma più vicino all'hardware.\
+Questa distinzione è largamente arbitraria e formalmente vaga, ma può spiegare perché vi siano differenti presentazioni della materia; inoltre può apparire sfuggente a questo punto del corso, ma verrà auspicabilmente chiarita nella sua seconda parte, ad esempio discutendo il già citato teorema di Cook.
+
+Ovviamente tutta la trattazione che segue potrebbe essere basata su uno qualunque di questi formalismi, e su altri ancora che non abbiamo menzionato, tra cui ad esempio le grammatiche e sistemi di Post, gli algoritmi di Markov, il  $\lambda$-calcolo, le macchine a registri (che vedremo di sfuggita), e molti altri ancora.\
+Ciascuno di essi chiarisce in maggiore o minore misura i vari aspetti che andremo a considerare nel seguito senza per altro definire classi diverse di funzioni calcolabili o classi di complessità, come abbiamo già più volte ripetuto.

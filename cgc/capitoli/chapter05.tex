@@ -1,0 +1,152 @@
+\chapter{FaaS}
+
+Il meccanismo di ``\textit{Function as a Service}'', o \textbf{FaaS}, conosciuto anche come ``\textit{serverless}\footnote{\textbf{Serverless} indica il fatto che la gestione del server è trasparente a chi ne usufruisce.} computing'', ha avuto molto successo nel mondo dell'ICT e dello sviluppo del software e molte altre compagnie hanno iniziato a offrirlo come servizio.
+
+\vspace{12pt}
+\noindent``More than 20\% of global enterprises will have deployed serverless computing technologies by 2020.'' [\texttt{Gartner, Dec 2018}]
+
+\vspace{12pt}
+\noindent``The most prominent manifestation of serverless computing is function platform ad a service, or fPaaS.\ Gartner predicts that half of global enterprises will have deployed fPaaS by 2025, up from 20\% today.'' [\texttt{Gartner, Dec 202}0]
+
+\section{AWS Lambda}
+Permette di \textbf{eseguire codice} senza eseguire il provisioning o gestire i server, il tutto \textbf{senza amministrazione}.\
+Una volta caricato il codice, \textbf{Lambda si occuperà di eseguirlo e scalarlo} con disponibilità elevata.\
+È possibile configurare il codice in modo che \textbf{si attivi automaticamente da altri servizi AWS} o chiamarlo direttamente da qualsiasi app Web o mobile.\
+\textbf{Si paga solo per il tempo di elaborazione} che si consuma.\
+
+\noindent Facile da usare:\
+\begin{itemize}
+	\item carica la tua funzione/progettala in AWS IDE/selezionala dall'elenco di esempi predefiniti;
+	\item seleziona l'origine dell'evento da monitorare (ad es.\ Bucket S3).
+\end{itemize}
+
+\noindent Poi Lambda attiva automaticamente la funzione quando si verifica un evento; gestisce tutte le capacità, la scalabilità, l'applicazione di patch e l'amministrazione dell'infrastruttura per eseguire il codice e pubblica metriche e registri in tempo reale.\
+Tutto ciò con un servizio low cost (canone basso per richiesta).\
+
+\subsubsection{Prezzo}
+
+\begin{itemize}
+	\item Richieste:\ \$0,20 per 1 milione di richieste.
+	\item Durata (dipende dalla quantità di memoria allocata alla funzione):\ \$0,0000166667 per ogni GB/sec.
+\end{itemize}
+
+\noindent Se hai assegnato 512 MB di memoria alla tua funzione, l'hai eseguita 3 milioni di volte in un mese e ha funzionato per 1 secondo ogni volta, i tuoi addebiti saranno:\
+\[3.000.000/1.000.000 \times \$0,20 = \$0,60  \]
+\[+\]
+\[ (3.000.000 \times 1) \times (512/1024) \times \$ 0,0000166667 = \$ 25,00 \]
+
+\noindent Livello di utilizzo gratuito
+
+\begin{itemize}
+	\item 1 milione di richieste gratuite al mese.
+	\item 400.000 GB/sec. di tempo di elaborazione al mese.
+\end{itemize}
+
+\noindent Se hai assegnato 512 MB di memoria alla tua funzione, l'hai eseguita 3 milioni di volte in un mese e ha funzionato per 1 secondo ogni volta, e hai avuto l'utilizzo gratuito per sfruttare le tue spese saranno:
+
+\[ (3.000.000-1.000.000)/1.000.000 \times \$ 0,20 = \$ 0,40\]
+\[+\]
+\[((3.000.000 \times 1) \times (512/1024) - 400.000) \times \$ 0,0000166667 = \$ 18,33\]
+
+\subsubsection{Perché il nome ``lambda''?}
+
+AWS Lambda prende il suo nome dal \textit{lambda calcolo}:\
+\[ \lambda x.\ f(x)\]
+
+\noindent $f$ è il supporto a tempo di esecuzione offerto da AWS, mentre \textit{x} è la funzione caricata su AWS.
+
+\section{Confronto fra 10 piattaforme FaaS}
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|l|l|}
+		\hline
+		\textbf{Commercial}    & \textbf{Open source} \\\hline\hline
+		AWS Lambda             & Apache Openwhisk     \\
+		Google Cloud Functions & Fission              \\
+		MS Azure Functions     & Fn                   \\
+		                       & Knative              \\
+		                       & Kubeless             \\
+		                       & Nuclio               \\
+		                       & OpenFaaS             \\\hline
+	\end{tabular}
+\end{table}
+
+\subsection{Business view}
+
+\subsubsection{Licensing}
+
+Tutte le piattaforme open source usano una licenza permissiva:\ quella più usata è Apache 2.0.\
+
+Tutte le piattaforme FaaS commerciali usano licenze proprietarie, con MS Azure Functions che rilascia anche alcune delle sue componenti come progetti open source.\
+
+\subsubsection{Installazione}
+
+Tra le piattaforme commerciali, solo Azure Functions ha alcune parti installabili on-premises.\
+
+Le piattaforme FaaS open source sono tutte installabili e permettono di avere una certa portabilità nell'installazione (supportano più target):\ Kubernetes è la più supportata.\
+
+\subsubsection{Codice sorgente}
+
+Tutte le piattaforme open source sono ospitate su GitHub e la maggior parte sono implementate in Go.\
+
+Azure Functions è l'unica piattaforma commerciale che è parzialmente open source.\
+
+\subsubsection{Interface}
+
+Tutte le piattaforme supportano CLI (\textit{Command Line Interface}), mentre non sempre sono disponibili le API e le GUI.\
+Per quanto riguarda l'amministrazione, quindi dal punto di vista delle operazioni che possiamo eseguire sulla piattaforma per amministrarla (deployment, configurazione, terminazione), l'offerta varia considerevolmente.
+
+\subsubsection{Community}
+
+OpenFaaS, Apache Openwhisk e Knative hanno rispettivamente i rating più alti su GitHub in termini di stars, contributori e commits.\
+Le domande su Stackoverflow mostrano una notevole differenza in interessi tra piattaforme commerciali e quelle open source.
+
+\subsubsection{Documentazione}
+
+Tutte le piattaforme forniscono la documentazione necessaria a eseguire il deployment di un'applicazione e usare la piattaforma stessa; tuttavia non sempre vengono documentati lo sviluppo e l'architettura della piattaforma.\
+
+\subsection{Technical view}
+
+\subsubsection{Development}
+
+Java, Node.js e Python sono i runtime più supportati, con Docker che sta diventando piuttosto popolare per aiutare a personalizzare i runtime.\
+La possibilità di usare IDEs e editor di testo è principalmente offerta dalle piattaforme commerciali.
+
+\subsubsection{Versioning}
+
+La maggior parte delle piattaforme open source, a differenza delle piattaforme commerciali, implementano l'implicit versioning senza offrire meccanismi dedicati.
+
+\subsubsection{Event sources}
+
+Tutte le piattaforme supportano l'invocazione sincrona di una funzione basata su HTTP, mentre le invocazioni asincrone sono supportate da poche piattaforme.\
+Più di metà delle piattaforme open source non supportano i database come sorgenti di eventi.\
+Sono ampiamente supportati meccanismi di scheduling per processare flussi di dati e messaggi.\
+Soltanto metà delle piattaforme permette di avere sorgenti di eventi personalizzate.
+
+\subsubsection{Orchestrazione delle funzioni}
+
+Più della metà delle piattaforme FaaS supporta l'orchestrazione di funzioni:\ alcune offrono dei DSL (\textit{Domanin Specific Language}) \textit{ad-hoc}, altre dei workflow.
+
+\subsubsection{Testing \& debugging}
+
+Le piattaforme commerciali offrono delle opzioni più avanzate:\ funzioni di testing e debugging integrate all'interno dell'ambiente di sviluppo.
+
+\subsubsection{Monitoraggio}
+
+Le piattaforme commerciali offrono strumenti dedicati per eseguire monitoraggio e logging delle funzioni, mentre quelle open source si affidano all'integrazione di strumenti di terze parti.
+
+\subsubsection{Application delivery}
+
+La maggior parte delle piattaforme recensite segue un approccio dichiarativo per automatizzare la distribuzione delle applicazioni.\
+Le piattaforme commerciali supportano nativamente CI/CD attraverso strumenti dedicati, mentre le piattaforme open source (a parte OpenFaasS) non documentano l'integrazione con le pipeline CI/CD.
+
+\subsubsection{Code reuse}
+
+Solo AWS Lambda e MS Azure Functions offrono un marketplace delle funzioni integrato.
+
+\subsubsection{Access management}
+
+Le piattaforme commerciali supportano nativamente autenticazione e controllo di accesso alle risorse.\
+
+Le piattaforme open source si affidano, tipicamente, alle features offerte dall'ambiente che ospita il FaaS.

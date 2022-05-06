@@ -1,0 +1,169 @@
+\section{Funzioni di misura, un po' di gerarchia e due assiomi}
+
+Prima di studiare un po' più in dettaglio le classi $\mathcal{P}$ e $\mathcal{NP}$ facciamo una rapida carrellata su alcuni risultati di complessità, che enunceremo senza dimostrare; discuteremo anche brevemente l'influsso che sulla loro validità hanno la forma e il tipo delle funzioni che limitano le risorse che sono necessarie alle macchine per risolvere un problema, per esempio delle funzioni che stimano il numero di passi e di celle necessari.\
+
+In principio, una funzione di misura $f : \mathbb{N} \rightarrow \mathbb{N}$ può essere una qualunque funzione totale, anche avere essa stessa complessità enorme.\
+Vedremo subito che funzioni di misura arbitrarie portano a risultati che sono quantomeno controintuitivi, e pertanto considereremo di seguito una classe di funzioni di misura, dette \textit{appropriate}, anche se, a prima vista, possono sembrare particolarmente limitate.\
+Intuitivamente, le funzioni appropriate non richiedono più risorse di quanto stimato dal loro stesso valore, cioè l'algoritmo che calcola $f(x)$ deve richiedere tempo $\mathcal{O}(f(|x|) + |x|)$ (l'addendo $|x|$ interviene quando $f$ è sub-lineare, per rispettare l'ipotesi fatta che le funzioni di complessità in tempo siano almeno lineari) e richiedere spazio $\mathcal{O}(f(|x|))$.\
+
+Sotto queste ipotesi possiamo enunciare il teorema che risponde a una delle nostre prime domande:\ esiste davvero una gerarchia di problemi.\
+In altre parole, aumentando le risorse a disposizione delle nostre macchine si risolvono più problemi --- ciò che del resto ci dicono intuizione ed esperienza.\
+Successivamente, vedremo anche che ci sono problemi arbitrariamente complessi, e che quindi non vi è una classe che domini tutte le altre e che di conseguenza la gerarchia non è composta da un numero finito di classi.\
+
+In effetti, l'ultimo teorema vale anche nel caso in cui si considerino funzioni di misura qualsiasi, purché totali.\
+Ciò suggerirebbe di allargare la classe delle funzioni appropriate a quella delle funzioni totali:\ mal ce ne incoglierà! Vi sono un paio di teoremi che distruggono la gerarchia appena stabilita e quindi l'estensione fatta non raggiunge lo scopo che ci eravamo prefissato.\
+Il primo teorema dice che, per funzioni di misura arbitrarie, esistono problemi che non hanno un algoritmo ottimo; il secondo che vi sono delle lacune tra classi di complessità.\
+
+Infine, a puro titolo di curiosità, discuteremo di una classe di funzioni di misura della complessità, la cui definizione, sottesa da un'intuizione accettabilissima, è molto elegante, in quanto consta di due assiomi e non richiede alcun riferimento esplicito alle risorse di calcolo che esse richiedono per la soluzione del problema.\
+Purtroppo, valgono anche in questo caso i risultati anti-intuitivi citati sopra, e quindi ci tocca contentarci delle funzioni appropriate che allora useremo nel seguito, salvo che in questo breve capitolo.\
+
+\medskip
+\noindent Iniziamo con una buona definizione di funzione per misurare il consumo delle risorse:\ le funzioni appropriate di cui abbiamo parlato sopra.\
+Anche per esse vi sono molte definizioni leggermente diverse e molti nomi diversi:\ funzioni \textit{oneste}, \textit{costruibili} (in tempo o in spazio) e altre ancora.\
+Per i nostri scopi è sufficiente la seguente definizione.\
+
+\begin{definition}
+    \label{def_appropriata}
+    La funzione $f: \mathbb{N} \rightarrow \mathbb{N}$ calcolabile totale, è \textit{appropriata} se
+    \begin{itemize}
+        \item[i)] è monotona crescente (cioè $n \geq m$ implica $f(n) \geq f(m)$);
+        \item[ii)] esiste una MdT $M$ a $k$ nastri, tale che $\forall x \in \Sigma^*$ si arresta (dando come risultato $\diamond^{f(x)}$, con $\diamond \notin \Sigma$ simbolo speciale) in tempo $\mathcal{O}(f(|x|) + |x|)$ e in spazio $\mathcal{O}(f(|x|))$.
+    \end{itemize}
+\end{definition}
+
+\noindent Le condizioni poste a una funzione affinché sia appropriata sono piuttosto onerose e sembrano mordersi la coda.\
+Tuttavia le funzioni che si vedono di solito usare per dare la complessità degli algoritmi sono tutte appropriate.\
+Ad esempio sono funzioni appropriate $k, n, n^k, n!, \lfloor \log(n) \rfloor, \lfloor\sqrt{n} \rfloor$ (si noti che le utlime due sono sub-lineari); inoltre se $f,g$ sono funzioni appropriate, lo sono anche $f+g$ e $f\times g$, quindi tutti i polinomi sono funzioni appropriate; infine anche $f^g$ e $g \circ f$ lo sono, assieme a molte altre funzioni d'uso comune.\
+
+Adesso andiamo a stabilire che le classi dei problemi decidibili con risorse fissate, misurate con funzioni appropriate, aumentano al crescere delle risorse stesse.\
+Ciò significa che, al variare di queste, si può stabilire una gerarchia tra le classi di complessità.\
+
+\begin{theorem} [Gerarchia di tempo e spazio]
+    \label{gerarchia_space-time}
+    Se $f$ è appropriata:
+    \begin{itemize}
+        \itemsep 0px
+        \item $\mathrm{TIME}(f(n)) \subsetneq \mathrm{TIME}((f(2n+1))^3)$
+        \item $\mathrm{SPACE}(f(n)) \subsetneq \mathrm{SPACE}(f(n) \times \log(f(n)))$
+    \end{itemize}
+\end{theorem}
+
+\begin{proof}
+    Omessa.\
+    Notiamo soltanto che quella del primo punto si basa sulla dimostrazione che il problema (ancora la diagonalizzazione!):
+    \[\{x \mid \varphi_x(x)\ \mathit{converge\ entro}\ f(|x|)\ \mathit{passi}\}\]
+    appartiene a $\mathrm{TIME}(f^3)$ ma \textit{non} a $\mathrm{TIME}(f)$; la dimostrazione del secondo punto è analoga.\
+\end{proof}
+
+\noindent Naturalmente, accanto a questo teorema ce n'è uno del tutto analogo che riguarda le misure non deterministiche.\
+(Si noti di sfuggita che se $f(n)$ è un polinomio, lo è anche $f(2n + 1)^3$.)
+
+\medskip
+\noindent In realtà, la gerarchia è ben più densa, perché l'esponente 3 che compare nella formulazione del teorema precedente è determinato dalla particolare dimostrazione scelta.\
+In realtà, vi sono molte classi significative tra $\mathrm{TIME}(f^3)$ e $\mathrm{TIME}(f)$; analogamente per lo spazio.\
+Questo frammento di gerarchia ci basta comunque per dimostrare il seguente corollario, in cui si afferma che la classe dei problemi decidibili in tempo polinomiale deterministico è strettamente inclusa in quella dei problemi decidibili in tempo deterministico esponenziale, che abbiamo già incontrato e che adesso introduciamo esplicitamente:
+\[\mathrm{EXP} = \bigcup_{k \geq 1} \mathrm{TIME} \left(2^{n^k}\right)\]
+
+\begin{corollario}
+    \[\mathcal{P} \subsetneq \mathrm{EXP}\]
+\end{corollario}
+
+\begin{proof}
+    L'inclusione è ovvia perché $2^n$ cresce più velocemente di ogni polinomio; è propria perché
+    \[\mathcal{P} \subseteq \mathrm{TIME}(2^n) \subsetneq \mathrm{TIME}\left(\left(2^{(2n+1)}\right)^3\right) \subseteq \mathrm{TIME}\left(2^{n^2}\right)\]
+\end{proof}
+
+\noindent Questo corollario, assieme al fatto che $\mathrm{NTIME}(f(n)) \subseteq \mathrm{TIME}\left(c^{f(n)}\right)$ (teorema \ref{simulazione_non-deterministica}), ci permette di concludere che $\mathcal{NP}$ è inclusa in EXP (il che non ci dice ancora nulla se l'inclusione $\mathcal{P} \subseteq \mathcal{NP}$ è propria o meno).\
+Riceve allora giustificazione anche il modo di procedere per forza bruta:\ genera tutti i candidati a essere una soluzione in tempo deterministico esponenziale e poi certifica che un candidato è davvero una soluzione (in tempo deterministico polinomiale).
+
+\medskip
+
+\noindent Per dare un quadro assai sommario, ma un pochino più completo della gerarchia che si può stabilire tra le classi di complessità sia in tempo che in spazio e nelle loro versioni deterministiche e non deterministiche, riportiamo senza dimostrarli i seguenti risultati.\
+
+\begin{theorem}
+    Siano $f$ una funzione di misura appropriata e $k$ una costante, allora
+    \begin{itemize}
+        \item $\mathrm{SPACE}(f(n)) \subseteq \mathrm{NSPACE}(f(n))$
+        \item $\mathrm{TIME}(f(n)) \subseteq \mathrm{NTIME}(f(n))$
+        \item $\mathrm{NSPACE}(f(n)) \subseteq \mathrm{TIME}\left(k^{log(n) + f(n)}\right)$
+    \end{itemize}
+\end{theorem}
+
+\noindent Inoltre, ricordiamo che avevamo già stabilito i seguenti fatti.
+\begin{theorem}
+    \hfill
+    \begin{itemize}
+        \item $\mathrm{LOGSPACE} \subseteq \mathcal{P}$
+        \item $\mathrm{LOGSPACE} \subsetneq \mathrm{PSPACE}$
+        \item $\mathrm{PSPACE} = \mathrm{NPSPACE}$
+        \item $\mathcal{NP} \subseteq \mathrm{EXP}$
+    \end{itemize}
+\end{theorem}
+
+\noindent Come anticipato, vediamo che la gerarchia non è superiormente limitata, ovvero che ci sono problemi arbitrariamente difficili, indipendentemente dagli algoritmi usati per risolverli.\
+In questo teorema, la cui dimostrazione omettiamo, si può rilasciare senza timori la richiesta che le funzioni di misura siano appropriate.\
+
+\begin{theorem}
+    Per ogni funzione calcolabile totale $g$ esiste un problema $I \in \mathrm{TIME}(f(n))$ e $I \not \in \mathrm{TIME}(g(n))$ con $f(n) > g(n)$ quasi ovunque.
+    \footnote{Cioè tranne che per dati di ingresso tratti da un insieme finito.}
+\end{theorem}
+
+\noindent Abbiamo già preannunciato che usare funzioni di misura arbitrarie, per esempio funzioni che crescono vertiginosamente, porta a conclusioni bizzarre.\
+Le enunceremo, cercando di dar loro un minimo di intuizione, mediante i due teoremi che seguono e che non dimostreremo.
+\footnote{Non sorprenderà che le loro dimostrazioni siano basate su un ragionamento di tipo diagonale.}
+
+Il primo risultato riguarda l'esistenza di algoritmi ottimi per risolvere un dato problema, ovvero algoritmi le cui prestazioni non possono essere migliorate che per una costante moltiplicativa.\
+Una parte importantissima dell'informatica si occupa di trovare algoritmi ottimi per un problema, sia per ragioni di efficienza concreta, sia perché in questo modo si ottiene una misura precisa della difficoltà di un problema e dell'efficienza dei programmi che lo risolvono.\
+Il risultato che riportiamo è negativo:\ non sempre esiste un algoritmo ottimo.
+\footnote{Una visione intuitiva di questo teorema, suggerita da B\"orger, è che ci sono dei programmi che sono più veloci su una macchina (universale) vecchia e lenta che su una macchina (universale) nuova e veloce.}
+
+\begin{theorem} [di accelerazione, Blum]
+    Per ogni funzione calcolabile totale $h$, esiste un problema $I$ tale che, per ogni algoritmo $M$ che decide $I$ in tempo $f$ esiste $M'$ che decide $I$ in tempo $f'$ tale che
+    \[f(n) > h(f'(n))\ \mbox{quasi ovunque}\]
+\end{theorem}
+
+\noindent In altre parole, si può dimostrare l'esistenza di una successione di algoritmi via via più efficienti per risolvere il problema costruito in funzione di $h$, che è una funzione calcolabile totale, ma del tutto arbitraria.\
+Per esempio fissata la funzione $h$, il teorema dice che si può trovare un algoritmo, magari esponenzialmente più efficiente di $M$, un terzo esponenzialmente più efficiente del secondo, e così via; o peggio se la funzione $h$ cresce ancor più velocemente.\
+Si noti che non poniamo alcun vincolo sulla funzione $f$.\
+ATTENZIONE:\ data la funzione $h$, il problema che si costruisce per dimostrare il teorema è ``artificiale'', nel senso che non corrisponde ad alcun problema incontrato prima; inoltre, si sa solo che questa successione di algoritmi via via più efficienti \textit{esiste}, ma non come si costruiscono l'uno dall'altro!\
+
+Se anche fosse sopportabile la situazione evidenziata dal teorema precedente, quando si usano funzioni di misura che non sono appropriate si scopre che all'aumentare delle risorse non si allarga la classe dei problemi decisi con esse.\
+Di conseguenza si contraddice l'idea intuitiva che ci debba essere una gerarchia di classi di complessità, come espresso dal teorema \ref{gerarchia_space-time} che la stabilisce nel caso in cui le funzioni di misura siano \textit{appropriate}.\
+L'enunciato che segue è una forma speciale del teorema generale:\ invece che prendere una generica funzione calcolabile $h$, con $h(n) > n$, al variare della quale si costruisce la $f$ usata sotto, consideriamo per semplicità la funzione $2^n$.\
+Il risultato netto è che non si trova alcun problema decidibile in tempo deterministico (strettamente) superiore a $f(n)$ e (strettamente) inferiore a $2^{f(n)}$.
+\footnote{ Di nuovo, una visione intuitiva, anche questa dovuta a B\"orger, suggerisce che c'è un insieme di programmi sui quali la macchina lenta e quella veloce si equivalgono.}
+
+\begin{theorem} [della lacuna, Borodin]
+    Esiste $f$ calcolabile totale tale che $\mathrm{TIME}(f(n)) = \mathrm{TIME}\left(2^{f(n)}\right)$.
+\end{theorem}
+
+\noindent Una formulazione più fine di questo teorema richiede che la funzione $f$ considerata sia monotona; se non lo fosse non sorprenderebbe poi molto che non vi siano problemi la cui soluzione richiede risorse comprese tra due funzioni che oscillano.\
+Inoltre, si può vedere (dalla dimostrazione) che la funzione $f$ che individua la lacuna cresce in maniera estremamente rapida, ciò che è proibito alle funzioni di misura appropriate.\
+
+Naturalmente, valgono anche i teoremi di accelerazione e della lacuna che si ottengono sostituendo misure di spazio invece che di tempo nell'enunciato dei due teoremi precedenti.\
+
+\medskip
+\noindent In un certo senso, l'ultima osservazione fatta ribadisce la sensazione che si potrebbe sviluppare una teoria della complessità che sia indipendente dallo spazio o dal tempo usati, ma dipenda solo da una nozione astratta di risorsa, istanziabile ad esse, ma anche ad altre risorse, quali l'energia consumata o altro.\
+Vediamo allora un'altra caratterizzazione delle funzioni di misura, dovuta a Blum, che si muove in quest'ottica e che sta alla base del cosidetto approccio assiomatico alla complessità.\
+Questa caratterizzazione è particolarmente elegante in quanto è slegata da ogni modello di calcolo e richiede solo due assiomi.\
+Inoltre, molti dei teoremi sulla complessità, in particolare quelli dell'accelerazione e della lacuna, possono venir dimostrati usando solamente tali assiomi.\
+
+\begin{definition}
+    Una funzione $\phi$ è una misura di complessità se restituisce un naturale a fronte di una funzione $\psi$ e del suo dato di ingresso $x$ e inoltre soddisfa entrambi i seguenti assiomi:
+    \begin{enumerate}
+        \item $\phi(\psi,x)$ è definita se e solo se $\psi(x)$ lo è;
+        \item per ogni $\psi, x, k$, è decidibile se $\phi(\psi,x) = k$.
+    \end{enumerate}
+\end{definition}
+
+\noindent Il primo assioma ci dice che $\phi$ misura la complessità del calcolo di $\psi(x)$; il secondo assicura che si può davvero ottenere la complessità del calcolo di $\psi(x)$.\
+Quindi, se la funzione $\phi$ misurasse il numero dei passi, ri-otterremmo la vecchia definizione di complessità in tempo; se misurasse le celle toccate quella in spazio.
+\footnote{Purché si accetti di non saper valutare lo spazio necessario a una macchina non terminante, anche nel caso in cui questa sia in ciclo.}
+
+Non è difficile verificare che le funzioni di misura appropriate soddisfino i due assiomi.\
+Tuttavia vi sono funzioni di misura che soddisfano tali assiomi e il cui impiego conduce a risultati ancora una volta sorprendenti.\
+Oltre alle situazioni contro-intuitive appena viste, può capitare che la complessità della composizione sequenziale di due algoritmi risulti \textit{minore} della complessità del primo dei due; in altre parole, fare ulteriori calcoli può ridurre la complessità del problema appena risolto!\
+Non possiamo allora che rassegnarci a usare funzioni appropriate.\
+
+\newpage
+

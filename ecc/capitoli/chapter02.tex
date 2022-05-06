@@ -1,0 +1,166 @@
+\section{Macchine di Turing}
+
+Introdurremo di seguito uno dei formalismi più importanti e più diffusi per esprimere algoritmi:\ le Macchine di Turing, che ricordano con straordinaria verosomiglianza i comuni elaboratori di Von Neumann (o a programma memorizzabile) cui siamo abituati.\
+Ve ne sono moltissime definizioni, che differiscono per varianti spesso irrilevanti; la definizione originale prevede un esecutore umano e fu introdotta da Alan Turing nel 1936, ben prima che ci fossero dei computer funzionanti.\
+
+\begin{definition}[Macchina di Turing]
+    \label{Macchina di Turing}
+    Si dice Macchina di Turing (in breve MdT) una quadrupla \[M=(Q, \Sigma, \delta, q_0)\] dove:
+
+    \begin{itemize}
+        \item $Q (\ni q_i)$ è l'insieme \textit{finito} degli \textit{stati}, con $h \not\in Q$ (con lo stato speciale $h$ indicheremo il caso di arresto ``corretto'' di un calcolo di $M$).\ Attenzione che \textit{computazione terminata} $\neq$ \textit{la macchina si arresta} poiché la macchina si può arrestare senza aver raggiunto la configurazione finale (ad esempio se la macchina entra in uno stato $q_k$ e la funzione $\delta$ non è definita per quello stato).
+        \item $\Sigma (\ni \sigma, \sigma', \dots)$ è l'insieme \textit{finito} dei simboli (\textit{alfabeto}) con
+              \begin{itemize}
+                  \item $\# \in \Sigma$ rappresenta il \textit{carattere bianco};
+                  \item $\triangleright \in \Sigma$ (\textit{respingente}) rappresenta l'inizio della stringa;
+                  \item $\{L, R, -\} \notin \Sigma$ indicano rispettivamente ``scorri a sinistra'', ``scorri a destra'' e ``resta fermo'' sul nastro.
+              \end{itemize}
+        \item $q_0 \in Q$ è lo \textit{stato iniziale}.
+        \item $\delta \subseteq (Q \times \Sigma) \times (Q \cup \{h\}) \times \Sigma \times \{L,R,-\}$ è la \textit{relazione di transizione}, tale che
+              \[\mathrm{se}\ (q, \triangleright, q', \sigma, D) \in \delta\ \mathrm{allora}\  \sigma = \triangleright, D = R\]
+              Questa condizione dice che il carattere corrente, ovvero il cursore, non può mai trovarsi a sinistra della \textit{marca di inizio stringa}, $\triangleright$.\
+              Più intuitivamente se $\delta (q, \triangleright) = (q', \sigma, D)$ allora $\sigma = \triangleright, D = R$, secondo quanto stipulato sotto.
+
+              In questa parte del corso restringeremo la relazione $\delta$ in modo che sia una funzione rispetto ai suoi primi due argomenti, imponendo cioè che, per ogni coppia di quintuple:
+              \[(q,\sigma,q',\sigma',D'),(q,\sigma,q'',\sigma'',D'')\in\delta \Rightarrow q'=q'', \sigma'=\sigma'', D'=D''\]
+              Grazie a questa condizione possiamo scrivere $\delta(q,\sigma)=(q', \sigma', D')$ al posto della quintupla $(q,\sigma,q',\sigma',D')$.\
+              Se volessimo essere più precisi, una relazione è una corrispondenza tra gli elementi di due insiemi; una funzione invece è una particolare relazione che associa ad ogni elemento del dominio uno e un solo elemento del codominio.
+    \end{itemize}
+\end{definition}
+
+\noindent È facile verificare che la condizione (i) dell'idea intuitiva di algoritmo elencata dianzi è soddisfatta, così come lo è anche la prima parte della condizione (ii).\
+Esse richiedono che i programmi siano finiti e che le possibili istruzioni, operanti su dati discreti, siano in numero finito.\
+Infatti, ogni macchina ha un numero finito di possibili istruzioni, poiché gli insiemi $Q$ e $\Sigma$ sono finiti; di conseguenza la sua funzione di transizione $\delta$ contiene un numero finito di elementi.\
+Inoltre, i dati su cui opera una MdT sono stringhe $w$ di caratteri appartenenti a $\Sigma$, in simboli $w \in \Sigma^*$.\
+Più precisamente $\Sigma^*$ contiene la stringa vuota $\epsilon$ e per tutte le stringhe $w \in \Sigma^*$ e tutti i caratteri $a \in \Sigma^*$ contiene la stringa $a\cdot w$, dove ``$\cdot$'' è l'operazione associativa (quasi sempre omessa) di giustapposizione tra caratteri esteso alle stringhe; brevemente, $\Sigma^*$ è il monoide libero generato da $\Sigma$ avente come unica operazione interna associativa ``$\cdot$'' ($\forall w, w', w'' \in \Sigma^*\ \mathrm{vale}\ w \cdot (w' \cdot w'') = (w \cdot w') \cdot w''$) e con identità destra e sinistra $\epsilon$ ($\forall w \in \Sigma^*\ \mathrm{vale}\ \epsilon \cdot w = w = w \cdot \epsilon$).
+
+Esiste una variante delle MdT detta \textit{non-deterministica} in cui non si richiede che $\delta$ sia una funzione.\
+Nella seconda parte del corso ne daremo una definizione formale, e ricorderemo che ha la ``stessa potenza espressiva'' della MdT definita sopra.\
+Più avanti useremo, introducendola in modo intuitivo, anche la variante in cui si hanno più nastri, la cui definizione si trova nella definizione \ref{MdT_k-nastri}.\
+Il suo potere espressivo non cambia, così come non cambia quello di tutte le altre varianti, per esempio quelle macchine con un nastro infinito anziché semi-infinito, oppure con più di un nastro, oppure ancora quelle che possono o scrivere o spostarsi, o hanno altre diavolerie ``ragionevoli''.\
+Questa robustezza rafforza la sensazione che il modello sia azzeccato.\
+
+\begin{example}[Una macchina che qualcosa fa]{\label{Simple MdT}}
+
+    La tabella riportata sotto rappresenta la funzione di transizione della MdT $M = (Q, \Sigma, \delta, q_0)$, con $Q=\{q_0,q_1\}$ e $\Sigma=\{\#,\triangleright,a\}$.\
+
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{ |c|c|c|c| }
+            \hline
+            $q$   & $\sigma$         & $\delta(q,\sigma)$     \\\hline\hline
+            $q_0$ & $\triangleright$ & $q_0,\triangleright,R$ \\
+            $q_0$ & $\#$             & $h,\#,-$               \\
+            $q_0$ & $a$              & $q_1,\#,L$             \\
+            $q_1$ & $\#$             & $q_0,\#,L$             \\
+            $q_1$ & $a$              & $q_0,a,-$              \\
+            \hline
+        \end{tabular}
+    \end{table}
+
+    \noindent In seguito, nel definire una MdT, ometteremo per brevità la definizione degli insiemi $Q$ e $\Sigma$ degli stati e dei simboli, i cui elementi possono essere dedotti guardando la tabella che definisce la funzione di transizione $\delta$.\
+\end{example}
+
+\noindent Passiamo ora a descrivere la dinamica delle macchine di Turing, cioè il loro comportamento quando operano su una stringa di caratteri memorizzati sul nastro.\
+In altre parole, vogliamo definire cos'è una computazione di una macchina.\
+Intuitivamente, una computazione di una MdT è una successione di configurazioni, ognuna ottenuta dalla precedente in accordo con la definizione della funzione di transizione $\delta$.\
+Ci manca la definizione di configurazione, che verrà data tra poche righe.\
+Per il momento, e in modo del tutto informale, indichiamo la coppia \textit{Stato}/\textit{Nastro} una \textit{configurazione istantanea} della macchina; dove \textit{Stato} è lo stato in cui si trova la macchina e \textit{Nastro} è una porzione ``abbastanza lunga'' e \textit{finita} del nastro che contiene almeno la sua parte non bianca.\
+
+La seguente tabella rappresenta informalmente una computazione della MdT introdotta nell'esempio \ref{Simple MdT}, che si arresta con successo in sette passi.\
+Nelle configurazioni, il carattere sottolineato nella parte \textit{Nastro} sta a indicare la posizione corrente del cursore, o \textit{testina}.\
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|}
+        \hline
+        Configurazione                                                & Azione effettuata                              \\\hline\hline
+        $q_0$/$\triangleright \#\#a\#a\underline{a}\# \rightarrow$    & ``cancella'' $a$ cambia stato e vai a sinistra \\
+        $q_1$/$\triangleright \#\#a\#\underline{a}\#\# \rightarrow$   & non scrive, non si sposta, cambia stato        \\
+        $q_0$/$\triangleright \#\#a\#\underline{a}\#\# \rightarrow$   & ``cancella'' $a$ cambia stato e vai a sinistra \\
+        $q_1$/$\triangleright \#\#a\underline{\#}\#\#\# \rightarrow$  & lascia \#, cambia stato, va a sinistra         \\
+        $q_0$/$\triangleright \#\#\underline{a}\#\#\#\# \rightarrow$  & ``cancella'' $a$ cambia stato e vai a sinistra \\
+        $q_1$/$\triangleright \#\underline{\#}\#\#\#\#\# \rightarrow$ & lascia \#, cambia stato, va a sinistra         \\
+        $q_0$/$\triangleright \underline{\#}\#\#\#\#\#\# \rightarrow$ & si arresta                                     \\
+        $h$/$\triangleright \underline{\#}\#\#\#\#\#\# \rightarrow$   &                                                \\\hline
+    \end{tabular}
+\end{table}
+
+\noindent Più precisamente, una \textit{configurazione} $C$ di una MdT è una quadrupla
+\[(q,u,\sigma,v) \in (Q \cup \{h\}) \times \Sigma^* \times \Sigma \times \Sigma^F\]
+dove $q$ è lo stato corrente, $u$ è la stringa di caratteri a sinistra del simbolo corrente $\sigma$ e $v$ è quella dei caratteri alla sua destra.\
+Per semplicità scriveremo $(q, u\underline{\sigma}v)$ al posto di $(q,u,\sigma,v)$, così come abbiamo già fatto sopra.\
+Poiché la stringa $w\sigma v$ deve essere finita (e poiché ora)\footnote{Nella seconda parte del corso terremo traccia di tutte le caselle visitate dalla MdT, ottenendo così una stima dello spazio necessario per quella computazione.} non ci interessa considerare i simboli \# a destra del simbolo $\sigma_n \neq \#$ più a destra nel nastro (ovvero della porzione $v$), indichiamo con $\epsilon$ la stringa vuota e conveniamo che $\# \cdot \epsilon = \epsilon$ e $\sigma \cdot \epsilon = \sigma$, se $\sigma \neq \#$.\
+Definiamo allora $\Sigma^F = \Sigma^* \cdot (\Sigma \backslash \{\#\}) \cup \{\epsilon\}$.\
+Quindi scriviamo $v = \sigma_0\sigma_1\dots\sigma_n$, con $\sigma_n \neq \#$, al posto della stringa infinita $\sigma_0\sigma_1\dots\sigma_n\#\#\dots\#\dots$.\
+Si noti tuttavia che può benissimo darsi che $\sigma_i = \#$ per qualche $i<n$ e anche che il carattere corrente $\sigma$ può essere \#; inoltre la stringa $u$ può essere vuota solo quando il carattere corrente $\sigma$ è la marca di inizio stringa $\triangleright$ per la seconda condizione sulla funzione di transizione $\delta$.\
+Con questa convenzione ogni stringa è finita.
+
+\vspace{12 pt}
+
+\noindent Il frammento iniziale della computazione di prima viene rappresentato come:
+\begin{table}[H]
+    \begin{tabular}{l}
+        $(q_0, \triangleright\#\#a\#a, a, \epsilon) \rightarrow (q_1, \triangleright\#\#a\#, a,\epsilon) \rightarrow$      \\
+        $(q_0, \triangleright, \#\#a\#, a,\epsilon) \rightarrow (q_1, \triangleright\#\#a, \#,\epsilon) \rightarrow \dots$ \\
+    \end{tabular}
+\end{table}
+
+\noindent Un altro esempio di computazione della macchina definita nell'es.\ \ref{Simple MdT} è:
+\begin{table}[H]
+    \begin{tabular}{l}
+        $(q_0, \triangleright\#, a, a) \rightarrow (q_1, \triangleright, \#, \#a) \rightarrow (q_0, \epsilon, \triangleright, \#\#a) \rightarrow$ \\
+        $(q_0, \triangleright, \#, \#a) \rightarrow (h, \triangleright, \#, \#a)$                                                                 \\
+    \end{tabular}
+\end{table}
+
+\noindent Per non eccedere nella pignoleria, non sempre utilizzeremo la versione di configurazione nella forma definita sopra, ma ci riterremo liberi di scrivere $(q,w)$ quando non interessi sapere dove si trova il cursore (v.\ la definizione di computazione più sotto), o di usare altre convenzioni quando il loro significato sia chiaro dal contesto.
+
+\vspace{12pt}
+
+\noindent Formalmente un \textit{passo di computazione} è definito per casi nel modo seguente, intendendo che le quadruple che vi appaiono siano configurazioni (ricordandosi che $q \neq h$ e usando $q'$ per indicare, oltre a uno stato in $Q$, anche $h$; indicando con $a,b,c$ elementi generici di $\Sigma$; e ricordando inoltre, soprattutto nel caso (ii), che se $b = \#$ e $ v = \epsilon$ allora $bv = \epsilon$ e infine che nel caso (ii) se $a = \triangleright$ allora anche $b= \triangleright$).\
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{l c l l}
+        i)   &     & $(q, uav) \rightarrow (q', ubv)$    & se $\delta(q, a)=(q', b, -)$ \\
+        ii)  &     & $(q, ucav) \rightarrow (q', ucbv)$  & se $\delta(q, a)=(q', b, L)$ \\
+        iii) & (a) & $(q, uacv) \rightarrow (q' , ubcv)$ & se $\delta(q, a)=(q', b, R)$ \\
+             & (b) & $(q, ua) \rightarrow (q', ub\#)$    & se $\delta(q, a)=(q', b, R)$ \\
+    \end{tabular}
+\end{table}
+
+\noindent Ciascun passo ha un effetto limitato sulle configurazioni, come richiesto dalla seconda parte del punto (ii) nella idea intuitiva di algoritmo.\
+Inoltre, un singolo passo dipende \textit{unicamente da un solo simbolo}, quello corrente,\footnote{Si noti che l'unica maniera per ispezionare una parte non finita del nastro sarebbe quella di accedere a tutto il nastro a destra del cursore.} e da \textit{un solo stato}, quello corrente (cf.\ i punti (iii) e (iv) richiesti dall'intuizione).\
+Si noti che sia per determinare la regola da applicare che per applicarla diamo per primitiva la capacità dell'esecutore di ricorrere al ``pattern matching''.
+
+\medskip
+
+\noindent Una \textit{computazione} è una successione finita di passi \[(q_0,\triangleright w)\rightarrow^*(q', w')\] dove $\rightarrow^*$ è la chiusura riflessiva e transitiva di $\rightarrow$.\
+Come d'abitudine, se vi sono $n$ passi, la computazione è lunga $n$ e la scriviamo così
+\[(q_0,\triangleright w)\rightarrow^n(q', w')\]
+Diremo invece che la computazione $(q_0, w) \rightarrow^* (q', w')$ \textit{termina} (converge, $\downarrow$) su $w$ sse $q' = h$, e che \textit{non termina} (diverge, $\uparrow$) sse per ogni $q', w'$ tali che $(q_0, w) \rightarrow^* (q', w')$ esistono $q'', w''$ tali che $(q', w') \rightarrow (q'', w'')$.\
+Se fosse necessario precisare che la computazione in esame è una di quelle di una particolare macchina $M$, scriveremo $\rightarrow^*_M$; con $M(w)$ esprimeremo che la macchina $M$ inizia la sua computazione dalla configurazione $(q_0, \underline{\triangleright} w)$, cioè avendo come dato iniziale la stringa $w$, ovvero che \textit{applichiamo} $M$ a $w$.
+
+\medskip
+
+\noindent C'è un limite ai passi di computazione o allo spazio necessario a contenerne i dati (punto (v) della definizione intuitiva di algoritmo)?\
+\textbf{NO}, come si vede dal seguente esempio.\
+
+\begin{example}[Una macchina che non converge per nessun ingresso]
+
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{|l|l|l|}
+            \hline
+            $q$   & $\sigma$         & $\delta$                 \\\hline\hline
+            $q_0$ & $\triangleright$ & $q_0, \triangleright, R$ \\
+            $q_0$ & $a$              & $q_0, a, R$              \\
+            $q_0$ & $\#$             & $q_0, \#, R$             \\\hline
+        \end{tabular}
+    \end{table}
+
+    Un esempio di computazione non terminante della macchina di sotto è
+    \[(q_0, \underline{\triangleright} a\#a\#) \rightarrow (q_0, \triangleright a\#\underline{a}\#) \rightarrow^* (q_0, \triangleright a\#a\#\dots\underline{\#}\#) \rightarrow \dots\]
+
+\end{example}

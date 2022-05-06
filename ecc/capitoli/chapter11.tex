@@ -1,0 +1,91 @@
+\section{Una teoria quantitativa degli algoritmi}
+
+Nella prima parte abbiamo studiato alcuni aspetti estensionali della teoria della calcolabilità.\
+Infatti, abbiamo caratterizzato i problemi risolubili, rappresentati mediante funzioni calcolabili totali o insiemi ricorsivi, quelli insolubili o semi-decidibili, rappresentati da funzioni calcolabili o insiemi ricorsivamente enumerabili, e infine abbiamo discusso problemi nemmeno semi-decidibili, rappresentati da funzioni non calcolabili o insiemi non ricorsivamente enumerabili.\
+Quindi l'enfasi è stata posta su \textit{cosa} si calcola.\
+
+Passiamo ora a studiare \textit{come} si calcola e \textit{quali risorse} siano necessarie per calcolare, ovvero spostiamo l'accento sugli aspetti intensionali dei problemi, cioè introduciamo una \textit{teoria quantitativa} dei problemi analizzando il comportamento degli \textit{algoritmi} durante la loro esecuzione.\
+
+Considereremo nel seguito solo problemi \textit{decidibili}, limitandoci a quelli di \textit{decisione}, cioè guarderemo solo quei problemi, o insiemi, per cui esiste un algoritmo che ne calcola la funzione caratteristica.\
+Per fare ciò, useremo alcune opportune varianti delle macchine di Turing, considerandole come automi accettori.\
+In altre parole, le macchine usate finiranno in uno stato di accettazione se il dato in ingresso appartiene all'insieme, e quindi quel caso particolare del problema è risolto positivamente, altrimenti raggiungeranno uno stato di rifiuto.\
+
+Le risorse di cui si tiene principalmente conto quando si scrivono o si utilizzano programmi sono relative al \textit{tempo} e allo \textit{spazio}.\
+Tuttavia queste non sono le uniche risorse critiche usate durante il calcolo; per esempio può essere importante valutare il dispendio energetico, che nel caso di macchine mobili può non coincidere esattamente con il tempo di calcolo, oppure il numero delle comunicazioni che avvengono tra i processori, in macchine parallele o distribuite.\
+Nel seguito ci limiteremo a studiare, da un punto di vista astratto, solo quanto tempo e/o spazio sono necessari alla soluzione di un problema, ovvero alla soluzione di tutti i suoi casi; esamineremo anche in gran fretta pregi e manchevolezze di un tentativo di prescindere da tempo e spazio, in un quadro ancor più astratto.\
+In ogni caso, è necessario calcolare le risorse necessarie alla soluzione di un caso del problema in funzione dei suoi dati di ingresso, o meglio della loro \textit{taglia}.\
+La taglia del dato di ingresso $x$, che esprimeremo come $|x|$, verrà opportunamente misurata in base ad alcuni criteri, quali una stima dell'occupazione di memoria, il numero dei componenti del dato medesimo o altri ancora.\
+
+Ricapitolando:\ dato un problema $I$ (sotto forma di un insieme) cercheremo una funzione $f(|x|)$ che esprima la quantità di risorse in spazio o tempo necessaria al calcolo della soluzione di $x \in I$, che spesso chiameremo il caso $x$ di $I$.\
+Quella che andremo a delineare risulta quindi una teoria della \textit{complessità asintotica}, perché si studia come cresce l'uso delle risorse al crescere dei dati di ingresso.\
+
+La giustificazione concreta per lo sviluppo di una teoria della complessità astratta è, come già detto, quello di misurare l'efficienza degli algoritmi e, in ultima analisi, rispondere quando possibile alla domanda seguente:\ \textit{qual è il modo più efficiente di risolvere un problema}?\
+Noi non risponderemo a questa domanda dando le tecniche e i metodi per progettare e realizzare algoritmi --- argomento di altri corsi --- anche se considereremo alcuni problemi paradigmatici e alcuni algoritmi per deciderli.\
+Ci limiteremo piuttosto a capire, seppur superficialmente, le caratteristiche che tali problemi e quegli algoritmi hanno.\
+Detto in maniera molto informale e intuitiva, cercheremo di individuare una parte della struttura \textit{profonda} che accomuna molti problemi, o meglio quella del modo di risolverli, in un senso molto simile a quanto fatto nella prima parte del corso, quando abbiamo raggruppato i problemi decidibili tra loro e li abbiamo separati da quelli indecidibili.\
+Ancora:\ cercheremo di evidenziare per quanto possibile la struttura matematica comune a gruppi di problemi, manifestata dal fatto che i loro algoritmi risolutori si ``trasformano'' gli uni negli altri, mediante opportune funzioni di riduzione.\
+
+Per far ciò è necessario prima studiare come si possono esprimere limiti alle risorse necessarie al calcolo:\ come si definisce e quali proprietà ha una funzione $f$ (dai naturali ai naturali) che sia in grado di stimare la quantità minima di risorse necessarie per risolvere un certo problema $I$.\
+Ovviamente, vogliamo far sì che un algoritmo $M$ che risolve il caso $x \in I$ richieda una quantità di risorse spazio/temporali inferiore, o meglio ancora uguale a $f(|x|)$:\ $f$ è quindi la minima delle funzioni che maggiorano la quantità di risorse necessarie al calcolo di $x \in I$.\
+Si noti che se un algoritmo ha bisogno di una certa quantità di risorse, funzionerà benissimo con risorse maggiori e che invece se fornissimo a tale algoritmo una quantità di risorse inferiore a $f(|x|)$, allora potremmo non essere in grado di decidere con esso il caso $x \in I$.\
+Trovata una tale funzione che stima la quantità di risorse necessarie, diremo piuttosto imprecisamente che il problema $I$ ha \textit{complessità} in tempo o spazio $f$.\
+Si noti che $f$ deve stimare le risorse necessarie alla soluzione di \textit{tutti} i casi del problema, incluso il caso più difficile che ne richiede in misura maggiore; stiamo dunque parlando di complessità nel caso \textit{pessimo}.\
+
+È importante osservare che determinare questa funzione $f$, se e quando ciò è possibile, richiede di considerare tutti gli algoritmi che risolvono il problema $I$, i quali sono tanti quanti i numeri naturali (v.\ il teorema \ref{n_fcalcolabili}).\
+Infatti, per quanto appena detto, per stabilire che $I$ ha complessità $f(n)$ \textit{bisogna costruire un} programma che risolve il caso $x \in I$ in tempo o spazio inferiore o uguale a $f(|x|)$.\
+Ecco allora che, data una certa funzione $f$, si può definire una \textit{classe di complessità}, dipendente da $f$, cui appartengono tutti quei problemi per cui esiste almeno un algoritmo che li risolve e che richiede risorse in misura inferiore o uguale a $f(n)$.\
+
+Allora viene naturale chiedersi:\ se il limite $f(n)$ alle risorse disponibili viene aumentato fino a un certo $g(n)$, cioè $g(n) > f (n)$, la classe di problemi che si possono risolvere diviene più ampia?\
+Ad esempio, aumentando le risorse di memoria di una certa macchina da $f(n) = 2n$ a $g(n) = n^2$, riusciamo a risolvere problemi che prima non potevamo risolvere?\
+In altre parole, esistono delle classi i cui problemi sono \textit{risolubili} con dei limiti alle risorse \textit{prefissati}?\ ovvero esistono davvero \textit{classi di complessità} diverse tra loro?\ e se sì, quali sono le relazioni che sussistono tra esse?\
+Vedremo che in alcuni casi interessanti si possono stabilire delle gerarchie precise tra classi di problemi, e quindi classificare i problemi in base alla quantità di risorse necessarie per risolverli.\
+Tuttavia, vedremo anche che vi sono dei casi in cui non è noto se vi sia una gerarchia in senso stretto, o addirittura che non è possibile stabilirne alcuna, a causa di funzioni di stima bizzarre.\
+
+Nel caso in cui si possano definire precisamente delle classi di complessità, queste hanno dei \textit{problemi completi}?\
+(Cioè problemi che appartengono a una classe e che sono i più \textit{ardui} da risolvere con quelle limitazioni spazio/temporali?\ cf.\ la definizione \ref{arduo_completo}.)
+
+E inoltre:\ esistono \textit{classi particolarmente interessanti} dal punto di vista computazionale?\ e siccome una classe non è interessante senza almeno un problema completo che sia noto prima dell'introduzione della classe medesima, la stessa domanda implica anche:\ \textit{vi sono problemi completi particolarmente interessanti}?\
+Avete certamente già incontrato nei corsi precedenti le seguenti due classi di complessità
+
+\begin{itemize}
+    \item\textbf{Ptime}, o semplicemente $\mathcal{P}$, la classe dei problemi risolubili in tempo polinomiale \textit{deterministico}.
+    \item\textbf{NPtime}, o semplicemente $\mathcal{NP}$, la classe dei problemi risolubili in tempo polinomiale \textit{non-deterministico}.
+\end{itemize}
+
+\noindent Queste due classi sono particolarmente rilevanti e spesso vengono associate rispettivamente alla classe dei problemi ``trattabili'' e a quella dei problemi ``intrattabili''.\
+Questa associazione è talmente forte, sebbene non scevra da critiche che riporteremo nel seguito, da essersi meritata il nome di {\footnotesize TESI DI COOK E KARP}, in analogia con la tesi di Church e Turing.\
+
+\medskip
+\noindent Prima di descrivere la teoria che abbiamo intuitivamente delineato, ci sono tre condizioni preliminari sulle quali ci soffermiamo.
+
+Innanzitutto, bisogna mettersi d'accordo su \textit{come si misura} lo spazio o il tempo necessario per risolvere un problema.\
+Di solito, il costo di una computazione è la somma dei costi dei suoi passi elementari.\
+Ad esempio, se il modello di calcolo sono le macchine di Turing, il tempo è misurato di solito dal numero dei passi necessari per arrivare alla configurazione terminale; se il modello è quello di un linguaggio funzionale, può essere il numero delle chiamate di funzione o delle riduzioni; se è un linguaggio di tipo \textit{\footnotesize WHILE} può essere il numero dei confronti, o delle operazioni di somma o di moltiplicazione o il numero degli accessi in memoria, opportunamente pesati.\
+Nel seguito non studieremo in dettaglio i vari modi per definire le funzioni di costo, ma ci limiteremo a osservare che bisogna aver molta cura nella loro scelta.\
+Inoltre, le funzioni di costo così scelte devono consentire una buona formalizzazione di ciò che sembra accadere in realtà, quale ad esempio l'intuizione forte che al crescere delle risorse cresca anche la classe dei problemi risolvibili con esse.\
+Infine, riporteremo anche un paio di fatti, intuitivamente paradossali, che si verificano quando si scelgano funzioni di costo in una certa misura arbitrarie, seppur apparentemente soddisfacenti.\
+
+Altra condizione preliminare è quella di garantire che la complessità di un problema non cambi al variare del modello di calcolo in cui la funzione che decide il problema è espressa.\
+In altre parole, vogliamo essere sicuri che i risultati della teoria della complessità che andremo a enunciare siano \textit{invarianti rispetto al modello di calcolo} scelto.\
+Ci poniamo cioè l'obiettivo di avere una teoria \textit{robusta}.\
+Fortunatamente, sotto ragionevolissime ipotesi, la scelta del modello di calcolo \textit{non influenza} le classi di complessità che esso induce al variare delle risorse spazio/temporali disponibili.\footnote{Per far ciò si ricorre a riduzioni da un modello di calcolo all'altro, che sono ``semplici'' in un senso diverso da quello visto nella prima parte, ma altrettanto preciso; ne faremo solo un breve cenno.}
+Quindi potremo parlare di classi di complessità in generale, senza specificare da quale modello siano state indotte.\
+Non studieremo approfonditamente il problema di garantire che tali classi siano effettivamente chiuse rispetto a ``ragionevoli'' trasformazioni di modelli, né caratterizzeremo in dettaglio quali trasformazioni siano ragionevoli.\
+Ci basterà mostrare, mediante un esempio, come modifiche apparentemente innocue apportate a un modello possono mutare drasticamente le classi di complessità, se il modo in cui si definiscono le funzioni di costo non viene anch'esso opportunamente modificato.\
+Infine, ci limiteremo a enunciare, senza dimostrarli, alcuni teoremi che assicurano che le classi di complessità, in particolare $\mathcal{P}$ e $\mathcal{NP}$, sono sostanzialmente invarianti rispetto al modello di calcolo.\
+
+La terza condizione per costruire una teoria quantitativa degli algoritmi accettabile, è che la complessità di un problema sia \textit{invariante rispetto alla rappresentazione} del problema stesso.\
+Ad esempio, la complessità di un problema sui grafi \textit{non deve} dipendere dal fatto che questi siano rappresentati come matrici o come liste di adiacenza o ancora come coppie di insiemi $(N, A)$, dove $N$ sono i nodi e $A$ sono gli archi.\
+In altre parole, la richiesta di invarianza rispetto alla rappresentazione significa che le classi di complessità sono chiuse rispetto al cambio di rappresentazione dei dati.\
+Abbiamo già incontrato la stessa richiesta quando abbiamo affermato che i risultati di calcolabilità \textit{non} dipendono dal formato dei dati e allora abbiamo usato funzioni di codifica (calcolabili e) totali per passare da una rappresentazione a un'altra; qui chiederemo inoltre che le funzioni che trasformano i dati da un formato a un altro siano \textit{facili}, in un senso che sarà più chiaro in seguito.\
+Naturalmente ci possono essere casi in cui la complessità cambia al cambiare della rappresentazione, ma sono casi degeneri, seppure molto interessanti da indagare perché ammettono algoritmi che li risolvono in modo particolarmente efficiente, sfruttando la loro struttura matematica.\
+Ad esempio, si considerino i casi in cui si debbano moltiplicare matrici sparse o di altra forma speciale.\
+Non si dimentichi che una notevole parte dell'ingegno dell'infernatico si esercita proprio nel trovare le giuste strutture dei dati!
+
+Concludiamo questa breve introduzione ripetendo una domanda che ci siamo già posti:\ \textit{le classi di complessità formano una gerarchia}?\
+La letteratura riporta, sotto ragionevolissime ipotesi, un gran numero di risultati che stabiliscono le relazioni tra varie classi di complessità.\
+Noi vedremo solamente un piccolissimo frammento di questa gerarchia, riassumibile nella seguente catena di inclusioni tra classi, la cui definizione posponiamo
+\[\mathrm{LOGSPACE} \subseteq \mathcal{P} \subseteq \mathcal{NP} \subseteq \mathrm{PSPACE} = \mathrm{NPSPACE} \subset \mathcal{R} \subset RE\]
+Oltre alle inclusioni proprie esplicitamente rappresentate nella parte destra della formula, è noto anche che LOGSPACE $\subset$ PSPACE.\
+Non è ancora noto invece quali altre inclusioni siano proprie.\
+In particolare, non è noto se $\mathcal{P} \subset \mathcal{NP}$ o se piuttosto $\mathcal{P} = \mathcal{NP}$ e nemmeno se ciò sia dimostrabile o meno:\ non si è tuttora riusciti a ottenere quel risultato di separazione tra le due classi che ci è riuscito nella prima parte considerando $R$ ed $RE$ -- là il gioco di separarle riesce perché decidere la non appartenenza di un elemento a un insieme ricorsivo richiede un tempo \textit{finito}, mentre questa limitazione di finitezza non può essere soddisfatta quando l'insieme è ricorsivamente enumerabile e non ricorsivo; qui il gioco non riesce affatto, non tanto perché sia i problemi in $\mathcal{P}$ che quelli in $\mathcal{NP}$ sono decidibili e quindi lo sono \textit{per definizione} in tempo finito, ma soprattutto perché, e lo vedremo più in dettaglio, tali insiemi sono per l'appunto decidibili in tempo \textit{limitato}.\

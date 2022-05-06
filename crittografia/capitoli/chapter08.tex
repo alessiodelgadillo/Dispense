@@ -1,0 +1,148 @@
+\chapter{Cifrari perfetti}
+
+Sono cifrari che proteggono le informazioni con \textbf{sicurezza assoluta} indipendentemente dalle capacità computazionali del crittoanalista.\
+Sono cifrari simmetrici e solo chi possiede la chiave privata del cifrario può decifrare i crittogrammi.\
+Per garantire questa protezione il costo è alto, di conseguenza i cifrari perfetti sono usati solo in casi ristretti (comunicazioni classificate); per le comunicazioni crittografiche di massa si usano cifrari che offrono una \textit{sicurezza di tipo computazionale}:\ si assume che il crittoanalista abbia accesso a risorse computazionali ragionevoli (polinomiali) e che $P\neq NP$.\
+
+\vspace{12pt}
+\noindent Informalmente:\ un cifrario è perfetto se la sicurezza è garantita qualunque sia l'informazione carpita dal canale.\
+\vspace{12pt}
+
+\noindent La pubblicazione ufficiale in letteratura che ha formalizzato il concetto di cifrario perfetto si deve a \textit{Shannon} (1949), un ingegnere e matematico americano.\
+Shannon ha studiato il processo della comunicazione tra mittente e destinatario come se fosse un processo stocastico.\
+
+\begin{itemize}
+    \item \textit{MSG}:\ spazio dei messaggi
+    \item \textit{CRITTO}:\ spazio dei crittogrammi
+    \item $M$:\ variabile aleatoria che descrive il comportamento del mittente e assume valori in \textit{MSG}
+    \item $C$:\ variabile aleatoria che descrive il processo di comunicazione sul canale e assume valori in \textit{CRITTO}
+    \item $P(M = m)$:\ probabilità che il mittente voglia spedire il messaggio $m$
+    \item $P(M = m \mid C = c)$:\ probabilità condizionata che il messaggio inviato sia $m$, posto che sul canale transita il crittogramma $c$
+\end{itemize}
+
+\noindent Siamo in una situazione dove il crittoanalista conosce tutto del sistema tranne la chiave; in particolare, conosce la distribuzione di probabilità con cui il mittente invia i messaggi, il cifrario utilizzato e lo spazio delle chiavi (\textit{key}).
+
+\vspace{12pt}
+Un cifrario è perfetto se
+\[\forall\ m \in \mathit{MSG}\ \mathrm{e}\ \forall\ c \in \mathit{CRITTO}\ P(M = m) = P(M = m \mid C = c)\]
+
+\begin{example}
+
+    Supponiamo che
+    \[\exists\ \bar{m}:\ P(M=\bar{m})=p>0\]
+    \[\exists\ \bar{c}:\ P(M=\bar{m} \mid C = \bar{c}) = 1\]
+
+    \noindent In questo caso si vuole evidenziare il fatto che se passa $\bar{c}$ sul canale e il crittoanalista è in grado di capire al 100\% che si tratta del messaggio $\bar{m}$ cifrato, allora acquisirà conoscenza dall'invio di $\bar{c}$.\
+    Ciò accade se e solo se \[P(M = m) \neq P(M = m \mid C = c)\] ovvero solo se il cifrario \textbf{non} è perfetto.
+
+    Si potrebbe anche fare un ulteriore esempio dove \[\exists\ \bar{\bar{c}}:\ P(M = \bar{m} \mid C = \bar{\bar{c}}) = 0\] e concluderne che se passa $\bar{\bar{c}}$ canale, il crittoanalista sa sicuramente che il suo corrispettivo non è $\bar{m}$.\
+    Nuovamente, il crittoanalista ha appreso nuove informazioni dall'osservazione dei crittogrammi sul canale.
+\end{example}
+
+\noindent In un cifrario perfetto, la \textbf{conoscenza complessiva} del crittoanalista \textbf{non cambia} dopo aver osservato un crittogramma in transito:\ $m$ e $c$ sono del tutto \textbf{scorrelati}, nessuna informazione su $m$ può filtrare da $c$; agli occhi del crittoanalista $c$ appare come una sequenza del tutto casuale.\
+
+\begin{theorem}[Shannon]
+
+    In un cifrario perfetto, il numero delle chiavi deve essere maggiore o uguale al numero dei messaggi possibili.
+\end{theorem}
+
+\begin{proof}
+
+    Sia $N_m$ il numero dei messaggi possibili, cioè
+    \[m \in \mathit{MSG}\ \mathrm{t.c.}\ P(M=m)>0\]
+    e $N_k$ il numero di chiavi.\
+    Supponiamo per assurdo che \[N_k<N_m\] e che \[\exists\ c \in \mathit{CRITTO}\ \mathrm{t.c.}\ P(C =c)>0\]
+    Immaginiamo che a $c$ possano corrispondere $S$ messaggi, ovvero tutti quei messaggi $m_i$ che possono essere decifrati a partire da $c$ con la chiave $k_i$.\
+    Si può dire con certezza che
+    \[S \leq N_k\]
+    L'ipotesi di partenza era $N_k < N_m$, quindi $S \leq N_k < N_m$.\
+    Ma questo significa che $S < N_m$, cioè, il numero di messaggi ottenibili decifrando un crittogramma con ogni chiave è minore del numero dei messaggi totali inviabili con questo sistema di cifratura.\
+
+    In altre parole
+    \[\exists\ m \in \mathit{MSG}, P(M = m) > 0\ \mathrm{t.c.}\ P(M = m \mid C = c) = 0\]
+    Ma questo vorrebbe dire fornire informazioni al crittoanalista:\ il cifrario \textit{non} è perfetto $\Rightarrow$ \textbf{assurdo} $N_k \geq N_m$.\
+
+\end{proof}
+
+\noindent\textbf{Osservazione}\quad Dato che $N_k \geq N_m$, allora le chiavi saranno \textit{molto lunghe}.\
+
+\section{One-Time Pad}
+
+Viene introdotto nel 1917 da Mauborgne e Vernam.\
+Usa l'alfabeto binario $\{0, 1\}$, quindi messaggio, crittogramma e chiave sono sequenze di 0 e 1.\
+È stato usato durante la seconda guerra mondiale e negli anni `60 per le comunicazioni tra l'Unione Sovietica e gli Stati Uniti.\
+
+La regola di cifratura e decifrazione è pubblica:\ è lo \texttt{XOR} ($\oplus$).\
+Supponiamo che \textit{MSG}, \textit{CRITTO} e \textit{KEY} siano tutte sequenze $\{0,1\}^n$, ovvero fissiamo un intero $n$ che stabilisce la lunghezza di essi.\
+Quindi, il messaggio $m \in \{0,1\}^n$ e la chiave $k \in \{0,1\}^n$, il crittogramma $c = C(m, k)$ lo si ottiene facendo $m \oplus k$ e il messaggio $m = D(c, k)$ lo si ottiene facendo $c \oplus k$.\
+Il motivo per cui si può fare la decifrazione come la cifratura sta nel fatto che
+\[m \oplus k = c \Rightarrow c \oplus k = (m \oplus k) \oplus k \Rightarrow m \oplus (k \oplus k) \Rightarrow m \]
+
+\vspace{12pt}
+\noindent\textbf{Osservazione}\quad Nei casi in cui il messaggio $m$ presenti delle regolarità fra i bit, l'operazione $\oplus$ permette di ``distruggerle''.\
+\vspace{12pt}
+
+\noindent La chiave deve essere non riutilizzabile, altrimenti si forniscono informazioni sui messaggi al crittoanalista.\
+Assumiamo di avere due messaggi $m'$ e $m''$ cifrati con la stessa chiave $k$, diventano $c'$ e $c''$.\
+Il crittoanalista potrebbe eseguire l'operazione
+\[c' \oplus c'' = (m' \oplus k) \oplus (m'' \oplus k) = m' \oplus m'' \oplus k \oplus k = m' \oplus m''\]
+A questo punto quell'operazione potrebbe sembrare innocua ma non lo è affatto:\ per la proprietà dello $\oplus$ le stringhe uguali danno 0, di conseguenza tutte quelle parti dell'operazione $m' \oplus m''$ che danno 0, indicano al crittoanalista che i messaggi erano uguali.\
+Il cifrario non è perfetto.
+
+\subsubsection{One-Time Pad è perfetto}
+
+Ipotesi
+
+\begin{itemize}
+    \item Tutti i messaggi hanno lunghezza $n$:\ si fa padding se sono più corti, di divide se sono più lunghi.
+    \item Tutte le sequenze di lunghezza $n$ sono messaggi possibili:\ probabilità molto bassa ma $>0$ anche per tutte le sequenze prive di significato, ciò significa che ogni tanto Alice e Bob si inviano messaggi senza senso al solo scopo di confondere il crittoanalista.\
+    \item Chiave scelta perfettamente a caso per ogni messaggio.\
+\end{itemize}
+
+\noindent Sotto queste ipotesi One-Time Pad è un \textbf{cifrario perfetto} e \textbf{minimale} (impiega un numero minimo di chiavi).\
+Il problema di fondo è la necessità di una chiave segreta lunga quanto il messaggio ogni volta che viene inviato un messaggio:\ tanto vale scambiarsi il messaggio in segreto.
+
+\begin{proof}
+    \[\mathrm{Tesi:}\ \forall\ m \in \mathit{MSG}\ \mathrm{e}\ \forall\ c \in \mathit{CRITTO}\ P(M = m) = P(M = m \mid C = c)\]
+    Ricordiamo che \[P(M = m \mid C = c) = \frac{P(M=m \land C=c)}{P(C=c)}\]
+    Per le proprietà dello $\oplus$ \textit{fissato} un messaggio $m$, chiavi diverse producono crittogrammi $c$ diversi a partire da questo $m$; dunque
+    \[\exists !\ \mathrm{chiave}\ k\ \mathrm{t.c.}\ m \oplus k = c\]
+    In questo modo vale che $\forall\ c \in \mathit{CRITTO}$
+    \[P(C = c) = P(\mathrm{scegliere\ l'unica\ chiave}\ k\ \mathrm{t.c.}\ m \oplus k = c ) = \frac{1}{2^n}\]
+    Questo significa che per ogni messaggio, ottenere un particolare crittogramma è una cosa che dipende solo ed esclusivamente dalla chiave:\ la probabilità che dato un determinato messaggio $m$ che viene inviato, il suo crittogramma corrispondente sia proprio $c$ è pari alla probabilità stessa di inviare il messaggio (messaggio e crittogramma sono completamente scorrelati).\
+    $P(M = m)$ e $P(C = c)$ sono \textbf{eventi indipendenti}.\
+    \[\frac{P(M=m \land C=c)}{P(C=c)} = \frac{P(M=m)\cdot P(C=c)}{P(C=c)} = P(M=m)\]
+
+    \noindent Adesso dimostriamo che il cifrario è \textit{minimale}.\
+
+    Per il teorema di Shannon $N^k \geq N^m$, ma noi sappiamo che se la lunghezza dei messaggi è $n$ allora $N^k = N^m = N^c = 2^n$.\
+    Perciò, anche le chiavi sono $2^n$ e sono il minimo di chiavi possibile:\ usarne meno non garantisce la sicurezza, dovrei cifrare più messaggi con la stessa chiave, mentre usarne più di $2^n$ sarebbe inutile, avrei chiavi inutilizzate.\
+
+\end{proof}
+
+\subsubsection{Attacchi}
+
+Un attacco brute force non ha senso poiché ogni chiave applicata a un crittogramma produce un messaggio che nel sistema OTP esiste:\ tutte le sequenze di $n$ bit esistevano come entità ``messaggio'' e avevano una probabilità $p > 0$ di essere inviate, semplicemente quelle che non hanno senso hanno una $p > 0$ ma molto bassa; in pratica, ogni chiave fa ricostruire un messaggio possibile.\
+
+Scambiarsi la chiave, però, non è una funzione semplice e ci sono varie alternative:\ è possibile incontrarsi raramente di persona, scambiarsi una chiave lunghissima e usarla a blocchi (invio un messaggio lungo $n$ $\Rightarrow$ uso $n$ bit della chiave $\Rightarrow$ destinatario riceve e decifra con $n$ bit della chiave).\
+Alternativamente si può usare un generatore pseudo-casuale crittograficamente sicuro facendo sì che sia mittente che destinatario conoscano il tipo di generatore, il seme e i suoi parametri così da generare gli stessi bit.\
+A questo punto vi è un bivio:\ o si rende pubblico il generatore usato stando però attenti alla periodicità del seme che potrebbe esporre il cifrario ad attacchi basati su chiave ripetuta oppure se ne crea uno ad hoc e lo si mantiene privato.\
+Tipicamente è possibile reperire sul web delle sequenze genomiche sufficientemente casuali:\ i due estremi della comunicazione possono accordarsi su quale file scegliere e da quale punto iniziare.\
+È un sistema usato e abbastanza sicuro.
+
+Nella dimostrazione che One-Time Pad è un cifrario perfetto, una delle ipotesi fatte era che tutte le sequenze di $n$ bit fossero messaggi possibili.\
+Tuttavia, i messaggi significativi in mezzo a tutti i $2^n$ messaggi possibili sono una parte molto più piccola di $2^n$; per questo motivo, rimuoviamo l'ipotesi che tutte le sequenze di $n$ bit sono messaggi possibili.\
+
+\noindent\textbf{Nota bene}:\ supponiamo che il cifrario non dipende in alcun modo da come cui vengono tradotti i messaggi da linguaggio naturale in binario.\
+I messaggi significativi in lingua inglese, ad esempio, sono circa $\alpha^n\ \mathrm{con}\ \alpha = 1.1$, perciò $\alpha^n << 2^n$.\
+Avendo annullato l'ipotesi che le sequenze di $n$ bit sono tutte messaggi possibili, possiamo dire che $N_m = \alpha^n$; per il teorema di Shannon
+\[N_k \geq N_m \Rightarrow N_k \geq \alpha^n\]
+La chiave sarà una sequenza di $t$ bit tale che $2^t \geq \alpha^n$, di modo che l'insieme delle chiavi copra almeno tutto l'insieme dei messaggi.
+\[2^t \geq \alpha^n \Rightarrow t \geq \log_2\alpha^n = n\log_2\alpha = 0.12\cdot n\]
+Questo significa che il numero di bit necessari per avere una chiave lunga quanto un messaggio significativo sono $t = 0.12 \cdot n$, ovvero è possibile ridurre la lunghezza delle chiavi a $\frac{1}{12}$ dei bit usati precedentemente (quando l'ipotesi che tutte le sequenze di $n$ bit fossero messaggi possibili era ancora valida); tuttavia, i messaggi sono ancora lunghi $n$ bit, perciò, i primi $t$ bit della chiave verranno generati realmente in maniera casuale mentre i successivi $n - t$ bit verranno generati in maniera deterministica.
+
+È opportuno, però, per confondere l'avversario, che coppie messaggio-chiave diverse, producano lo stesso crittogramma.\
+In pratica, decifrando lo stesso crittogramma con svariate delle $2^t$ chiavi, è possibile ottenere altrettanti messaggi significativi:\ sarebbe un vantaggio troppo grosso per il crittoanalista se un crittogramma fosse decifrabile con una o poche più chiavi.\
+Per far questo deve valere che
+\[\#\mathrm{coppie}\langle m, k\rangle >> \#\mathrm{crittogrammi} \Rightarrow \alpha^n 2^t >> 2^n\]
+Da cui si ricava che $t >> 0.88 \cdot n$.\

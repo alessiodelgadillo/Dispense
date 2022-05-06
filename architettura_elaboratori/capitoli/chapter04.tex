@@ -1,0 +1,188 @@
+\chapter{Livello Firmware}
+
+\section{Caratteristiche di un sistema a livello firm\-ware}
+
+Un \textit{sistema di elaborazione} a livello firmware è costituito da un certo numero di \textit{unità di elaborazione} tra loro interagenti, $\mathrm{U}_1, \dots, \mathrm{U}_n$.
+
+A ogni unità di elaborazione è affidato un certo sottoinsieme delle funzionalità dell'intero sistema.\
+Attraverso l'interazione tra unità è realizzato il compito che globalmente s'intende affidare all'intero sistema.\
+Ogni unità è specializzata verso uno specifico compito, ma attraverso l'interazione tra esse si realizza un sistema avente la caratteristica di \textit{essere generale nei confronti del supporto fornito ai livelli superiori del sistema}.\
+In particolare, il funzionamento di ogni unità e l'interazione tra le varie unità realizzano l'\textit{interpretazione} di qualunque programma espresso con il formalismo che definisce il livello assembler del sistema.
+
+Essendo un modulo di elaborazione, un'unità svolge il proprio specifico compito in modo:
+
+\begin{itemize}
+    \item autonomo:\ \textit{l'unità è capace di controllare la propria elaborazione in modo del tutto indipendente, pur ricavando informazioni sulle funzionalità da eseguire e valori dei dati attraverso l'interazione con altre unità};
+    \item sequenziale:\ \textit{il fondamento dell'unità è descritto da un programma sequenziale.\ Chiameremo microprogramma la descrizione del funzionamento dell'unità, e microlinguaggio il linguaggio di programmazione sequenziale con cui esprimere il microprogramma}.
+\end{itemize}
+
+\subsection{Modello Parte Controllo - Parte Operativa}
+
+Il microprogramma di un'unità di elaborazione è a sua volta implementato dal \textit{livello hardware} sottostante.\
+Questa interpretazione è realizzata da due reti sequenziali LLC tra loro interagenti, dette \textbf{Parte Controllo} (PC) e \textbf{Parte Operativa} (PO).
+
+PO provvede all'esecuzione delle operazioni dai comandi del microlinguaggio, o \textbf{microistruzioni}, disponendo delle tipiche risorse strutturali messe a disposizioni dal livello hardware:\ \textit{commutatori}, \textit{selezionatori}, \textit{rete di calcolo} mono-funzione o multi-funzione (ALU), \textit{registri}.
+
+PC provvede:
+\begin{itemize}
+    \item al \textit{controllo della sequenzializzazione} delle microistruzioni, allo scopo utilizzando i valori delle \textbf{variabili di condizionamento} relative allo stato di PO;
+    \item a \textit{ordinare a PO l'esecuzione} delle operazioni di ogni microistruzione mediante i valori delle \textbf{variabili di controllo} $\alpha$ e $\beta$.
+\end{itemize}
+
+\noindent PC e PO sono \textit{reti sequenziali LLC} impulsate dallo stesso segnale di clock, e quindi aventi lo stesso ciclo di clock:
+
+\begin{itemize}
+    \item questo, detto \textbf{\textit{ciclo di clock}} dell'unità è determinato in modo tale da permettere la stabilizzazione di entrambe le reti per l'esecuzione di una qualsiasi microistruzione.
+\end{itemize}
+
+\noindent Poiché la struttura PC-PO rappresenta l'interprete hardware del microlinguaggio del livello firmware, \textit{il modello di programmazione del livello firmware è dunque \textbf{sincrono}}:
+
+\begin{itemize}
+    \item \textit{ogni microistruzione è eseguita in tempo costante uguale al ciclo di clock}.
+\end{itemize}
+
+\subsection{Il procedimento di progettazione delle unità}
+
+I passi essenziali nel procedimento formale di progettazione di un'unità sono i seguenti:
+
+\begin{enumerate}
+    \item Specifica delle operazioni esterne affidate all'unità
+    \item Scrittura del microprogramma che interpreta le operazioni esterne
+    \item Progetto PO
+    \item Progetto PC
+    \item Valutazione del ciclo di clock dell'unità
+    \item Valutazione tempo medio di elaborazione
+\end{enumerate}
+
+\section{Formalizzazione del procedimento}
+
+A partire dalla specifica delle operazioni esterne, il procedimento di progettazione ha lo scopo di realizzare la struttura dell'unità di elaborazione secondo il modello PC-PO, e di valutarne le prestazioni.
+
+\subsection{Microlinguaggio}
+
+La formalizzazione del procedimento è basata sulla scrittura del \textit{microprogramma eseguibile}, ogni passo del quale (\textit{microistruzione}) è eseguito esattamente in un ciclo di clock.
+
+\subsection{Ottimizzazione delle micro operazioni}
+
+Esistono diversi modi per scrivere microprogrammi efficienti:
+
+\begin{itemize}
+    \item Eliminazione delle \textit{nop}:\ ogni volta che si esegue una nop, agli effetti del tempo di elaborazione viene perduto un ciclo di clock;
+    \item Parallelismo delle micro operazioni:\ trasformare una computazione sequenziale nella computazione parallela equivalente.
+\end{itemize}
+
+\noindent Formalmente valgono le seguenti \textbf{condizioni di Bernstein}:
+
+\begin{itemize}
+    \item $W(\mu-op_1) \cap R(\mu-op_2) = \emptyset $
+    \item $R(\mu-op_1) \cap W(\mu-op_2) = \emptyset $
+    \item $W(\mu-op_1) \cap W(\mu-op_2) = \emptyset $
+\end{itemize}
+
+La terza condizione vale solo in un modello asincrono di computazione, nel quale non si fanno ipotesi sulla durata delle operazioni e sui loro istanti di inizio.
+
+\subsection{Struttura di PO}
+
+La struttura di PO, vista come rete sequenziale di Moore, è ricavata formalmente dal microprogramma.
+
+\begin{enumerate}
+    \item Si individuano tante classi di operazioni elementari per quanti sono i registri destinazione (che compaiono a destra dell'operatore $\rightarrow$).\ Ciò permette di individuare i possibili ingressi di ogni registro.
+    \item Si ricava una sottostruttura indipendente per ogni registro, con la propria variabile di controllo $\beta$; nel caso in cui gli ingressi possibili IN siano in numero $r>1$, sull'ingresso del registro viene inserito un commutatore, comandato da $\lceil \log_2r\rceil$ variabili di controllo $\alpha$ e i cui ingressi principali sono quelli di IN.
+    \item Si individuano tante classi di operazioni elementari per quante sono le reti logiche dagli operatori che compaiono nelle operazioni elementari.
+    \item Si ricava una struttura indipendente per ogni rete logica:\ se si tratta di una rete multifunzione, come una ALU, con $r$ funzioni, occorrono $\lceil \log_2r\rceil$ variabili di controllo $\alpha$ per comandare la scelta della funzione; per ogni ingresso principale, se è prevista più di una sorgente, si inserisce un commutatore pilotato da opportune variabili di controllo $\alpha$.
+    \item Si implementano le variabili di condizionamento, come funzioni di uscite di registri o uscite di reti combinatorie
+\end{enumerate}
+
+\subsection{Struttura di PC}
+
+La struttura di PC, vista come rete sequenziale di Mealy, è ricavata formalmente dal microprogramma mediante il seguente procedimento.
+
+\begin{enumerate}
+    \item Gli stati interni corrispondono biunivocamente alle etichette delle microistruzioni del microprogramma.\ Se \textit{m} è il numero degli stati interni, il registro di stato del controllo è di \textit{s} bit con $s= \lceil \log_2m\rceil$ .
+    \item Gli stati d'ingresso corrispondono biunivocamente alle possibili combinazioni di variabili di condizionamento per formare le condizioni logiche del microprogramma
+    \item Gli stati di uscita corrispondono biunivocamente alle possibili combinazioni di segnali di controllo $\alpha$ e $\beta$ necessari a eseguire tutte le micro-operazioni del microprogramma.
+    \item La tabella di verità della funzione delle uscite di $\omega_{PC}$ e della funzione di transizione dello stato interno $\sigma_{PC}$ viene ricavata in base alle tre corrispondenze suddette e alla struttura del microprogramma.\ Da questa tabella è possibile sintetizzare PC con parte combinatoria a due o più livelli di logica.
+\end{enumerate}
+
+\noindent Si osservi che \textit{tutti i segnali $\beta$ devono sempre essere specificati per ogni possibile combinazione}, mentre i segnali $\alpha$ potranno eventualmente essere non specificati per qualche combinazione.
+
+\subsection{Ciclo di clock}
+
+A differenza di una rete sequenziale isolata, per un'unità di elaborazione PC-PO occorre ricavare la \textit{condizione di stabilizzazione di entrambe le reti sequenziali PC e PO}.\
+Il ciclo di clock non può dunque concludersi prima che siano stabili le funzioni di transizione di PC e di PO, cioè prima che siano stabili, rispettivamente, gli ingressi del registro di stato del controllo e di tutti i registri di PO.
+
+Poiché PO è una rete di Moore, dopo un tempo $T_\omega\mathrm{PO}$, sono stabili le variabili di condizionamento.\
+Solo a questo punto, poiché PC è una rete di Mealy, può iniziare, per l'ultima volta all'interno di questo ciclo di clock, la stabilizzazione delle funzioni $\omega_{\mathrm{PC}}$ e $\sigma_{\mathrm{PC}}$ in parallelo.\
+Una volta che $\omega_{\mathrm{PC}}$ si è stabilizzata definitivamente, dopo un intervallo $T_{\omega}\mathrm{PC}$, può quindi iniziare, per l'ultima volta all'interno di questo ciclo di clock, la stabilizzazione della funzione $\sigma_{\mathrm{PO}}$; il ciclo di clock si può concludere quando si sono stabilizzate definitivamente tanto la $\sigma_{\mathrm{PC}}$ quanto la $\sigma_{\mathrm{PO}}$.
+
+Di conseguenza, la lunghezza del ciclo di clock è data da:
+\[\tau = T_{{\omega}_{PO}} + \max\{ T_{{\omega}_{PC}} +  T_{{\sigma}_{PO}},  T_{{\sigma}_{PC}}\} + \delta\]
+Mentre il tempo medio di elaborazione di una unità è calcolato come
+\[T = k\tau\]
+Dove $k$ è il \textit{numero medio di cicli di clock necessari a eseguire la generica operazione esterna}.
+
+In generale, in un microprogramma sono presenti più sottosequenze di microistruzioni eseguite con una certa probabilità $p_i$ dove:
+\[\sum^{n-1}_{i =0}p_i = 1\]
+Di ogni sottosequenza si calcola il numero di cicli di clock $k$, necessario a eseguirla e quindi si ricava il valore di $T$ come media pesata:
+\[T = \tau \times \sum^{n-1}_{i =0}p_ik_i\]
+Quando non siano note le $p_i$ si assume che tutte le sequenze siano equiprobabili.
+
+\textit{La \textbf{banda di elaborazione} è definita come il numero medio di operazioni esterne che l'unità può eseguire nell'unità di tempo}:\ $B = \frac{1}{T}$
+
+\section{Comunicazioni a livello firmware}
+
+\subsection{Comunicazioni tra unità}
+
+Nel modello a scambio di messaggi a livello firmware i canali di comunicazione sono implementati da supporti fisici (strutture d'interconnessione) costituiti da interfacce presenti nella Parte Operativa delle unità e da collegamenti tra le unità stesse.
+
+Il canale di comunicazione tra due unità è implementato da tre componenti:\ interfaccia di uscita, collegamento fisico e interfaccia d'ingresso.
+
+Le forme di comunicazioni possibili sono
+\begin{itemize}
+    \item Simmetrica vs asimmetrica:\ nel caso simmetrico il canale di comunicazione ha un singolo mittente e un singolo destinatario, nel caso asimmetrico in ingresso il canale di comunicazione ha più mittenti e un singolo destinatario, nel caso asimmetrico in uscita il canale di comunicazione ha un singolo mittente un più destinatari.
+    \item Asincrona vs sincrona:\ si dice che un canale (simmetrico) ha grado di asincronia $k$, con $k \geq 0$, se il mittente può inviare fino a $k$ messaggi senza attendere che il destinatario ne abbia ricevuto uno o più.\ Nel caso che il mittente intenda inviare un $(k+1)$-esimo messaggio senza che il destinatario ne abbia ricevuto alcuno dei $k$ precedenti, occorre che il mittente stesso attenda che il destinatario ne abbia ricevuto almeno uno.\ Il caso $k = 0$ è quello della comunicazione sincrona:\ per ogni messaggio, il mittente, prima di poter proseguire, deve attendere che il destinatario lo abbia ricevuto.
+\end{itemize}
+
+\subsection{Protocollo mediante segnali di RDY e ACK}
+
+La trasmissione del messaggio (\texttt{MSG}) avviene attraverso un registro di uscita di $\mathrm{U}_1$ (\texttt{OUT}) e un registro d'ingresso di $\mathrm{U}_2$ (\texttt{IN}) connessi da un collegamento fisico.\
+Si tratta dei registri d'ingresso e di uscita con le caratteristiche tipiche di un'unità firmware.\
+Una volta che $\mathrm{U}_1$ ha scritto il valore di \texttt{MSG} in \texttt{OUT}, questo valore si propaga all'ingresso di \texttt{IN} di $\mathrm{U}_2$, e sarà quindi scritto in tale registro al primo impulso di clock di $\mathrm{U}_2$.\
+Il valore di \texttt{MSG} è ora disponibile a $\mathrm{U}_2$ come stato interno di PO.
+
+La \textit{sincronizzazione} è implementata facendo uso di due linee addizionali, di un bit ciascuna, detta \textbf{\textit{linea di Ready}} (\texttt{RDY}) e \textbf{\textit{linea di Acknowledgement}} (\texttt{ACK}):
+
+\begin{itemize}
+    \item mediante la linea \texttt{RDY} $\mathrm{U}_1$ fa sapere a $\mathrm{U}_2$ che ha inviato un nuovo messaggio; essa ha dunque il significato di segnalare a $\mathrm{U}_2$ la presenza di un nuovo messaggio;
+    \item mediante la line \texttt{ACK} $\mathrm{U}_2$ fa sapere $\mathrm{U}_1$ che ha ricevuto il nuovo messaggio; essa ha dunque il significato di segnalare a $\mathrm{U}_1$ la ricezione di un messaggio.
+\end{itemize}
+
+\noindent Poiché intendiamo implementare un protocollo per la comunicazione asincrona di grado $k = 1$, il significato della linea \texttt{ACK} è di far sapere a $\mathrm{U}_1$ che è possibile inviare un nuovo messaggio.
+
+\subsection{Interfaccia a transizione di livello}
+
+I quattro elementi di memoria, \texttt{RDYOUT}, \texttt{ACKOUT}, \texttt{RDYIN}, \texttt{ACKIN}, sono detti \textbf{\textit{indicatori d'interfaccia}} e sono così caratterizzati:
+
+\begin{itemize}
+    \item sugli \textit{indicatori d'interfaccia di uscita} (\texttt{RDYOUT} e \texttt{ACKIN}) è definita l'unica operazione chiamata \textbf{\textit{set}}:\ l'esecuzione di \texttt{set RDYOUT} da parte di $\mathrm{U}_1$ ha come effetto finale il fatto che l'indicatore d'interfaccia d'ingresso di $\mathrm{U}_2$ \texttt{RDYIN} assume l'uscita uguale a uno; analogamente, l'esecuzione di \texttt{set ACKIN} da parte di $\mathrm{U}_2$ ha come effetto finale il fatto che l'uscita di \texttt{ACKOUT} in $\mathrm{U}_1$ assume il valore uno;
+    \item sugli \textit{indicatori d'interfaccia d'ingresso} (\texttt{RDYIN} e \texttt{ACKOUT}) sono definite due operazioni.\ Una è il test del valore di uscita di tali indicatori.\ L'altra, chiamata \textbf{\textit{reset}}, ha come effetto di portare l'uscita degli indicatori stessi a zero:\ \texttt{reset RDYIN} porta a zero l'uscita di \texttt{RDYIN}, \texttt{reset ACKOUT} porta a zero l'uscita di \texttt{ACKOUT}.
+\end{itemize}
+
+\noindent Per quanto riguarda l'impatto del protocollo sulla struttura di PC e PO:
+
+\begin{itemize}
+    \item tutti gli indicatori d'interfaccia fanno parte dello stato interno di PO;
+    \item \texttt{RDYIN} e \texttt{ACKOUT} fanno parte delle variabili di condizionamento.
+\end{itemize}
+
+\subsection{Altre forme di comunicazione}
+
+\textbf{Comunicazione domanda e risposta}:\ si consideri una unità $\mathrm{U}_1$ che invia un messaggio a $\mathrm{U}_2$ dopodiché attende un messaggio da $\mathrm{U}_2$ stessa; tipicamente, si tratta di una situazione cliente-servente, in cui il cliente $\mathrm{U}_1$ prima invia un messaggio al servente $\mathrm{U}_2$ per chiedere un servizio, e quindi attende dal servente un messaggio di risposta.\
+Anche se le interfacce tra $\mathrm{U}_1$ e $\mathrm{U}_2$ contengono gli indicatori di \texttt{ACK}, questi non servono nella comunicazione a domanda e risposta:\ $\mathrm{U}_1$ non invierà un nuovo messaggio prima di aver ricevuto la risposta da $\mathrm{U}_2$, quindi l'\texttt{ACK} è implicito nella risposta.
+
+\textbf{Comunicazione asincrona con grado di asincronia \textit{k} $>$ 1}:\ in questo caso non esiste una soluzione basata su semplici interfacce nelle due unità comunicanti, ma è necessario interporre una terza unità (Unità Buffer) che implementi una coda FIFO a \textit{k} posizioni.
+
+\textbf{Collegamenti a bus}:\ il bus risulta composto da $n +2$ linee, per dati di $n$ bits.\
+Tutti i bit di \texttt{RDY}, sia ingresso sia in uscita, di tutte le unità sono infatti connessi a una singola linea, così come tutti i bit di \texttt{ACK}, e tutti i bit facenti parte del messaggio.\
+L'uscita del registro \texttt{OUT} è messa in \texttt{AND} con il segnale \texttt{RDYOUT} allo scopo di ``ripulire'' il bus dopo che il messaggio è stato ricevuto.
+

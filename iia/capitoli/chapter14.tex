@@ -1,0 +1,159 @@
+\chapter{Introduzione all'uso di SVM}
+
+Un classificatore derivato dalla \textit{statistical learning theory} di Vapnik e altri.\
+Dopo anni di sviluppi teorici, SVM è diventato famoso quando, utilizzando immagini come input, ha fornito una precisione paragonabile alle rete neurali allo stato dell'arte (negli anni `90), con funzionalità progettate a mano in un'attività di riconoscimento della grafia.\
+
+Attualmente, SVM è ampiamente utilizzato in tutti i campi di applicazione dell'apprendimento supervisionato; viene utilizzato anche per la regressione.\
+
+Gli obiettivi di questa introduzione SVM in IIA sono:
+\begin{enumerate}
+	\item Controllo della complessità del modello tramite un approccio di ottimizzazione per approssimare direttamente la minimizzazione del rischio strutturale:\ \textbf{classificatore a massimo margine}.\
+	\item Utilizzare un'espansione di base lineare in modo efficiente tramite il kernel, così da ottenere un altro approccio flessibile per l'apprendimento supervisionato \textit{non lineare}.
+	\item Evitare interpretazioni errate tipiche nell'uso di SVM, tali sono convinzioni eccessivamente ottimistiche sull'overfitting e sull'evitamento del corso di dimensionamento.
+\end{enumerate}
+
+\section{Classificatore a massimo margine}
+
+Problema di classificazione binaria.\
+Cominciamo assumendo un problema linearmente separabile e assumendo anche nessun dato di rumore.
+
+Non tutti gli iperpiani che risolvono il compito sono uguali\dots\
+Variando l'iperpiano di separazione, il margine varia altrettanto.\
+
+\begin{definition}
+	Il \textbf{margine} è il doppio della distanza tra l'iperpiano e il punto più vicino.\
+\end{definition}
+
+\noindent Intuitivamente si cerca la distanza massima dai punti dati per massimizzare la zona ``safe''.\
+
+\begin{definition}
+	\[\mathit{Support\ Vectors}:\ \mathbf{x}_p\ \mathrm{tale\ che}\ |\mathbf{w}^T\mathbf{x}_p +b| = 1  (b=w_0)\]
+	Tutti i punti sono correttamente classificati se $\forall i\ (w^T x_i +b)y_i \geq 1 $
+\end{definition}
+
+\noindent Consideriamo il problema di imparare un \textit{modello lineare} per la classificazione binaria, cioè una funzione $h: \mathbb{R}^n \rightarrow \{-1,1\}$
+\[h(x) = \mathit{sign}(wx + b )\]
+basata su esempi $(x_p, y_p)$
+
+\vspace{12pt}
+\noindent\textbf{Training problem}:\ trovare $(w, b)$ in modo tale che tutti i punti siano classificati correttamente e il \textit{margine sia massimizzato}.
+
+\subsubsection{Due fatti utili}
+
+\[\mathrm{Margine} = \frac{2}{|w|}\qquad \left[|w|^ 2 = (w^Tw)\right]\]
+\[\Rightarrow\quad\mathit{massimizza\ il\ margine} \leftrightarrow \mathit{minimizza}\ |w| \leftrightarrow \mathit{minimizza}\ \frac{|w|^2}{2} \]
+VC-dim dell'SVM è inverso al margine $\rightarrow$ controllo della complessità del modello dal margine.\
+
+\vspace{12pt}
+
+\noindent L'\textit{iperpiano ottimale} è l'iperpiano che massimizza il margine (e risolve il training problem).
+
+\subsection{Hard Margin SVM}
+
+\textbf{Training problem (forma primale)}:
+\[\min\left[\frac{|w|^2}{2}\right],\ (\mathrm{i.e.}\ w^Tw)\ \mathrm{tale\ che}\ (wx_p + b) y_p \geq 1\qquad p = 1 \dots l\]
+Nota:\ minimizzazione diretta della complessità del modello (funzione di ottimizzazione), tenendo la soluzione (0 errori) nei \textit{vincoli}.\
+La funzione obiettivo è convessa in $w$.
+
+Ovviamente, se esiste una forma primale, esiste anche un forma duale.\
+Supponendo di aver trovato la soluzione del problema duale, possiamo calcolare $(w,b)$:
+\[w = \sum_{p=1}^l\alpha_py_px_p\quad b = y_k- w^Tx_k, \qquad \forall\alpha_k>0\]
+
+\[h(x) = \mathit{sign}(w^Tx +b) = \mathit{sign}\left(\sum_{p=1}^l \alpha_py_px^T_px +b\right) = \mathit{sign}\left(\sum_{p\in \mathit{SV}}\alpha_py_px^T_px +b\right)\]
+\begin{enumerate}
+	\item $\alpha_p \neq 0 \leftrightarrow$ vettori di supporto ($\alpha_p \neq 0 \rightarrow x_p$ è un vettore di supporto).\ La soluzione è sparsa e formulata solo in termini di SV.\ \textit{L'iperpiano dipende solo dai vettori di supporto}.
+	\item Una forma speciale della soluzione:\ non è nemmeno necessario calcolare $(w, b)$ esplicitamente per classificare i punti.
+\end{enumerate}
+
+\noindent \textbf{Nota}:\ i dati vengono inseriti sotto forma di prodotti puntiformi di coppie di punti.
+
+\subsection{Soft Margin}
+
+L'hard margin per tutti i punti può essere troppo restrittivo; alcuni errori possono essere consentiti per la \textit{tolleranza al rumore} e per \textit{fornire un margine più ampio}.\
+
+\begin{center}
+	Soluzione:\ consentire errori che introducono \textbf{slack-variables}.
+\end{center}
+
+\noindent Le \textit{slack-variables} $\xi_i$ possono essere aggiunte per consentire una classificazione errata di punti dati difficili o rumorosi.
+
+\begin{flushleft}
+	\textbf{Training problem (forma primale)}:
+	\[\min\left[\frac{|w|^2}{2} + C\cdot\sum_i\xi_i\right]\ \mathrm{tale\ che}\ (wx_p + b) y_p \geq 1 - \xi_p,\quad \forall p\ \xi_p\geq 0\]
+	$\xi_p$ positivo indica un errore o un margine troppo piccolo, $C> 0$ guida il numero di errori consentiti (gli indici di $\xi_p$ calcolati dal risolutore).
+\end{flushleft}
+
+\noindent $C$ è un iperparametro definito dall'utente.\
+Se $C$ è piccolo allora sono consentiti molti errori di training, possibile underfitting.\
+Se $C$ è grande allora non sono ammessi errori di training (piccolo margine), possibile overfitting.\
+
+\section{Kernel}
+
+\subsubsection{Mapping to a High-Dimensional Space}
+
+Mappare i punti dati nello spazio di input su uno spazio delle features ad alta dimensione (cosiddetto in SVM), dove possono essere separabili linearmente.\
+
+Si può usare la \textit{Linear Basic Expansion} $\Phi(x)$ invece di $x$; tuttavia, l'uso di spazi di features ad alta dimensione (espansione di funzioni di base di grandi dimensioni) può essere computazionalmente irrealizzabile e, cosa più importante, può \textbf{facilmente} portare all'\textit{overfitting} senza controllare la dimensione dello spazio delle features e la \textit{complessità} del classificatore:\ la complessità è qui correlata alla dimensionalità dell'input, numero di parametri liberi sull'equazione
+\[h_w(x) = \mathit{sign}\left(\sum_kw_k\phi_k(x)\right)\]
+Si propone l'approccio Kernel per gestire (\textit{implicitamente}) lo spazio delle features nel contesto del modellamento regolarizzato (dove la complessità dipende dal margine); pertanto, grazie alla regolarizzazione automatizzata di SVM, \textit{la complessità del classificatore può essere mantenuta piccola} indipendentemente dalla dimensionalità nel nuovo spazio delle features.
+
+In SVM non è necessario calcolare $w$ e i dati inseriti sotto forma di prodotti puntiformi di coppie di punti.
+\[h_w(x) = \mathit{sign}\left(\sum_{p \in \mathit{SV}}\alpha_py_px^T_px+b\right)\]
+\[h_w(x) = \mathit{sign}\left(\sum_kw_k\phi_k(x)\right)\]
+\[h_w(x) = \mathit{sign}\left(\sum_{p \in \mathit{SV}}\alpha_py_p\phi^T(x_p)\phi(x)\right)\]e non è nemmeno necessario calcolare direttamente $\phi$ \[h(x)= \mathit{sign}\left(\sum_{p \in \mathit{SV}}\alpha_py_pK(x_p,x)\right)\]cioè possiamo \textit{gestire implicitamente} lo spazio delle features tramite una \textbf{funzione del kernel}.
+
+\begin{definition}
+	Un \textbf{\textit{kernel}} $k: \mathbb{R}^n\times\mathbb{R}^n \rightarrow \mathbb{R}$ è una funzione tale che esistono uno spazio di Hilbert $X$ (possibilmente ad alta dimensione) e una funzione $\Phi: \mathbb{R}^n \rightarrow X$ con
+	\[K (x_i, x_j) = \Phi^T(x_i)\Phi(x_j)\]
+	cioè un kernel è una potenziale scorciatoia per calcolare il prodotto scalare in modo efficiente anche in spazi ad alta dimensione.
+\end{definition}
+
+\subsubsection{Kernel notevoli}
+
+\begin{flushleft}
+	\textbf{Lineare}:\[K (x_i, x_j) = x^T_ix_j\]
+	Mapping $\Phi:\quad x \rightarrow \phi(x)$, dove $\phi(x)$ è $x$ stessa.
+\end{flushleft}
+
+\begin{flushleft}
+	\textbf{Polinomiale} di potenza p: \[ K (x_i, x_j) = (1 + x^T_ix_j)^p\]
+	Mapping $\Phi:\quad x \rightarrow \phi(x)$, dove $\phi(x)$ ha dimensione esponenziale in $p$.
+\end{flushleft}
+
+\begin{flushleft}
+	\textbf{RBF} (funzione a base radiale) Gaussiana:\[ K (x_i, x_j) = e^{\scalebox{1.1}{$\left(-\frac{||x_i-x_j||^2}{2\sigma^2}\right)$}}\]
+	Mapping $\Phi:\quad x \rightarrow \phi(x)$, dove $\phi(x)$ è \textit{infinita-dimensionale}.
+\end{flushleft}
+
+\noindent \textit{RBF} è una scelta molto popolare; si noti che ha un iperparametro ($\sigma$).\
+Può essere molto potente sulla discriminazione TR ma ovviamente incline all'\textbf{overfitting}.\
+
+La progettazione di un nuovo kernel per tipi speciali di dati è un argomento di ricerca corrente.
+
+\begin{itemize}
+	\item Si sceglie il parametro di trade-off $C$ e la funzione kernel $K$ (e i suoi parametri).
+	\item Si risolve il problema di ottimizzazione per trovare $\alpha$:
+	      \begin{itemize}
+		      \item Il costo computazionale scala con $l$ (numero di dati) invece di $n$ (dimensione dello spazio delle features).
+		      \item Modularità:\ cambia solo il kernel (con lo stesso risolutore).
+	      \end{itemize}
+	\item Il modello finale \[h(x) = \mathit{sign}\left(\sum_{p\in\mathit{SV}}\alpha_py_pK(x_p,x)\right)\]
+\end{itemize}
+
+\subsection{Evitare interpretazioni errate}
+
+\begin{itemize}
+	\item L'overfitting può verificarsi senza un'attenta selezione degli iperparametri SVM:\ $C$, kernel, parametri del kernel,\ \dots
+	\item Il trattamento implicito dello spazio High dim è nel \textit{feature space} e non nell'input space (supponendo che vi proiettiamo input significativi).\
+
+	\item Tecnica di convalida vista finora per la selezione del modello (es.\ $C$ , kernel e gli iperparametri del kernel) e anche la valutazione del modello dovrebbe essere usata rigorosamente.\
+\end{itemize}
+
+\subsubsection{Conclusioni}
+
+SVM è uno strumento avanzato, molto utile e molto noto nel Machine Learning; generalmente le prestazioni sono molto buone, ma \textit{non necessariamente} le migliori in confronto ad altri metodi (come le reti neurali e altri).\
+
+Provenire dalla teoria (SRM) è un buon modo per fornire nuovi approcci ML.\
+Combinare in modo efficiente l'\textit{espansione lineare} di base tramite kernel all'interno di un approccio \textbf{max margin} consente di combinare modelli flessibili e il controllo della complessità.\
+
+La modularità del kernel apre nuove possibilità.\

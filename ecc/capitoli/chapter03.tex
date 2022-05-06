@@ -1,0 +1,116 @@
+\section{Linguaggi \textit{\small FOR} e \textit{\small WHILE}}
+
+Introduciamo adesso un altro formalismo per esprimere funzioni, certamente più familiare:\ un linguaggio di programmazione, o meglio il suo nucleo, in forma essenziale.\
+Si tratta di un linguaggio imperativo semplicissimo, che opera solo sui numeri naturali e sui valori di verità, con strutture di controllo che sono presenti in ogni linguaggio di programmazione.
+
+\subsection*{Sintassi (astratta)}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{c l l}
+        $E\rightarrow$  & $n \mid x \mid  E_1 + E_2 \mid E_1 \times E_2 \mid E_1 - E_2$                                            & \small \footnotesize Espr.\ Aritmetiche \\
+        $B\rightarrow$  & $b \mid E_1 < E_2 \mid \lnot B \mid B_1 \lor B_2$                                                        & \footnotesize Espr.\ Booleane           \\
+        $C \rightarrow$ & $\texttt{skip} \mid x:=E \mid C_1;C_2 \mid \mathtt{if}\ B\ \mathtt{then}\ C_1\ \mathtt{else}\ C_2 \mid $ & \footnotesize Comandi                   \\
+                        & $\mathtt{for}\ x=E_1\ \mathtt{to}\ E_2\ \mathtt{do}\ C \mid \mathtt{while}\ B\ \mathtt{do}\ C$           &                                         \\
+    \end{tabular}
+\end{table}
+
+dove $n \in \mathbb{N}$ (i numeri naturali), $x \in \mathit{Var}$ (insieme numerabile di variabili) e $b\in \mathit{Bool} = \{\mathit{tt}, \mathit{ff}\}$\footnote{Poiché non vi sono comandi di lettura né di scrittura su periferiche, assumeremo nel seguito che i programmi abbiano già la memoria inizializzata con i dati di ingresso (cioè che abbiamo una $\sigma$ iniziale, vedi sotto) e che i risultati finali siano leggibili in memoria.} (valore di verità).\
+
+\vspace{12 pt}
+
+\noindent Chiameremo \textit{\footnotesize WHILE} il linguaggio definito dalla grammatica BNF definita sopra\footnote{Di solito si indica con \textit{\scriptsize WHILE} il linguaggio definito dalla grammatica di cui sopra, privata della produzione relativa al comando $\mathtt{for}\ x = E_1\ \mathtt{to}\ E_2\ \mathtt{do}\ C$.\ Avere o non avere comandi di questo tipo non crea alcun problema, in quanto essi sono ``esprimibili'' mediante un oppotuno comando di tipo $\mathtt{while}\ B\ \mathtt{do}\ C$.}; chiameremo invece \textit{\footnotesize FOR} il linguaggio risultante dall'omissione del comando $\mathtt{while}\ B\ \mathtt{do}\ C$ nella definizione della sintassi.\
+
+\subsection*{Semantica (ovvero calcolare è dimostrare)}
+
+Prima di definire la dinamica del nostro linguaggio abbiamo bisogno di un paio di nozioni ausiliarie.\
+Rappresentiamo la memoria tramite una funzione (da sottoinsiemi \textit{finiti} di \textit{Var} nei numeri naturali, tanto in un programma ci possono essere solo un numero finito di variabili)
+\[\sigma : \mathit{Var} \rightarrow \mathbb{N}\]
+e definiamo l'operazione di \textit{aggiornamento} tramite la funzione, o meglio il funzionale a tre argomenti
+\[ -[-/-]:(\mathit{Var}\rightarrow \mathbb{N}) \times \mathbb{N} \times \mathit{Var} \rightarrow (\mathit{Var} \rightarrow \mathbb{N}) \]
+definito come \qquad
+$\sigma[n/x](y) = \left\{\begin{array}{l l}
+        n         & \mathrm{se}\ y=x    \\
+        \sigma(y) & \mathrm{altrimenti} \\
+    \end{array} \right.$
+
+\vspace{12pt}
+
+\noindent Il significato, o \textit{semantica} di un'espressione aritmetica è data dalla seguente funzione, definita ovunque.\
+Seguendo la tradizione scriveremo il suo argomento principale, l'espressione aritmetica, tra le parentesi $[\![$ e $]\!]$, cui viene giustapposto il secondo argomento, cioè la memoria in cui l'espressione va valutata.\
+\[\mathcal{E} [\![-]\!]- : E \times (\mathit{Var} \rightarrow \mathbb{N})\rightarrow\mathbb{N}\]
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{l c l}
+        $\mathcal{E} [\![n]\!]\sigma$             & = & $n$                                                                                  \\
+        $\mathcal{E} [\![x]\!]\sigma$             & = & $\sigma(x)$                                                                          \\
+        $\mathcal{E} [\![E_1+E_2]\!]\sigma$       & = & $\mathcal{E} [\![E_1]\!]\sigma\ \mathit{pi\acute{u}}\ \mathcal{E} [\![E_2]\!]\sigma$ \\
+        $\mathcal{E} [\![E_1\times E_2]\!]\sigma$ & = & $\mathcal{E} [\![E_1]\!]\sigma$ \textit{per} $\mathcal{E} [\![E_2]\!]\sigma$         \\
+        $\mathcal{E} [\![E_1 - E_2]\!]\sigma$     & = & $\mathcal{E} [\![E_1]\!]\sigma$ \textit{meno} $\mathcal{E} [\![E_2]\!]\sigma$        \\
+    \end{tabular}
+\end{table}
+
+\noindent dove \textit{più, meno, per} sono ``vere'' funzioni da coppie di naturali a numeri naturali, a differenza di $+,-,\times$ che sono solo simboli (\textit{tokens}) del nostro linguaggio di programmazione.\
+Poiché i nostri dati sono solo numeri naturali, la funzione \textit{meno} che impieghiamo è la funzione, di solito chiamata \textit{meno limitato}, che si comporta come aspettato quando il minuendo è maggiore o uguale al sottraendo e restituisce 0 altrimenti.\
+
+Invece, nella prima equazione, non abbiamo fatto distinzione tra i \textit{numerali} e i \textit{numeri naturali} e li abbiamo rappresentati con gli stessi simboli; pur non essendo del tutto corretto, ciò viene comunemente fatto e non dovrebbe creare problemi perché di solito è chiaro quando $n$ rappresenta un numero e quando un simbolo del linguaggio.
+
+\medskip
+
+\noindent La semantica di un'espressione booleana è data dalla seguente funzione ovunque definita, che usa la $\mathcal{E}$ appena introdotta.
+\[\mathcal{B} [\![-]\!]- : B \times (\mathit{Var} \rightarrow \mathbb{N})\rightarrow\mathit{Bool}\]
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{l c l}
+        $\mathcal{B} [\![t]\!]\sigma$            & = & $\mathit{tt}$                                                                   \\
+        $\mathcal{B} [\![f]\!]\sigma$            & = & $\mathit{ff}$                                                                   \\
+        $\mathcal{B} [\![E_1 < E_2]\!]\sigma$    & = & $\mathcal{E} [\![E_1]\!]\sigma\ \mathit{minore}\ \mathcal{E} [\![E_2]\!]\sigma$ \\
+        $\mathcal{B} [\![\lnot B]\!]\sigma$      & = & $\mathit{not}\ \mathcal{B} [\![B]\!]\sigma$                                     \\
+        $\mathcal{B} [\![B_1 \lor B_2]\!]\sigma$ & = & $\mathcal{B} [\![B_1]\!]\sigma\ \mathit{or}\ \mathcal{B} [\![B_2]\!]\sigma$     \\
+    \end{tabular}
+\end{table}
+
+\noindent dove \textit{minore}, \textit{not}, \textit{or} sono ``vere'' funzioni.\
+
+\medskip
+
+\noindent Lo stile di definizione seguito per dar semantica alle espressioni va sotto il nome di stile \textit{denotazionale} e si propone di associare una funzione a ciascun operatore, o più in generale, a ciascun costrutto del linguaggio.\
+La definizione di un costrutto composto viene data in termini dei suoi componenti, e per questa proprietà a volte questo stile viene anche detto \textit{composizionale}.\
+Adesso daremo la semantica dei comandi usando un approccio \textit{operazionale}, guidato dalla sintassi.\
+In effetti, andremo a definire una sorta di macchina astratta, che procede per passi discreti, apportando modifiche discrete sulle sue configurazioni, o stati, che possiamo immaginare come coppie $\langle \mathit{comando}, \sigma\rangle$.\
+Questa macchina astratta, che definisce in modo intensionale la semantica di un linguaggio di programmazione o di un sistema, va sotto il nome di \textit{sistema di transizioni} e formalmente è una coppia $(\Gamma, \rightarrow)$ dove
+
+\begin{itemize}
+    \item $\Gamma$ è la classe delle \textit{configurazioni} (nel nostro caso la classe delle coppie $\langle c \in C, \sigma\rangle$, dove $\sigma$ è definita per ogni variabile che appaia in \textit{comando}; la coppia con il comando $c$ vuoto ($\neq \mathtt{skip}$) è abbreviata da $\sigma$).
+    \item $\rightarrow\ \subseteq \Gamma \times \Gamma$ è una funzione, detta di \textit{transizione}.\
+\end{itemize}
+
+\noindent Noi seguiremo un approccio detto SOS (Structural Operational Semantics) (o \textit{small-step}), in cui ciascuna transizione \[\langle c, \sigma\rangle \rightarrow \langle c', \sigma' \rangle\]
+rappresenta un singolo passo di computazione, ovvero il fatto che la macchina ha attraversato lo stato $\langle c, \sigma\rangle$ e transisce nello stato $\langle c', \sigma'\rangle$ a causa di una sua certa attività.
+\footnote{Un approccio alternativo consiste nel definire una semantica \textit{naturale} o \textit{big-step}, in cui le transizioni hanno tutte la forma \[\langle c \in C, \sigma\rangle \Rightarrow \sigma'\] cioè $\sigma'$ memorizza le modifiche prodotte dall'intera esecuzione del comando $c$ nella memoria iniziale $\sigma$.\ Un'intera computazione viene allora vista come la deduzione della transizione in questione.\ Potremmo però trovarci nell'impossibilità di dimostare l'esistenza di una transizione per uno stato:\ in questo caso avremmo o una situazione di stallo, o una situazione di non-terminazione della computazione, quando la deduzione non sia finita.}
+
+In maniera del tutto simile a quanto fatto con le macchine di Turing, si
+può allora definire una \textit{computazione} come la chiusura riflessiva e transitiva della funzione di transizione, formalmente, una \textit{computazione} è \[\langle c, \sigma\rangle \rightarrow^* \langle c', \sigma' \rangle\]
+Una computazione termina con successo, o converge, se $\langle c, \sigma\rangle \rightarrow^* \sigma'$.
+
+Si noti che la semantica operazionale di un programma è allora data dal grafo $(\Gamma, \rightarrow$), mentre le computazioni danno una descrizione dei passi necessari al calcolo con granularità fine quanto si voglia.\
+
+In questo approccio, l'attività svolta dalla macchina quando transisce da una configurazione nella successiva viene a volte resa esplicita, etichettando la funzione di transizione e ottenendo così i \textit{sistemi di transizioni etichettati}.\
+\footnote{Ovviamente questo può venir fatto anche nell'approccio naturale, componendo le etichette e rappresentando così le computazioni attraverso una sequenza di etichette.}
+Un'ulteriore estensione piuttosto comune riguarda l'arricchimento della coppia ($\Gamma, \rightarrow$) con un insieme di configurazioni terminali, ovvero di stati finali (a volte si aggiunge alla coppia anche una configurazione iniziale, da cui si assume partano tutte le computazioni).\
+Nel nostro caso, il sistema di transizioni che useremo avrà come configurazioni finali le coppie formate da un comando vuoto e una memoria $\sigma$, che abbiamo già abbreviato con $\sigma$.
+
+È evidente come gli stili di definizione denotazionale e operazionale siano differenti, in quanto non c'è modo immediato di comporre il ``risultato'' di un'esecuzione con quello di un'altra esecuzione.\
+Tuttavia, anche l'approccio operazionale è in larga misura composizionale, per il modo che seguiamo nel definire la classe delle transizioni.\
+Infatti, di seguito introduciamo un insieme di assiomi e regole di inferenza, che inducendo sulla sintassi dei comandi, ci permettono di dedurre tutte e sole le transizioni (ovvero prendiamo la minima classe che contiene tutte le instanze degli assiomi ed è chiusa rispetto alle regole di inferenza).
+
+\[\frac{-}{\langle \mathtt{skip}, \sigma\rangle \rightarrow \sigma}\quad \qquad \frac{-}{\langle x:=E, \sigma\rangle \rightarrow \sigma[n/x]},\ \mathrm{se}\ \mathcal{E}[\![E]\!]\sigma = n\]
+\[\frac{\langle C_1, \sigma\rangle \rightarrow \langle C'_1, \sigma'\rangle}{\langle C_1; C_2, \sigma\rangle \rightarrow \langle C'_1; C_2,\sigma'\rangle}\quad \qquad \frac{\langle C_1, \sigma\rangle \rightarrow \sigma'}{\langle C_1; C_2, \sigma\rangle \rightarrow \langle C_2, \sigma'\rangle}\]
+\[\frac{-}{\langle \mathtt{if}\ B\ \mathtt{then}\ C_1\ \mathtt{else}\ C_2, \sigma\rangle \rightarrow \langle C_1, \sigma\rangle},\ \mathrm{se}\ \mathcal{B}[\![B]\!]\sigma = \mathit{tt}\]
+\[\frac{-}{\langle \mathtt{if}\ B\ \mathtt{then}\ C_1\ \mathtt{else}\ C_2, \sigma\rangle \rightarrow \langle C_2, \sigma\rangle},\ \mathrm{se}\ \mathcal{B}[\![B]\!]\sigma = \mathit{ff}\]
+\[\frac{-}{\langle \mathtt{for}\ i=E_1\ \mathtt{to}\ E_2\ \mathtt{do}\ C, \sigma\rangle \rightarrow \langle i:= n_1;\ C; \mathtt{for}\ i = n_1 + 1\ \mathtt{to}\ n_2\ \mathtt{do}\ C, \sigma \rangle}\]
+\[\mathrm{se}\ \mathcal{B}[\![E_2 < E_1]\!]\sigma = \mathit{ff} \land \mathcal{E}[\![E_1]\!]\sigma = n_1 \land \mathcal{E}[\![E_2]\!]\sigma = n_2\]
+\[\frac{-}{\langle \mathtt{for}\ i=E_1\ \mathtt{to}\ E_2\ \mathtt{do}\ C, \sigma\rangle \rightarrow \sigma},\ \mathrm{se}\ \mathcal{B}[\![E_2 < E_1]\!]\sigma = \mathit{tt}\]
+\[\frac{-}{\langle \mathtt{while}\ B\ \mathtt{do}\ C, \sigma\rangle \rightarrow \langle \mathtt{if}\ B\ \mathtt{then}\ C;\ \mathtt{while}\ B\ \mathtt{do}\ C\ \mathtt{else\ skip}, \sigma \rangle}\]

@@ -1,0 +1,54 @@
+\chapter{From the Cloud to the IoT}
+
+L'\textbf{Internet of Things} (\textbf{IoT}) è un'area in continua in espansione che prevede la connessione di dispositivi elettronici o cyber-fisici (Android wearables, Google Nest, Amazon Echo, Domotica) al fine di creare una serie di applicazioni innovative impressionanti come \textit{embedded AI}, \textit{sistemi di guida autonoma}, \textit{flotte di droni}, \textit{smart agricolture}, \textit{smart city},\ \dots
+
+\vspace{12pt}
+\noindent``\textit{More than 10 bilion active IoT devices in 2021, more than 25.4 bilion estimated for 2030}.''\quad [\texttt{dataprot.net}]
+\vspace{12pt}
+
+\noindent Tutte le applicazioni di IoT, non solo la parte di sensoristica o di attuazione, ma anche reti di sensori che sono dispiegate vicino al terreno, producono una quantità di dati enorme; fortunatamente il cloud è abbastanza grande per accoglierli.\
+Tuttavia per alcune applicazioni questo tipo di architettura non è molto efficace:\ è necessario filtrare/processare tali dati prima di arrivare al cloud; la latenza, cioè il tempo che intercorre tra la rilevazione di un dato e l'attuazione determinata dalla sua elaborazione, deve essere veramente breve (si pensi ad esempio ai veicoli intelligenti).
+
+Tradizionalmente il deployment delle applicazioni avveniva tramite due modelli principali:
+
+\begin{enumerate}
+	\item IoT + Edge (o edge computing):\ l'intera applicazione è collocata al confine (edge) della rete; l'idea è di processare i dati direttamente laddove vengono prodotti.\
+	      \begin{itemize}
+		      \item Latenze basse.
+		      \item Limitata capacità di calcolo.
+		      \item Difficoltà nella condivisione dei dati.
+	      \end{itemize}
+	\item IoT + Cloud:\ i dati vengono mandati al cloud per l'elaborazione.
+	      \begin{itemize}
+		      \item Enorme potenza di calcolo.
+		      \item È necessaria una connessione fra i dispositivi coinvolti.
+		      \item Latenza più alta.
+		      \item Bottleneck dovuti all'ampiezza di banda
+	      \end{itemize}
+\end{enumerate}
+
+\noindent A partire da tutto ciò è partita l'idea di questa continuità tra l'IoT e il Cloud che viene spesso chiamata \textit{Fog Computing}.
+
+\vspace{12pt}
+\noindent Il \textbf{Fog Computing} mira ad estendere il Cloud verso l'IoT per supportare meglio le applicazioni IoT \textit{latency-sensitive} e \textit{bandwith-hungry}.
+\vspace{12pt}
+
+\noindent C'è un interesse molto grande nel mondo industriale e in quello della ricerca.\
+Ci sono molte sfide aperte:
+\begin{itemize}
+	\item deployment adattivo di applicazioni:\ mandare in esecuzione un'applicazione multi-servizio su un'infrastruttura grande, distribuita ed eterogenea non è semplice;
+	\item la gestione delle applicazioni durante il ciclo di vita del sistema;
+	\item il monitoraggio distribuito su infrastrutture offerte anche da provider diversi;
+	\item problemi di trust, di privacy, di sicurezza in generale;
+	\item fault resilience;
+	\item testbeds:\ infrastrutture su cui è possibile sperimentare il fog davvero;
+	\item aspetti di business model.
+\end{itemize}
+
+\subsubsection{Deployment delle applicazioni}
+
+Le applicazioni di nuova generazione sono tipicamente multi-servizio (microservizi), quindi consistono di più ``pezzi'' che devono essere mandati in esecuzione sui nodi di un'infrastruttura eterogenea.\
+In generale le applicazioni hanno dei requisiti, sia hardware che software, e dei vincoli di qualità.
+
+Dall'altra parte abbiamo l'infrastruttura con le sue capabilities, che ha tre caratteristiche molto importanti:\ è eterogenea, i nodi non sono tutti uguali, è enorme ed è dinamica.
+

@@ -1,0 +1,58 @@
+\chapter{Programmazione e SQL}
+
+\section{Uso di SQL da programmi}
+
+\subsubsection{Problemi}
+
+\begin{itemize}
+	\item Come collegarsi alla BD?
+	\item Come trattare gli operatori SQL?
+	\item Come trattare il risultato di un comando SQL (relazioni)?
+	\item Come scambiare informazioni sull'esito delle operazioni?
+\end{itemize}
+
+\subsubsection{Approcci}
+
+Linguaggio integrato (dati e DML):\ linguaggio disegnato ad-hoc per usare SQL.\
+I comandi SQL sono controllati staticamente dal traduttore ed eseguiti dal DBMS.
+
+\noindent Linguaggio convenzionale + API:\ linguaggio convenzionale che usa delle funzioni di libreria predefinita per usare SQL.\
+I comandi SQL sono stringhe passate come parametri alle funzioni che poi vengono controllate dinamicamente dal DBMS prima di eseguirle.
+
+\noindent Linguaggio che ospita l'SQL:\ linguaggio convenzionale esteso con un nuovo costrutto per marcare i comandi SQL.\
+Occorre un \textbf{pre-compilatore} che controlla i comandi SQL, li sostituisce con chiamate a funzioni predefinite e genera un programma nel linguaggio convenzionale + API.
+
+\subsection{Un linguaggio integrato:\ PL/SQL}
+
+Un linguaggio per manipolare basi di dati che integra DML (SQL) con il linguaggio ospite.\
+Un linguaggio a blocchi con una struttura del controllo completa che contiene l'SQL come sottolinguaggio.\
+Permette:
+
+\begin{itemize}
+	\item di definire variabili di tipo scalare, record (annidato), insieme di scalari, insiemi di record piatti, cursore;
+	\item di definire i tipi delle variabili a partire da quelli della base di dati;
+	\item di eseguire interrogazioni SQL ed esplorarne il risultato;
+	\item di modificare la base di dati;
+	\item di definire procedure e moduli;
+	\item di gestire il flusso del controllo, le transazioni, le eccezioni.
+\end{itemize}
+
+\subsubsection{Cursore}
+
+È il meccanismo per ottenere uno alla volta gli elementi di una relazione.\
+Un cursore viene definito come un'espressione SQL, poi si apre per far calcolare al DBMS il risultato e infine con un opportuno comando si trasferiscono i campi delle ennuple in opportune variabili del programma.
+
+\subsection{Linguaggio con interfaccia API}
+
+Invece di modificare il compilatore di un linguaggio, si usa una libreria di funzioni/oggetti che operano su basi di dati (API) alle quali si passa come parametro stringhe SQL e ritornano il risultato sul quale si opera con una logica ad iteratori.\
+Esempio:
+\begin{itemize}
+	\item Microsoft ODBC è C/C++ standard su Windows
+	\item Sun JDBC è l'equivalente in Java
+\end{itemize}
+Dorebbero essere indipendenti dal DBMS:\ un ``driver'' gestisce le richieste e le traduce in un codice specifico di un DBMS.\
+Il DB può essere in rete.
+
+\subsection{SQLJ:\ Java che ospita l'SQL}
+
+Dialetto di SQL che può essere immerso in programmi Java, che poi vengono tradotti da un precompilatore in programmi Java standard sostituendo i comandi SQL in chiamate di una libreria che usano JDBC.

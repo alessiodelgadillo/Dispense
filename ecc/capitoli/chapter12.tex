@@ -1,0 +1,417 @@
+\section{Misure di complessità deterministiche}
+
+In questo capitolo studieremo brevemente come associare a una macchina di Turing una funzione che stimi il tempo che le è necessario per risolvere un caso $x \in I$ del problema $I$ che decide.\
+Poi vedremo un paio di teoremi che mostrano come e di quanto questo tempo possa essere ridotto, al prezzo di usare macchine con un hardware più ``efficiente''.\
+Preliminarmente introdurremo una variante ``parallela'' delle macchine di Turing, permettendo alla macchina di operare simultaneamente su molti nastri.\
+Questa estensione naturalmente non modifica la classe dei problemi decidibili, tuttavia ci consente in alcuni casi un trattamento più agevole.\
+Inoltre è un buon modello delle attuali macchine parallele sincrone (ma non di quelle concorrenti e distribuite e men che meno di quelle impiegate nel paradigma chiamato ``mobile computing''!), nella stessa misura in cui le macchine di Turing a un nastro lo sono delle macchine sequenziali mono-processore.\
+Vedremo infine quale sia il prezzo in termini di tempo che si deve pagare per simulare una macchina a molti nastri su una a un nastro solo, dando così un preciso limite teorico ai vantaggi ottenibili dall'introduzione di calcolatori paralleli.\
+
+Lo stesso schema verrà seguito per misure che riguardano lo spazio necessario al calcolo.\
+Introdurremo un'ulteriore variante delle macchine di Turing in cui si identificano i nastri di lavoro (ignorando quelli destinati ai dati in ingresso e in uscita), in modo da definire lo spazio necessario per risolvere un problema.\
+Anche in questo caso, la potenza espressiva non cambia.\
+Infine, mostreremo che lo spazio può essere compresso in modo analogo a quanto fatto per ridurre il tempo.\
+
+L'aggettivo \textit{deterministico} che compare nel titolo è legato al fatto che le macchine di Turing che impieghiamo usano una \textit{funzione} di transizione, come quelle usate nella prima parte del corso.\
+Ciò garantisce che ogni passo di computazione è univocamente determinato dallo stato e dal simbolo correnti, in altri termini, la macchina è \textit{deterministica}.\
+In seguito vedremo cosa succede impiegando \textit{relazioni} di transizione piuttosto che funzioni, il che rende le macchine di Turing \textit{non deterministiche}, in un senso che sarà precisato.\
+
+\subsection{Macchine di Turing a k-nastri}
+
+Ricordiamo che per le macchine di Turing introdotte nella definizione \ref{Macchina di Turing} si postula l'esistenza di un nastro semi-infinito e di una funzione di transizione $\delta$ che opera su di esso.\
+Adesso arricchiamo l'hardware delle macchine di Turing fornendole di $k$ nastri.\
+Poiché trattiamo solo problemi di decisione, ci prendiamo la libertà di spezzare lo stato di arresto $h$ in due nuovi stati di arresto \textit{\footnotesize SI}, \textit{\footnotesize NO}, a rappresentare che la macchina si ferma con successo nel primo caso e con insuccesso nel secondo.\
+Formalmente:
+
+\begin{definition} [MdT a $k$ nastri]
+    \label{MdT_k-nastri}
+    Dato un numero naturale $k$, una \textit{Macchina di Turing a k nastri} è una quadrupla $M = (Q, \Sigma, \delta, q_0)$, con
+    \begin{itemize}
+        \item $\#, \triangleright \in \Sigma$ e $L, R, - \notin \Sigma$
+        \item \textit{\footnotesize SI}, \textit{\footnotesize NO} $\notin Q$
+        \item$\delta : Q \times \Sigma^k \rightarrow Q \cup \{$\textit{\footnotesize SI}, \textit{\footnotesize NO}$\} \times (\Sigma \times \{L,R,-\})^k$ è la funzione di transizione, soggetta alle stesse condizioni della definizione \ref{Macchina di Turing} sull'unicità della stringa in $(\Sigma \times \{ L,R, -\})^k$, in modo che $\delta$ sia una funzione, e sull'uso del carattere di inizio stringa $\triangleright$.
+    \end{itemize}
+\end{definition}
+
+\noindent La funzione di transizione $\delta$ per uno stato $q$ e $k$ simboli $\sigma_1, \dots, \sigma_k$ ha allora la forma seguente
+\[\delta (q,\sigma_1, \dots,\sigma_k) = (q', (\sigma_1', D_1), (\sigma_2', D_2), \dots, (\sigma_k', D_k))\]
+Una configurazione di una macchina a $k$ nastri ha la forma:
+\[(q, u_1 \sigma_1 v_1, u_2 \sigma_2 v_2 , \dots, u_k \sigma_k v_k)\]
+dove il carattere corrente sull'$i$-esimo nastro è $\sigma_i$, che abbiamo evitato di sottolineare per non appesantire la notazione; le sue computazioni lunghe $n$ saranno rappresentate da
+\[(q, w_1 , w_2, \dots, w_k) \rightarrow^n (q', w_1', w_2', \dots, w_k')\]
+le cui mosse, derivabili in accordo con la funzione di transizione $\delta$, hanno la forma
+\[(q, u_1 \sigma_1 v_1, u_2 \sigma_2 v_2 , \dots, u_k \sigma_k v_k) \rightarrow (q, u_1 \sigma_1 v_1', u_2 \sigma_2 v_2', \dots, u_k\sigma_k v_k')\]
+Si noti che se si volesse rappresentare una situazione in cui ci sono davvero $k$ processori che evolvono in sincronia, ciascuno con il suo carattere corrente e con il suo stato preso da un insieme $Q_i$, basterebbe definire l'insieme della macchina a $k$ nastri come $Q = Q_1 \times Q_2 \times \dots \times Q_k$ e interpretare nel modo ovvio la funzione di transizione in modo da tenerne conto.\
+
+Vediamo adesso un esempio di macchina di Turing con due nastri.\
+
+\begin{example}
+    \label{ex_k-nastri}
+    La seguente MdT con 2 nastri riconosce le stringhe palindrome costruite sull'alfabeto $\{a, b\}$.\
+    La funzione di transizione può essere suddivisa in tre ``blocchi omogenei''.\
+    Nel primo blocco ci sono le istruzioni che ricopiano la stringa in ingresso sul secondo nastro; nel secondo la testina del primo nastro vien portata sul simbolo di inizio nastro, mentre quella del secondo nastro è lasciata sul primo carattere \# dopo la stringa.\
+    Il terzo blocco di istruzioni effettua il controllo vero e proprio, cancellando dal secondo nastro a partire da \textit{destra} i caratteri della stringa di ingresso se e solamente se corrispondono a quelli della stringa originale, incontrati muovendo il cursore del primo nastro da \textit{sinistra}.\
+    Ovviamente, la stringa è palindroma se le due testine si trovano su caratteri sempre uguali e il secondo nastro viene svuotato.\
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{ |c c c|c c c| }
+            \hline
+            $q$   & $\sigma_1$       & $\sigma_2$       & \multicolumn{3}{c|}{$\delta(q,\sigma_1, \sigma_2)$}                                               \\\hline\hline
+            $q_0$ & $\triangleright$ & $\triangleright$ & $q_0$                                               & $(\triangleright,R)$ & $(\triangleright,R)$ \\
+            $q_0$ & $a$              & $\#$             & $q_0$                                               & $(a,R)$              & $(a,R)$              \\
+            $q_0$ & $b$              & $\#$             & $q_0$                                               & $(b,R)$              & $(b,R)$              \\
+            $q_0$ & $\#$             & $\#$             & $q_0$                                               & $(\#,L)$             & $(\#,-)$             \\
+            \hline
+            $q_1$ & $a$              & $\#$             & $q_1$                                               & $(a,L)$              & $(\#,-)$             \\
+            $q_1$ & $b$              & $\#$             & $q_1$                                               & $(b,L)$              & $(\#,-)$             \\
+            $q_1$ & $\triangleright$ & $\#$             & $q_2$                                               & $(\triangleright,R)$ & $(\#,L)$             \\
+            \hline
+            $q_2$ & $a$              & $a$              & $q_2$                                               & $(a,R)$              & $(\#,L)$             \\
+            $q_2$ & $b$              & $b$              & $q_2$                                               & $(b,R)$              & $(\#,L)$             \\
+            $q_2$ & $a$              & $b$              & \textit{\footnotesize NO}                           & $(a,R)$              & $(a,-)$              \\
+            $q_2$ & $b$              & $a$              & \textit{\footnotesize NO}                           & $(b,R)$              & $(b,-)$              \\
+            $q_2$ & $\#$             & $\triangleright$ & \textit{\footnotesize SI}                           & $(\#,-)$             & $(\triangleright,R)$ \\
+            \hline
+        \end{tabular}
+    \end{table}
+
+    \noindent Come esempio di calcolo applichiamo la macchina alla stringa \textit{abba}, raggruppando per quanto possibile i passi della computazione in blocchi omogenei.
+    \item $(q_0,\underline{\triangleright} abba, \underline{\triangleright} \#) \rightarrow (q_0,\triangleright \underline{a}bba, \triangleright \underline{\#}) \rightarrow$
+    \item\qquad $ (q_0,\triangleright a\underline{b}ba, \triangleright a \underline{\#}) \rightarrow^3 (q_0,\triangleright abba\underline{\#}, \triangleright abba \underline{\#})\rightarrow $
+    \item
+    \item $(q_1,\triangleright ab\underline{b}a, \triangleright abba\underline{\#}) \rightarrow (q_1, \triangleright abb\underline{a}\#, \triangleright abba \underline{\#})\rightarrow^4 (q_1,\underline{\triangleright} abba, \triangleright abba \underline{\#})$
+    \item
+    \item $(q_2,\triangleright \underline{a}bba, \triangleright abb\underline{a}\#) \rightarrow (q_2,\triangleright a\underline{b}ba, \triangleright ab\underline{b}\#) \rightarrow (q_2,\triangleright ab\underline{b}a, \triangleright a\underline{b}\#) \rightarrow$
+    \item \qquad$(q_2,\triangleright abb\underline{a}, \triangleright \underline{a}\#) \rightarrow (q_2,\triangleright abba\underline{\#}, \underline{\triangleright}) \rightarrow (\mbox{\textit{\footnotesize SI}},\triangleright abba\underline{\#}, \triangleright \underline{\#})$
+\end{example}
+
+\subsection{Complessità in tempo deterministico}
+
+Introduciamo adesso il modo che useremo per determinare il tempo necessario alla soluzione di un problema, ricordando che per problema qui intendiamo l'appartenenza o meno a un insieme, ovvero a un linguaggio di cui le macchine di Turing sono gli automi accettori; poiché le macchine usate sono \textit{deterministiche}, anche le misure che introdurremo sono tali e spesso ometteremo tale aggettivo, dandolo per inteso.
+
+\begin{definition}
+    Diciamo che $t$ è il \textit{tempo richiesto} da una MdT $M$ a $k$ nastri\footnote{Se volessimo considerare il tipo di macchine viste in precedenza, cioè se $H = \{h\}$, allora si potrebbe definire che il \textit{tempo richiesto} da $M$ su $x$ è $t$.\ Inoltre, questa definizione
+        sarebbe accettabile anche per la complessità di problemi \textit{tout court} e non solo di problemi decidibili come facciamo, ponendo $\infty$ il tempo richiesto, se $M(x) \uparrow$.} per \textit{decidere} il caso $x \in I$ se
+    \[(q_0, \underline{\triangleright}x, \underline{\triangleright}, \dots, \underline{\triangleright}) \rightarrow^t (H, w_1,w_2, \dots, w_k),\ \mathrm{con}\ H \in \{\mbox{\textit{\footnotesize SI}, \textit{\footnotesize NO}}\}\]
+\end{definition}
+
+\noindent In realtà vorremmo ottenere una misura del tempo necessario a risolvere un problema mediante la macchina $M$ come una funzione della taglia dei suoi possibili dati di ingresso $x$; cioè, indicando la taglia di $x$ con $|x|$, vorremmo una funzione $f(|x|)$.\
+La definizione della taglia dei dati è arbitraria, ma spesso è molto naturale.\
+Per esempio, spesso la taglia di un grafo è il numero dei suoi nodi (e/o dei suoi archi), quella di una stringa o di un vettore la sua lunghezza, indipendentemente dagli elementi costitutivi.\
+La funzione \textit{taglia} deve essere ovviamente calcolabile totale e \textit{facile}; in ogni caso deve restituire un numero naturale.\
+In queste note useremo funzioni di taglia spesso senza definirle e nel modo che ci sarà più conveniente.\
+Nella maggior parte dei casi e senza avvertenza contraria, misureremo i dati di ingresso $x$ in relazione alle caselle della MdT necessarie a contenerli.\
+
+Nel seguito, non pretenderemo che la funzione $f(|x|)$ dia il numero \textit{esatto} di passi necessari al calcolo di $M(x)$, perché ciò potrebbe rivelarsi troppo complicato; ci contenteremo allora di approssimare tale numero per eccesso:\ la macchina non richiederà un tempo maggiore di quello stimato.\
+In conclusione, la funzione che determina la complessità di $M$ è una funzione calcolabile totale $f : N \rightarrow N$, la quale limita superiormente il numero dei passi che $M$ compie per risolvere il problema in questione --- torneremo sulle caratteristiche delle funzioni di misura nella definizione \ref{def_appropriata}.\
+Si noti che questo non contrasta con la richiesta di avere classi di complessità, indotte da funzioni di misura, che esprimono la quantità \textit{minima} di risorse necessarie alla decisione dei problemi in esse contenuti:\ basta trovare la minima funzione che limita superiormente i passi di $M$.\
+L'aggettivo \textit{deterministico} che compare nella definizione dipende dal fatto che le macchine di Turing usate sono deterministiche, nel senso che sarà più chiaro dopo la definizione \ref{MdT_non-det} (la componente $\delta$ è una funzione e non una relazione); quando sarà chiaro dal contesto che parliamo di questo tipo di macchine, ometteremo tale aggettivo.\
+
+\begin{definition}
+    $M$ \textit{decide} $I$ \textit{in tempo deterministico} $f$ se per ogni dato di ingresso $x \in I$ il tempo $t$ richiesto da $M$ per decidere $x$ è $\leq f(|x|)$.
+\end{definition}
+
+\noindent Adesso possiamo introdurre il concetto di \textit{classe di complessità} in tempo \textit{deterministico}.\
+
+\begin{definition} [Classe di complessità in tempo deterministico]
+    \[\mathrm{TIME}(f) = \{ I \mid \exists M\ \mathrm{che\ decide}\ I\ \mathrm{in\ tempo\ deterministico}\ f\}\]
+\end{definition}
+
+\noindent La classe appena introdotta contiene tutti e soli i problemi risolvibili in tempo deterministico $f$, ovvero affinché un problema vi appartenga occorre e basta che vi sia una macchina $M$ che lo decide in tempo deterministico $f$.\
+
+Prendiamo ad esempio la macchina $M$ dell'esempio \ref{ex_k-nastri} e calcoliamo la sua complessità in tempo, suppondendo che la stringa di ingresso sia lunga $n$.\
+Come abbiamo visto dianzi, il funzionamento della macchina può essere suddiviso in tre blocchi di operazioni ``omogenee'':
+\begin{enumerate}
+    \itemsep0px
+    \item copia il dato in ingresso sul secondo nastro in \hfill $n+1$ passi
+    \item rimette la prima testina sul $\triangleright$ in \hfill $n+1$ passi
+    \item sposta le due testine se i simboli sono uguali in \hfill $\underline{n+1}$ passi
+    \item[]\hfill $3n + 3$ passi
+\end{enumerate}
+cui va aggiunto il passo per l'accettazione.\
+Quindi il problema di verificare se una stringa è palindroma appartiene a TIME$(3n + 4)$ o, scordandosi le costanti, è dell'ordine di $n$.\
+
+\medskip
+\noindent \textbf{NOTAZIONE}\quad Nella discussione precedente abbiamo menzionato l'ordine di una funzione.\
+Poiché questo concetto viene ripetutamente usato in seguito, in quanto in questa porzione di teoria della complessità si preferisce ignorare le costanti (ne discuteremo più avanti le ragioni), vale la pena di introdurre esplicitamente la seguente abbreviazione, dove ``quasi ovunque'' significa per ogni argomento, eccetto che per un insieme finito di essi:
+\[\mathcal{O}(f) = \{g \mid \exists r \in \mathbb{R}^+.\ g(n) < r \times f (n)\ \mathrm{quasi\ ovunque}\}\]
+a indicare che la funzione $f$ cresce allo stesso modo o più velocemente delle funzioni $g$ appartenenti alla classe $\mathcal{O}(f)$, la quale viene quindi chiamata \textit{ordine} di $f$.\footnote{Di solito si introducono anche le classi
+    \begin{itemize}
+        \itemsep0px
+        \item[] $\Omega(f) = \{g \mid f \in \mathcal{O}(g)\}$ --- $f$ cresce più lentamente di $g$ e
+        \item[] $\Theta(f) = \mathcal{O}(f) \cap \Omega(f)$ --- $f$ cresce come $g$.
+    \end{itemize}}
+(Inutile notare che ``più velocemente'' dipende solo dal fattore moltiplicativo $r$.)\
+
+\medskip
+
+\noindent In effetti, il calcolo di complessità fatto sopra non tiene conto del fatto che, se la stringa non è palindroma, il numero di passi necessari è minore.\
+Abbiamo infatti definito una misura della complessità nel \textit{caso pessimo}.\
+Ci sono altri modi per misurare la complessità che tengono conto della distribuzione dei dati di ingresso.\
+Un esempio particolarmente rilevante è quello della complessità nel \textit{caso medio}, che tuttavia non tratteremo in queste note.
+
+Può essere interessante confrontare adesso, dal punto di vista della complessità, le macchine che decidono se una stringa è palindroma nelle loro versioni ``parallela'', appena vista, e ``sequenziale''.\
+Il tempo delle computazioni di quest'ultima è in $\mathcal{O}(n^2)$, perché servono $n$ passi per controllare se il primo simbolo è uguale all'ultimo e questo controllo va ripetuto per $n/2$ volte.\
+Una prima osservazione che possiamo fare è che il problema di decidere se una stringa è palindroma sta \textit{anche} in $\mathcal{O}(n^2)$, il che non sorprende perché abbiamo appena visto che sta in $\mathcal{O}(n)$ e se una funzione è superiormente dominata da $g \in \mathcal{O}(n)$ lo è a maggior ragione da $h \in \mathcal{O}(n^2)$ --- se avendo poco tempo a disposizione risolvo un problema, lo risolverò a maggior ragione se ne avessi di più.\
+
+Un'altra osservazione, forse più interessante, è che, usando una macchina parallela, abbiamo ``guadagnato'' tempo in modo quadratico (meglio:\ perduto da parallelo a sequenziale).\
+Questo è un fatto vero in generale.
+
+\begin{theorem} [Riduzione del numero di nastri]
+    \label{riduzione_nastri}
+    Data una macchina di Turing $M$ con $k$ nastri che decide $I$ in tempo deterministico $f$, allora $\exists M'$ con un solo nastro che decide $I$ in tempo deterministico $\mathcal{O}(f^2)$.
+\end{theorem}
+
+\begin{proof}
+    Riportiamo solo una traccia della dimostrazione, confidando nella diligenza dei lettori che vorranno certamente precisare i passi appena accennati.\
+    Costruiamo $M'$ in modo che simuli la data $M$, in modo analogo a quanto fatto nella costruzione della macchina di Turing universale.\
+    Ogni configurazione di $M$ della forma
+    \[(q, \triangleright w_1 \sigma_1 u_1, \triangleright w_2 \sigma_2 u_2, \dots, \triangleright w_k \sigma_k u_k)\]
+    viene simulata da:
+    \[(q', \triangleright \triangleright' w_1 \overline{\sigma}_1 u_1 \triangleleft' \triangleright' w_2 \overline{\sigma}_2 u_2 \triangleleft' \dots  \triangleright' w_k \overline{\sigma}_k u_k \triangleleft')\]
+    per qualche $q'$, cioè racchiudiamo ciascun nastro $w_i \sigma_i u_i$ tra due nuove parentesi $\triangleright'$ e $\triangleleft'$ e usiamo $\#\Sigma$ nuovi simboli $\overline{\sigma}_i$ per ricordarci la posizione della testina sull'$i$-esimo nastro.\
+
+    Per cominciare, la macchina $M'$ applicata a $x$ dovrà generare la configurazione che simula la configurazione iniziale di $M$, cioè dobbiamo passare dalla configurazione iniziale di $M$ $(q_0, \underline{\triangleright} x, \triangleright, \dots, \triangleright)$ a
+    \[(q', \triangleright \triangleright' x \triangleleft' (\triangleright' \triangleleft')^{k-1})\]
+    per qualche $q'$.\
+    Per far ciò, bastano $2k + \#\Sigma$ nuovi stati\footnote{Supponendo che il carattere \# non appaia in $x$, un modo per farlo è il seguente:\
+        arrivare al primo carattere \# (il che richiede $|x| + 1$ passi e un nuovo stato); cambiare
+        stato; tornare indietro di una casella e ricordarsi, codificandolo in un nuovo stato il simbolo ($\neq \#$) corrente, sia $a$, scriverci \#, spostarsi a destra e scrivere $a$; poi bisogna ripetere le ultime due mosse per $|x| - 1$ volte.\ In questo modo abbiamo ``spostato'' $x$ di una casella a destra, impiegando $2 \times |x|$ passi e $2 + \#\Sigma$ nuovi stati.\ A questo punto si scrive sulla casella corrente, che è vuota la parentesi $\triangleright'$; si torna sulla prima casella vuota muovendosi a destra e si scrivono $k - 1$ coppie $\triangleright' \triangleleft'$, usando altri $2 \times (k - 1)$ nuovi stati.} e un certo numero di passi che, essendo dell'ordine di $|x|$, non influenza la complessità asintotica (consideriamo infatti il caso pessimo, quindi tutto il dato iniziale va letto).\
+
+    Per simulare una mossa di $M$, la macchina $M'$ scorre l'intero nastro da sinistra a destra e \textit{viceversa} due volte:
+    \begin{itemize}
+        \item la prima volta $M'$ determina quali sono i simboli correnti di $M$, $\overline{\sigma}_i$ (si noti che, per ricordare quale sia la stringa $\overline{\sigma}_1 \dots \overline{\sigma}_k$ sono sufficienti $(\#\Sigma)^k$ nuovi stati);
+        \item la seconda volta $M'$ scrive i nuovi simboli nel posto giusto --- attenzione! se un $\triangleleft'$ deve essere spostato a destra, per far posto a un nuovo simbolo da scrivere, si verifica una cascata di spostamenti a destra!
+    \end{itemize}
+    Infine quando $M$ si ferma, anche $M'$ si ferma, eventualmente rimuovendo tutte le parentesi $\triangleright'$ e $\triangleleft'$ e sostituendo i caratteri $\overline{\sigma}_i$ con $\sigma_i$.\
+
+    Adesso ricordiamo un fatto generale e ovvio:\ una macchina non può toccare un numero di caselle maggiore del numero dei passi che compie.\
+    Di conseguenza, la lunghezza totale del nastro scritto è al più $K = k \times (f(n) + 2) +1$ (l'addendo 2 è dovuto alle parentesi $\triangleright'$ e $\triangleleft'$, l'addendo 1 al simbolo $\triangleright$).\
+    Allora, andare due volte avanti e indietro costa, in termini di tempo, per ogni stringa simulata $4K$ più al massimo $3K$ per gli spostamenti a destra, nel caso in cui la casella corrente sia all'estrema sinistra (è il caso pessimo nel quale ci poniamo sempre):\ $K$ per arrivare alla fine del nastro scritto e $2K$ per spostare a destra i $K$ caratteri, come descritto nella nota precedente.\
+    Poiché né $k$ né le altri costanti sono rilevanti, possiamo concludere che per simulare un \textit{singolo} passo di $M$ la macchina $M'$ richiede $\mathcal{O}(f|x|)$ passi sul dato $x$.\
+    Il numero di passi di $M'$ sull'intera computazione è quindi in $\mathcal{O}(f(|x|)^2)$, perché $M$ richiede tempo $f(|x|)$ e perché $M'$ impiega $\mathcal{O}(f(|x|))$ per simulare ogni passo di $M$.\
+    Infine, per costruzione $M'$ è equivalente a $M$, e quindi le due macchine decidono lo stesso problema; allora $M'$, che ha un nastro solo, decide tale problema in tempo deterministico $\mathcal{O}(f(|x|)^2)$.\
+\end{proof}
+
+\noindent Il teorema appena dimostrato mostra che le MdT sono molto stabili!\
+Infatti, miglioramenti che siano accettabili ``algoritmicamente'', come aggiungere nastri e processori che operano in parallelo, non solo non cambiano le funzioni calcolate, come ci aspettavamo, ma non modificano il tempo deterministico richiesto se \textit{non polinomialmente}, quindi le MdT appaiono stabili anche rispetto la tesi di Cook-Karp (ancora da vedere con precisione!).\
+
+Ribadiamo adesso l'osservazione fatta nella dimostrazione di sopra, che mette in relazione il tempo e lo spazio necessari alla soluzione di un problema.\
+Se una macchina di Turing $M$ richiede tempo $f(|x|)$ per decidere $x \in I$, significa che si arresta in un numero di passi inferiore a $f(|x|)$, e quindi non può aver visitato, in alcuno dei suoi nastri, un numero di caselle maggiore di $f(|x|)$.\
+Abbiamo quindi il seguente fatto basilare:
+
+\begin{center}
+    \textbf{Osservazione 1}:\ non si può usare più spazio che tempo!
+\end{center}
+
+\noindent Usiamo ancora la dimostrazione appena riportata per dedurre un ulteriore osservazione.\
+Infatti, il ragionamento fatto ci suggerisce come misurare, beninteso solo da un punto di vista teorico, i vantaggi che derivano dall'introduzione di macchine parallele.\
+Negli ultimi passi della dimostrazione abbiamo potuto ottenere l'ordine $\mathcal{O}(f(|x|)^2)$ eliminando il fattore $k^2$, perché $k$ è indipendente da $x$.\
+Però l'elevamento al quadrato del fattore $f(|x|)$ non potrà mai essere eliminato!\
+Quindi possiamo dedurre una stima del vantaggio che deriva dall'uso del parallelismo.
+
+\begin{corollario}
+    Le macchine parallele sono polinomialmente più veloci di quelle sequenziali.
+\end{corollario}
+
+\noindent Finora, nei nostri conti abbiamo impiegato solo gli ordini di crescita \textit{trascurando} le costanti.\
+Ovviamente, quando si cerchino stime più precise, le costanti contano terribilmente, tanto che l'astuzia dei progettisti di algoritmi si dispiega spesso proprio nello scoprire come ridurle.\
+Ciò nonostante, continueremo nel seguito a trascurare le costanti, a meno di casi particolari in cui esse saranno menzionate espressamente.\
+Due sono le ragioni:
+\begin{itemize}
+    \item[i)] la teoria che si sviluppa è molto più semplice; inoltre per valori grandi di $n$, cioè per dati di grandi dimensioni, le costanti tendono a valere ``poco'';
+    \item[ii)] macchine sempre più potenti tendono a far rimpicciolire le costanti.
+\end{itemize}
+
+\noindent L'ultima osservazione è sostenuta da un teorema che riportiamo qui sotto, detto di accelerazione lineare.\
+L'idea è che se $I \in \mathrm{TIME}(f)$, (ovvero se esiste una MdT $M$ che lo risolve in tempo deterministico $f(n)$) allora $I$ appartiene anche a $\mathrm{TIME}(\epsilon \times f)$, qualunque sia la scelta per $\epsilon > 0$ (attenzione:\ poiché la nostra complessità è nel caso pessimo, quanto detto è impreciso e ci sarà bisogno di una correzione per mantenere lineare la misura del tempo).\
+In altre parole, dato un algoritmo che decide un problema, se ne può sempre trovare uno equivalente che è più veloce per una costante moltiplicativa $\epsilon$ (supponendo ovviamente che questa sia minore di 1).\
+Attenzione però:\ se p.e.\ $I \in \mathrm{TIME}(2^n)$, ovvero se il problema $I$ è deciso da un algoritmo in tempo esponenziale, non è possibile trovare un algoritmo che lo risolva in tempo deterministico \textit{polinomiale}, per mezzo del \textit{solo} teorema di accelerazione.\
+Un'analoga osservazione vale ovviamente per lo spazio, come vedremo.\
+Quindi il teorema non inficia una eventuale gerarchia, ancora da stabilire.
+
+Il trucco fondamentale è quello di codificare l'alfabeto $\Sigma$ in un alfabeto ``più ricco'' $\Sigma^m$, con $m$ arbitrario.\
+In pratica, questo significa avere macchine con parole di dimensioni via via crescenti (32, 64, 128, \dots, $2^m$ bit).\
+Si vede quindi che l'accelerazione è legata al \textit{cambio di hardware}.
+
+Questo non è chiaramente del tutto fattibile in pratica, e mostra che le costanti \textit{sono} importanti quando la macchina sia fissata; inoltre, non si può aumentare a piacere l'efficienza di un tuo programma cambiando semplicemente l'hardware delle macchine!
+
+Nell'enunciato del teorema seguente compare un addendo $n + 2$ il quale dipende unicamente dal tipo di MdT usata (a 1 o a $k$ nastri, con nastro semi-infinito o infinito, ecc.).\
+La presenza dell'addendo $n$ garantisce che, anche se la $f(n)$ fosse lineare, la complessità risultante rimarrebbe tale.\
+In enunciati diversi del teorema si possono trovare diversi addendi, che variano in funzione dei vari tipi delle MdT; in tutti i casi essi garantiscono che il risultato sia una funzione almeno lineare.\
+Si noti anche che in questa dimostrazione e in altre che seguiranno, si misura la taglia del dato con il numero di caselle del nastro di ingresso che servono a memorizzarlo.\
+
+\begin{theorem} [Accelerazione lineare MdT]
+    \hfill
+
+    Se $I \in \mathrm{TIME}(f)$, allora $\forall \epsilon < 1 \in \mathbb{R}^+$ si ha che $I \in \mathrm{TIME}( \epsilon \times f(n) + n + 2)$.
+\end{theorem}
+\begin{proof}
+    Omessa, perché lunga e piena di dettagli insidiosi:\ si tratta di simulare una data macchina $M$ con una macchina $M'$, sulla falsariga di quanto fatto nella costruzione della macchina universale o nella dimostrazione \ref{riduzione_nastri}.\
+    Può essere tuttavia interessante notare un fatto che potrebbe guidare il lettore a una maggiore comprensione del teorema stesso e dell'uso che si può fare degli stati per ``ricordare'' porzioni di nastro.\
+    Quello che faremo è vedere che si può determinare il numero $m$ di simboli di $M$ da compattare in un unico simbolo di $M'$ in funzione del \textit{solo} $\epsilon$.\
+
+    Il primo passo ``condensa il dato di ingresso'' (in $n + 2$ passi, con $n = |x| \leq m \times \left\lceil \frac{|x|}{m}\right\rceil + 2)$:\ ogni sequenza di $m$ simboli di $M$ origina un singolo simbolo di $M'$, cioè $\sigma_{i_1} \dots \sigma_{i_m}$ viene codificata come il singolo simbolo $[\sigma_{i_1} \dots \sigma_{i_m}]$ (si noti che non c'è alcun problema se esiste $m' > 1$ tale che $\sigma_{k_h} = \#$ per $h \geq m' > 1$).\
+    In maniera analoga, gli stati di $M'$ saranno formati da triple $[q, \sigma_{i_1} \dots \sigma_{i_m}, k]$, con $1 \leq k \leq m$, in modo da ``rappresentare'' il fatto che $M$ si trova nello stato $q$ e ha il cursore sul $k$-esimo simbolo della stringa $\sigma_{i_1} \dots \sigma_{i_m}$.\
+    Data una configurazione, alla macchina $M'$ bastano 6 passi per simularne $m$ della macchina $M$.\
+    Nei primi 4 passi $M'$ va a sinistra, poi a destra, poi ancora a destra e infine ritorna sul carattere corrente $s = \sigma_{i_1} \dots \sigma_{i_m}$, in modo da raccogliere i simboli che $M$ potrebbe visitare e codificarli nel suo stato.\
+    Infatti, $M$ con $m$ mosse può spostare il suo cursore all'interno della stringa di $m$ caratteri che si trova a sinistra del carattere corrente, o di quella a destra o lasciarlo all'interno della stringa $s$ considerata.\
+    Quando $M$ compie $m$ mosse, $M'$ le simula ``a blocchi'' muovendosi a sinistra, oppure a destra del simbolo corrente $s$, ma in ogni caso ne modifica solo due, incluso $s$ -- le altre 2 mosse.\
+    Basta quindi ``prevedere'' il risultato di ciascun blocco di 6 transizioni di $M'$, che dipende \textit{solo} dalla funzione di transizione di $M$ e non dal tipo di mosse fatte e men che meno dalla taglia del dato di ingresso.\
+    Allora $M'$ farà $|x| + 2 + 6 \times \left\lceil \frac{f(|x|)}{m}\right\rceil$ passi e la traccia della dimostrazione si conclude scegliendo $m$ in modo tale che $m = \left\lceil \frac{6}{\epsilon} \right\rceil$.\
+
+\end{proof}
+
+\noindent Prima di introdurre una delle classi di complessità più importanti, quella dei problemi decidibili in tempo polinomiale deterministico, usiamo i teoremi precedenti, per fare alcune osservazioni che giustificano ulteriormente la scelta fatta di usare solo ordini di grandezza trascurando le costanti.
+
+Preliminarmente, notiamo che vi sono misure di complessità in tempo che sono sub-lineari, cioè vi sono macchine che richiedono un tempo $f(n) < n$ per risolvere un problema di taglia $n$.\
+Per esempio, la ricerca di una parola in un dizionario effettuata con un metodo dicotomico porta a leggere $\log n$ parole, certo non tutte quelle contenute nel dizionario stesso (ma tale misura è invariante rispetto al cambiamento di rappresentazione dei dati o si basa proprio su una caratteristica specifica della rappresentazione?).\
+Non considereremo nel seguito misure in tempo sub-lineari, perché per ipotesi vogliamo ottenere la complessità nel caso pessimo, e quindi le macchine leggono sempre l'intero dato di ingresso $x$, il che richiede appunto $n = |x|$ passi e quindi ogni funzione di complessità in tempo $f$ è tale che $f(n) \geq n$.\
+
+Adesso supponiamo di avere una funzione $f$.\
+Se $f(n) = c \times n$ (cioè $f$ è lineare), allora il teorema di accelerazione ci consente di ``rimpicciolire'' la costante fino a renderla uguale 1, ponendo $\epsilon = \frac{1}{c}$.\
+Se invece $f(n) = c_1n^k + c_2n^{k-1} + \dots + c_k$ (cioè è un polinomio), ancora una volta il teorema ci dice che possiamo rendere $c_1$ uguale 1 e inoltre gli addendi con esponente minori di $k$ si possono trascurare perché quello di grado massimo li domina per $n$ sufficientemente grande:\ ecco allora giustificato l'uso di $\mathcal{O}\left(n^k\right)$.\
+Infine, quanto detto sopra ci porta a concludere che, se $I$ è decidibile polinomialmente, allora esiste un $k$ tale che $I \in \mathcal{O}\left(n^k\right)$.\
+Analoghe considerazioni si possono applicare quando la funzione $f$ considerata maggiori ogni polinomio, per esempio sia una funzione esponenziale.
+
+Quanto osservato sopra basta per introdurre la classe dei problemi decidibili in tempo polinomiale deterministico, ovvero di quei problemi per cui esiste una macchina deterministica che li decide in tempo deterministico limitato da un polinomio.
+
+\begin{definition}
+    La classe dei problemi decidibili (da MdT) in tempo polinomiale deterministico è
+    \[\mathcal{P} = \bigcup_{k \geq 1} \mathrm{TIME}\left(n^k\right)\]
+\end{definition}
+
+\noindent Il prossimo passo dovrebbe essere quello di dimostrare che la classe $\mathcal{P}$ appena introdotta è invariante rispetto al cambio di modelli.\
+Dopo aver fatto questo, potremmo anche eliminare nella definizione precedente il riferimento alle macchine di Turing, ciò che implicitamente abbiamo già fatto.\
+Tuttavia la mancanza di tempo ci impedisce di affrontare il problema della robustezza delle classi di complessità con la dovuta attenzione.\
+Ci limiteremo allora a ritornare di sfuggita su questo punto più avanti, affermando senza dimostrarlo che si può passare \textit{in tempo polinomiale} da un algoritmo rappresentato in un modello a uno equivalente rappresentato in un altro modello.\
+In altre parole, la classe $\mathcal{P}$ è chiusa rispetto a trasformazioni di modelli, il che ne garantisce la robustezza.\
+
+Tuttavia, come accennato in precedenza, bisogna far molta attenzione al modo in cui si misura il tempo necessario a risolvere un problema.
+
+\subsection{Macchine di Turing I/O}
+
+Per studiare la complessità in spazio è conveniente usare un'ulteriore ragionevole e ben motivata variante di macchine di Turing, quelle che hanno un nastro dedicato a contenere il dato di ingresso, che sarà di sola lettura, uno destinato a memorizzare il risultato, che sarà di sola scrittura, e $k - 2$ nastri di lavoro, gli unici rilevanti ai fini della complessità.\
+
+\begin{definition}
+    \label{MdT_I/O}
+    Una MdT con $k$ nastri $M= (Q,\Sigma, \delta, q_0)$ è di tipo I/O se e solamente se la funzione di transizione $\delta$ è tale che, tutte le volte che $\delta(q, \sigma_1, \dots, \sigma_k) = (q', (\sigma_1', D_1), \dots, (\sigma_k', D_k))$
+    \begin{itemize}
+        \item $\sigma_1'=\sigma_1$ --- quindi il primo nastro è a sola lettura;
+        \item o $D_k = R$ o, quando $D_k = -, \sigma_k' = \sigma_k$ --- quindi il $k$-esimo nastro è a sola scrittura;
+        \item se $\sigma_1 = \#$ allora $D_1 \in \{L,-\}$ --- la macchina visita al massimo una cella bianca a destra del dato di ingresso (che ipotizziamo non contenere \# al suo interno, o che abbia una marca di fine stringa, v.\ dopo).
+    \end{itemize}
+\end{definition}
+
+\noindent Si noti che nulla cambia nella definizione di funzione calcolata, né rispetto alle macchine di Turing usate nella prima parte, né rispetto quelle con $k$ nastri.\
+Inoltre, le relazioni delle macchine con $k$ nastri di tipo I/O con quelle non di tipo I/O sono facili da stabilire.\
+
+\begin{property}
+    Per ogni MdT a $k$ nastri $M$ che decide $I$ in tempo deterministico $f$, esiste una MdT a $k+2$ nastri $M'$ di tipo I/O che decide $I$ in tempo deterministico $c \times f$, per qualche costante $c$.
+\end{property}
+
+\begin{proof}
+    La macchina $M'$ copia il primo nastro di $M$ sul proprio secondo nastro, impiegando $|x| + 1$ passi; opera come $M$ senza più toccare il proprio primo nastro; e quando $M$ si arresta, $M'$ si arresta dopo aver copiato il risultato sul proprio $k + 2$-esimo nastro, in al più $f(|x|)$ passi.\
+    In totale, la macchina $M'$ ha richiesto su $x$ un numero di passi inferiore o uguale a $2 \times f (|x|) + |x| + 1$.\
+    Determinare la costante $c$ è ora immediato.\
+\end{proof}
+
+\noindent Infine, per stabilire l'equivalenza tra le MdT a $k$ nastri di tipo I/O o le MdT usate nella prima parte, basta ricorrere alla simulazione vista nel teorema \ref{riduzione_nastri}.\
+Quindi, ancora una volta le macchine di Turing si dimostrano estremamente robuste:\ modifiche algoritmicamente ``ragionevoli'' non ne alterano il potere espressivo.
+
+\subsection{Complessità in spazio deterministico}
+
+Al fine di avere una nozione di misura di spazio sensata, modifichiamo la definizione di configurazione in modo da ricordare \textit{tutte} le celle visitate, incluse quelle che erano o sono diventate bianche.\
+A esser pignoli, questa modifica richiederebbe l'introduzione di un nuovo simbolo ausiliario, per esempio $\triangleleft \notin \Sigma$, da usare su ciascun nastro come delimitatore destro della parte scritta, e una semplice modifica alla funzione di transizione perché ne tenga conto e lo sposti, \textit{ma solo a destra}, quando necessario.\
+Per esempio, prendiamo la macchina ``parallela'' per decidere se una stringa è palindroma ed estendiamola con un nastro di ingresso e uno di uscita.\
+Alcuni passi della computazione su $aba$ verranno allora rappresentati così, dove $q_i, q_j , q_k$ e $q_h$ sono stati opportuni:
+\begin{itemize}
+    \itemsep0px
+    \item[] $(q_0, \underline{\triangleright} aba \triangleleft, \triangleright \triangleleft) \rightarrow^* (q_i, \triangleright aba \underline{\triangleleft}, \triangleright aba \underline{\triangleleft}) \rightarrow^*$
+    \item[] $(q_j, \underline{\triangleright} aba \triangleleft, \triangleright aba \underline{\triangleleft}) \rightarrow (q_k, \triangleright \underline{a}ba \triangleleft, \triangleright ab\underline{a} \triangleleft) \rightarrow (q_h, \triangleright a\underline{b}a \triangleleft, \triangleright a\underline{b}\# \triangleleft)$
+\end{itemize}
+
+\noindent Ci sentiamo liberi di non apportare queste modifiche e di immaginare che, una volta toccata, una casella del nastro apparirà sempre nella rappresentazione del nastro.\
+Quindi in una configurazione $(q, u_1 \sigma_1 v_1 , \dots, u_k \sigma_k v_k )$, $u_i$ comincia per $\triangleright$ e $v_i$ può finire con (molti) \#, tutti quelli su cui l'$i$-mo cursore è venuto a posizionarsi durante il calcolo.\
+In questo modo il numero delle caselle in uso nei nastri non diminuisce mai, né
+
+\begin{itemize}
+    \item nel nastro di ingresso, il primo, perché è di sola lettura;
+    \item nel nastro di uscita, il $k$-esimo, perché è di sola scrittura;
+    \item nei nastri di lavoro $1 < i < k$, perché i caratteri bianchi a destra non scompaiono mai.
+\end{itemize}
+
+\noindent Adesso siamo pronti per definire lo spazio necessario a una computazione come il numero totale delle caselle toccate solamente sui nastri di lavoro.\
+Come per il tempo, anche qui si parla di spazio deterministico perché usiamo macchine di Turing deterministiche.\
+
+\begin{definition}
+    Sia $M$ una MdT a $k$ nastri di tipo I/O tale per cui $\forall x$
+    \[(q_0, \underline{\triangleright} x, \underline{\triangleright}, \dots, \underline{\triangleright}) \rightarrow^* (H, w_1,w_2, \dots, w_k) \text{ con } H \in \{\mbox{\textit{\footnotesize SI, NO}}\} \]
+    Lo \textit{spazio richiesto} da $M$ per decidere $x$ è
+    \[\sum^{k-1}_{i=2} |w_i|\]
+    Inoltre $M$ \textit{decide} $I$ \textit{in spazio deterministico} $f(n)$ se $\forall x$ lo spazio richiesto da $M$ per decidere $x$ è minore o uguale a $f(x)$.\
+    Infine, se $M$ decide $I$ in spazio deterministico $f(n)$, allora $I \in \mathrm{SPACE}(f(n))$.
+\end{definition}
+
+\noindent Ovviamente, la definizione appena vista può essere immediatamente adattata nel caso generale, in cui si consideri anche lo stato di arresto $h$ come elemento dell'insieme $H$.
+
+Alcuni autori preferiscono definire lo spazio richiesto come
+\[\max_{2 \leq i \leq k-1} |w_i|\]
+ma la sola differenza con la nostra definizione è un fattore $k$, il quale viene trascurato quando si considerano solamente ordini di grandezza.\
+
+\medskip
+\noindent La ragione principale per cui si trascura lo spazio necessario a contenere i dati di ingresso e quelli di uscita è che si vogliono misure abbastanza fini per la complessità in spazio.\
+Infatti, se uno considerasse sempre anche la dimensione dei dati di ingresso, cioè la sommatoria di sopra partisse da 1 anziché da 2, si avrebbero sempre complessità almeno lineari.\
+Ciò perché la misura del primo nastro è proprio $|x| + 1$, in quanto tale nastro è di sola lettura e contiene la stringa $w_1 = \triangleright x$.\
+La dimensione del nastro d'uscita non è rilevante nel caso di problemi di decisione $I$ considerati:\ il risultato è semplicemente un segnale che il caso $x \in I$ è risolto positivamente o meno.\
+Inoltre, a differenza di quanto accade per le classi di complessità in tempo, ci sono delle classi interessanti e importanti che sono sub-lineari e che rivestono un ruolo rilevante nella trattazione successiva, per esempio, $\mathrm{LOGSPACE}(n)$, la classe dei problemi decisi in spazio deterministico logaritmico che definiamo più precisamente qui sotto (la quale potrebbe coincidere con $\mathcal{P}$:\ si veda il frammento di gerarchia introdotto a pagina 61).\
+In questo caso, sommare anche lo spazio per il dato di ingresso porterebbe a trascurare l'addendo $\log n$ che cresce meno di $n$ e a schiacciare così $\mathrm{LOGSPACE}(n)$ su $\mathrm{PSPACE}(n)$.\
+
+\medskip
+\noindent Passiamo ora a vedere che anche lo spazio è suscettibile di essere ridotto linearmente, come già visto per il tempo.\
+Si noti che un teorema analogo a quello di riduzione dei nastri sarebbe banale:\ avremmo ancora la stessa misura, dopo aver ricopiato fianco a fianco i $k$ nastri di lavoro su un solo nastro.\
+
+\begin{theorem}[Compressione Lineare in Spazio]
+    \hfill
+
+    Se $I \in \mathrm{SPACE}(f(n))$ allora $\forall \epsilon \in \mathbb{R}^+.\ I \in \mathrm{SPACE}(2 + \epsilon \times f(n))$
+\end{theorem}
+
+\noindent Come fatto precedentemente per $\mathcal{P}$, i problemi decidibili in tempo polinomiale deterministico, introduciamo ora la classe dei problemi decidibili in spazio deterministico polinomiale; poi, come promesso, definiremo quella dei problemi decidibili in spazio deterministico logaritmico, che giocheranno un ruolo importante nel capitolo 2.5.
+
+\begin{definition}
+    La classe dei problemi decidibili (da MdT) in spazio polinomiale deterministico è
+    \[\mathrm{PSPACE} = \bigcup_{k \geq 1} \mathrm{SPACE}\left(n^k\right)\]
+    La classe dei problemi decidibili (da MdT) in spazio logaritmico deterministico è
+    \[\mathrm{LOGSPACE} = \bigcup_{k \geq 1} \mathrm{SPACE}(k \times \log n)\]
+\end{definition}
+
+\noindent Per fortuna anche queste classi sono invarianti rispetto al cambio di modelli, e quindi come già fatto per $\mathcal{P}$ possiamo eliminare nella definizione precedente il riferimento alle macchine di Turing.\
+In altre parole, le classi PSPACE e LOGSPACE sono chiuse rispetto a trasformazioni di modelli, il che garantisce la loro robustezza, oltre a quella della teoria che stiamo passando in rassegna.\
+
+Concludiamo questo capitolo stabilendo alcune relazioni tra le classi di complessità appena introdotte e facendo un'ulteriore osservazione su come tempo e spazio siano correlati.\
+Iniziamo enunciando senza dimostrazione il teorema che stabilisce la relazione di stretta contenenza tra le due classi in spazio appena viste:
+
+\begin{theorem}
+    $\mathrm{LOGSPACE} \subsetneq \mathrm{PSPACE}$
+\end{theorem}
+
+\noindent Inoltre, confrontiamo LOGSPACE con $\mathcal{P}$, stabilendo un altro piccolissimo frammento della gerarchia che intercorre tra classi di complessità in spazio e in tempo; ulteriori risultati si trovano nel capitolo 2.4.
+
+\begin{theorem}
+    \label{logspaceInP}
+    $\mathrm{LOGSPACE} \subseteq \mathcal{P}$
+\end{theorem}
+
+\begin{proof}
+
+    Poiché il problema $I$ appartiene a LOGSPACE, c'è una macchina di Turing $M$ che decide ogni sua istanza $x \in I$ in $\mathcal{O}(\log|x|)$ spazio deterministico, basta notare che $M$ può attraversare al massimo $\mathcal{O}(|x| \times \log|x| \times \#Q \times \#\Sigma^{\log|x|})$ configurazioni non terminali diverse.\
+    Una computazione non può ripassare su una stessa configurazione, altrimenti va in ciclo, quindi una computazione ha al massimo $\mathcal{O}\left(|x|^k\right)$ passi per qualche $k$.
+
+\end{proof}
+
+\noindent Infine, dalla dimostrazione di sopra, si può vedere che, seppure in modo meno preciso, vale anche il ``duale'' di quanto affermato a pagina 69, e cioè che, nel caso di algoritmi per problemi decidibili
+
+\begin{center}
+    \textbf{Osservazione 2}:\ lo spazio limita il tempo di calcolo!
+\end{center}

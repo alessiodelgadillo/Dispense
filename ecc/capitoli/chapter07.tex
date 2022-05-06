@@ -1,0 +1,53 @@
+\section{Diagonalizzazione}
+
+Vediamo adesso una tecnica basilare della teoria della calcolabilità, che va sotto il nome di \textit{diagonalizzazione}.\
+Essa è strettamente legata alla dimostrazione che Cantor diede della non numerabilità dell'insieme dei sottoinsiemi dei numeri naturali.\
+Il modo con cui applichiamo la diagonalizzazione alle funzioni ricorsive primitive è in realtà indipendente da questo formalismo, essendo invece del tutto generale:\ si applica infatti a \textit{tutti} i formalismi con cui si possano definire \textit{solo} funzioni totali.\
+Di seguito usiamo questa tecnica per dimostrare che le funzioni ricorsive primitive non sono tutte le funzioni calcolabili totali in quanto ne manca almeno una che intuitivamente lo è.\
+Inoltre, la stessa dimostrazione fa vedere che comunque si estenda la classe delle funzioni ricorsive primitive a contenere \textit{solo} funzioni totali, si ricasca nello stesso problema:\ si può costruire una funzione intuitivamente calcolabile non esprimibile con quella estensione.\
+Di conseguenza, la classe delle funzioni ricorsive primitive, o qualunque classe che la estenda con solo funzioni totali calcolabili, non conterrà \textit{tutte} le funzioni intuitivamente calcolabili.\
+Quella che segue non è una vera dimostrazione, ma solo una traccia di come si dovrebbe procedere.
+
+\begin{itemize}
+    \item[i)] Ogni derivazione di una funzione ricorsiva primitiva è una stringa \textit{finita} di simboli presi da un alfabeto \textit{finito}.\
+          Quindi tali rappresentazioni si possono enumerare, per esempio con la funzione di G\"odel, e indichiamo con $f_n$ la funzione definita dalla $n$-esima derivazione.
+    \item[ii)] Definisci $g(x) = f_x (x) + 1$.\
+          Questa è effettivamente calcolabile:\ prendi la $x$-esima definizione, applicala avendo come argomento il suo stesso indice $x$, trova il risultato e sommagli 1.\
+          (Si noti che la scelta dell'algoritmo dipende dall'argomento.)
+          Inoltre, è facile vedere che la funzione $g$ è totale.
+    \item[iii)] La $g$ non si trova nella lista delle funzioni ricorsive primitive, perché $\forall n.\ g(n) \neq f_n(n)$, e quindi $\forall n.\ g \neq f_n$, o meglio la funzione calcolata dalla $g$ su $n$ restituisce un valore diverso dalla funzione calcolata dalla $f_n$ su $n$.
+\end{itemize}
+
+\noindent Come già anticipato, l'argomento usato sopra per le funzioni ricorsive primitive si applica ad \textit{ogni} formalismo che definisca \textit{solo} funzioni totali:\ basta costruire l'elenco delle funzioni definite in quel formalismo come fatto dal passo (i) di sopra, enumerandole come fatto nel capitolo precedente per le MdT, e poi diagonalizzare come nel passo (ii):\ la funzione così definita non appare nell'elenco costruito.\
+
+Quindi siamo obbligati a considerare anche \textit{funzioni parziali}, che indicheremo spesso mediante lettere dell'alfabeto greco, quali $\varphi$ e $\psi$.\
+Per fortuna, la diagonalizzazione non si applica alle funzioni parziali.\
+Infatti sia $\psi_n$ la funzione con $n$-esima definizione, cioè che appare in posizione $n$-esima nella lista (per esempio calcolata dall'$n$-esima MdT), e proviamo a diagonalizzare.\
+Definiamo quindi
+\[\varphi(x) = \psi_x(x) + 1\]
+Supponiamo adesso che $\varphi$ sia rappresentata dall'$n$-esimo algoritmo:\ non posso tuttavia concludere $\varphi \neq \psi_n$ perché $\psi_n(n)$ può non essere definita!
+
+Ma se prendessi proprio degli algoritmi che definiscono funzioni totali per applicare la diagonalizzazione?\
+In questo modo otterrei nuovamente una funzione che non trovo nella lista.\
+Vedremo alla fine di questa parte del corso che questa cosa non si può fare effettivamente, cioè che \textit{non esiste} un algoritmo che permetta di scegliere nella lista proprio le definizioni di funzioni totali.\
+
+Inoltre, fortunatamente le funzioni parziali hanno senso.\
+Per esempio, si consideri la funzione seguente, che è definita solo se $y\neq 0$
+\[\mathit{div}(x,y)= \lfloor x \div y \rfloor\]
+C'è ancora un sospetto da fugare.\
+Si potrebbero estendere tutte le funzioni parziali a funzioni totali, come facciamo nell'esempio seguente rendendo totale la funzione \textit{div} alla funzione \textit{div}* come suggerito più avanti?\
+La risposta è \textbf{NO}, perché, come vedremo alla fine della prima parte del corso, \textit{non sempre} c'è un algoritmo che calcola la funzione estesa (nel nostro caso \textit{div}*).\
+
+\begin{example}
+    Il primo modo è quello di definire accuratamente il dominio della funzione, per esempio ponendo
+    \[\mathit{div} : \mathbb{N} \times \mathbb{N}\backslash \{0\} \rightarrow \mathbb{N}\]
+    Però la funzione risultante non copre tutte le coppie di naturali.\
+    Possiamo far meglio:\ posto $* \notin \mathbb{N}$, abbiamo ancora una funzione su tutte le coppie di naturali \footnote{Il suo codominio non sono però i naturali; se volessi essere pignolo allora potrei definire $\mathit{div}^*(x,0) = 0$, facendo inorridire i nostri professori di matematica delle superiori.}
+    \[\mathit{div} : \mathbb{N} \times \mathbb{N} \rightarrow \mathbb{N} \cup \{*\}\]
+    \[\mathit{div}^*(x,y) = \left\{\begin{array}{l l}
+            div(x,y) & \mathrm{se}\ y\neq 0 \\
+            *        & \mathrm{se}\ y = 0   \\
+        \end{array}\right.\]
+\end{example}
+
+\noindent Poiché non possiamo e nemmeno vogliamo liberarci della parzialità, bisogna trovare il modo per poter definire anche funzioni parziali.
